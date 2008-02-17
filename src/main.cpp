@@ -3,7 +3,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "src/ui_mainwindow.h"
+
+void output();
+
 int main(int argc, char *argv[]) {
+  QApplication app(argc, argv);
+  QMainWindow *wnd = new QMainWindow();
+  
+  Ui::MainWindow ui;
+  ui.setupUi(wnd);
+  
+  wnd->showMaximized();
+  
+  return app.exec();
+}
+
+/* Testfunktion */
+void output() {
   int pid, pipes[2];
   
   // Zunächst eine Pipe erzeugen
@@ -30,7 +47,7 @@ int main(int argc, char *argv[]) {
     }
     
     // Das gewünschte Kommando ausführen
-    char *argument[3] = { "/bin/date", "--version", NULL };
+    char *argument[4] = { "/usr/bin/pdflatex", "/home/michael/fa.tex", NULL };
     char *command = argument[0];
     if (execv(command, argument) == -1) {
       perror("execv");
@@ -60,6 +77,5 @@ int main(int argc, char *argv[]) {
         printf(buffer); 
       }
   }
-  
-  return 0;
 }
+
