@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading ui file 'mainwindow.ui'
 **
-** Created: Sun Feb 17 21:44:52 2008
+** Created: Mon Feb 18 13:04:09 2008
 **      by: Qt User Interface Compiler version 4.3.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling ui file!
@@ -25,6 +25,7 @@
 #include <QtGui/QToolBar>
 #include <QtGui/QToolBox>
 #include <QtGui/QWidget>
+#include "src/editor.h"
 
 class Ui_MainWindow
 {
@@ -42,7 +43,7 @@ public:
     QTabWidget *tabs;
     QWidget *tab;
     QHBoxLayout *hboxLayout1;
-    QTextEdit *input;
+    Editor *input;
     QTextEdit *output;
     QMenuBar *menubar;
     QMenu *menu_Datei;
@@ -85,7 +86,7 @@ public:
     toolbox->setSizePolicy(sizePolicy1);
     page = new QWidget();
     page->setObjectName(QString::fromUtf8("page"));
-    page->setGeometry(QRect(0, 0, 109, 172));
+    page->setGeometry(QRect(0, 0, 40, 174));
     toolbox->addItem(page, QApplication::translate("MainWindow", "Page 1", 0, QApplication::UnicodeUTF8));
     page_2 = new QWidget();
     page_2->setObjectName(QString::fromUtf8("page_2"));
@@ -104,7 +105,7 @@ public:
     hboxLayout1 = new QHBoxLayout(tab);
     hboxLayout1->setObjectName(QString::fromUtf8("hboxLayout1"));
     hboxLayout1->setContentsMargins(0, 0, 0, 0);
-    input = new QTextEdit(tab);
+    input = new Editor(tab);
     input->setObjectName(QString::fromUtf8("input"));
 
     hboxLayout1->addWidget(input);
@@ -123,7 +124,7 @@ public:
     MainWindow->setCentralWidget(centralwidget);
     menubar = new QMenuBar(MainWindow);
     menubar->setObjectName(QString::fromUtf8("menubar"));
-    menubar->setGeometry(QRect(0, 0, 598, 26));
+    menubar->setGeometry(QRect(0, 0, 598, 22));
     menu_Datei = new QMenu(menubar);
     menu_Datei->setObjectName(QString::fromUtf8("menu_Datei"));
     MainWindow->setMenuBar(menubar);
