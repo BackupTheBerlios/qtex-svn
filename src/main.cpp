@@ -3,17 +3,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "src/ui_mainwindow.h"
+#include "src/mainwindow.h"
 
 void output();
 
 int main(int argc, char *argv[]) {
   QApplication app(argc, argv);
-  QMainWindow *wnd = new QMainWindow();
   
-  Ui::MainWindow ui;
-  ui.setupUi(wnd);
-  
+  MainWindow *wnd = new MainWindow();
   wnd->showMaximized();
   
   return app.exec();

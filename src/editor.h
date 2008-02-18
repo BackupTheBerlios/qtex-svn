@@ -19,9 +19,20 @@ class Editor : public QTextEdit
 		
 	public:
 		Editor( QWidget * parent = 0 );
+    QString getFilename();
+    bool hasChanged();
+    void save();
+    void saveAs();
+    void setChanged(bool);
+    void setFilename(QString);
+    
+  private slots:
+    void changed();
 		
 	private:
+    bool changeState;
 		Highlighter *highlighter;
+    QString filename;
 	};
 
 #endif
