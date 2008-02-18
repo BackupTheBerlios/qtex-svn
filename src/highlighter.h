@@ -38,8 +38,8 @@ class Highlighter : public QSyntaxHighlighter
 		QRegExp commentStartExpression;
 		QRegExp commentEndExpression;
 		
-		QTextCharFormat keywordFormat;
-		QTextCharFormat classFormat;
+		//QTextCharFormat keywordFormat;
+		QTextCharFormat latexFormat;
 		QTextCharFormat singleLineCommentFormat;
 		QTextCharFormat multiLineCommentFormat;
 		QTextCharFormat quotationFormat;
