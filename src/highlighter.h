@@ -35,15 +35,15 @@ class Highlighter : public QSyntaxHighlighter
 		};
 		QVector<HighlightingRule> highlightingRules;
 		
-		QRegExp commentStartExpression;
-		QRegExp commentEndExpression;
+		QRegExp mathModeStartExpression;
+		QRegExp mathModeEndExpression;
 		
 		//QTextCharFormat keywordFormat;
 		QTextCharFormat latexFormat;
 		QTextCharFormat singleLineCommentFormat;
-		QTextCharFormat multiLineCommentFormat;
-		QTextCharFormat quotationFormat;
-		QTextCharFormat functionFormat;
+		QTextCharFormat mathModeFormat;
+		//QTextCharFormat quotationFormat;
+		//QTextCharFormat functionFormat;
 	};
 
 #endif

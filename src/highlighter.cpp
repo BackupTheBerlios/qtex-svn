@@ -8,6 +8,8 @@
  */
 
 #include <QtGui>
+#include <iostream>
+using namespace std;
 
 #include "highlighter.h"
 
@@ -46,52 +48,56 @@ Highlighter::Highlighter(QTextDocument *parent)
 	rule.format = singleLineCommentFormat;
 	highlightingRules.append(rule);
 	
-	multiLineCommentFormat.setForeground(Qt::red);
+	mathModeFormat.setBackground(Qt::green);
 	
-	quotationFormat.setForeground(Qt::darkGreen);
-	rule.pattern = QRegExp("\".*\"");
-	rule.format = quotationFormat;
-	highlightingRules.append(rule);
+	//quotationFormat.setForeground(Qt::darkGreen);
+	//rule.pattern = QRegExp("\".*\"");
+	//rule.format = quotationFormat;
+	//highlightingRules.append(rule);
 	
-	functionFormat.setFontItalic(true);
-	functionFormat.setForeground(Qt::blue);
-	rule.pattern = QRegExp("\\b[A-Za-z0-9_]+(?=\\()");
-	rule.format = functionFormat;
-	highlightingRules.append(rule);
+	//functionFormat.setFontItalic(true);
+	//functionFormat.setForeground(Qt::blue);
+	//rule.pattern = QRegExp("\\b[A-Za-z0-9_]+(?=\\()");
+	//rule.format = functionFormat;
+	//highlightingRules.append(rule);
 	
-	commentStartExpression = QRegExp("/\\*");
-	commentEndExpression = QRegExp("\\*/");
+	mathModeStartExpression = QRegExp("\\$.");
+	mathModeEndExpression = QRegExp("\\$");
 }
 
 void Highlighter::highlightBlock(const QString &text)
 {
+	
 	foreach (HighlightingRule rule, highlightingRules) {
 		QRegExp expression(rule.pattern);
 		int index = text.indexOf(expression);
 		while (index >= 0) {
 			int length = expression.matchedLength();
 			setFormat(index, length, rule.format);
+			//QString string = rule.format.background().color().name();
+			//cout << "bg-color:" + string.toStdString() + "\n";
 			index = text.indexOf(expression, index + length);
 		}
 	}
+	// mathMode
 	setCurrentBlockState(0);
 	
 	int startIndex = 0;
 	if (previousBlockState() != 1)
-		startIndex = text.indexOf(commentStartExpression);
+		startIndex = text.indexOf(mathModeStartExpression);
 	
 	while (startIndex >= 0) {
-		int endIndex = text.indexOf(commentEndExpression, startIndex);
-		int commentLength;
+		int endIndex = text.indexOf(mathModeEndExpression, startIndex+1);
+		int mathModeLength;
 		if (endIndex == -1) {
 			setCurrentBlockState(1);
-			commentLength = text.length() - startIndex;
+			mathModeLength = text.length() - startIndex;
 		} else {
-			commentLength = endIndex - startIndex
-			+ commentEndExpression.matchedLength();
+			mathModeLength = endIndex - startIndex
+			+ mathModeEndExpression.matchedLength();
 		}
-		setFormat(startIndex, commentLength, multiLineCommentFormat);
-		startIndex = text.indexOf(commentStartExpression,
-								  startIndex + commentLength);
+			setFormat(startIndex, mathModeLength, mathModeFormat);
+		startIndex = text.indexOf(mathModeStartExpression,
+								  startIndex + mathModeLength);
 	}
 }
