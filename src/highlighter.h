@@ -35,15 +35,20 @@ class Highlighter : public QSyntaxHighlighter
 		};
 		QVector<HighlightingRule> highlightingRules;
 		
+		// Sktuktur, die ein Intevall(begin und länge) sowie ein dezugehörigs format aufnimmt
+		struct IntervallWithFormat
+		{
+			int index;
+			int length;
+			QTextCharFormat format;
+		};
+		
 		QRegExp mathModeStartExpression;
 		QRegExp mathModeEndExpression;
 		
-		//QTextCharFormat keywordFormat;
 		QTextCharFormat latexFormat;
 		QTextCharFormat singleLineCommentFormat;
 		QTextCharFormat mathModeFormat;
-		//QTextCharFormat quotationFormat;
-		//QTextCharFormat functionFormat;
 	};
 
 #endif

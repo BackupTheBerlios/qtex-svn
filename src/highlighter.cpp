@@ -8,8 +8,6 @@
  */
 
 #include <QtGui>
-#include <iostream>
-using namespace std;
 
 #include "highlighter.h"
 
@@ -17,25 +15,6 @@ Highlighter::Highlighter(QTextDocument *parent)
 : QSyntaxHighlighter(parent)
 {
 	HighlightingRule rule;
-	
-	/*keywordFormat.setForeground(Qt::darkBlue);
-	keywordFormat.setFontWeight(QFont::Bold);
-	QStringList keywordPatterns;
-	keywordPatterns << "\\bchar\\b" << "\\bclass\\b" << "\\bconst\\b"
-	<< "\\bdouble\\b" << "\\benum\\b" << "\\bexplicit\\b"
-	<< "\\bfriend\\b" << "\\binline\\b" << "\\bint\\b"
-	<< "\\blong\\b" << "\\bnamespace\\b" << "\\boperator\\b"
-	<< "\\bprivate\\b" << "\\bprotected\\b" << "\\bpublic\\b"
-	<< "\\bshort\\b" << "\\bsignals\\b" << "\\bsigned\\b"
-	<< "\\bslots\\b" << "\\bstatic\\b" << "\\bstruct\\b"
-	<< "\\btemplate\\b" << "\\btypedef\\b" << "\\btypename\\b"
-	<< "\\bunion\\b" << "\\bunsigned\\b" << "\\bvirtual\\b"
-	<< "\\bvoid\\b" << "\\bvolatile\\b";
-	foreach (QString pattern, keywordPatterns) {
-		rule.pattern = QRegExp(pattern);
-		rule.format = keywordFormat;
-		highlightingRules.append(rule);
-	}*/
 	
 	latexFormat.setFontWeight(QFont::Bold);
 	latexFormat.setForeground(Qt::darkMagenta);
@@ -48,34 +27,29 @@ Highlighter::Highlighter(QTextDocument *parent)
 	rule.format = singleLineCommentFormat;
 	highlightingRules.append(rule);
 	
-	mathModeFormat.setBackground(Qt::green);
-	
-	//quotationFormat.setForeground(Qt::darkGreen);
-	//rule.pattern = QRegExp("\".*\"");
-	//rule.format = quotationFormat;
-	//highlightingRules.append(rule);
-	
-	//functionFormat.setFontItalic(true);
-	//functionFormat.setForeground(Qt::blue);
-	//rule.pattern = QRegExp("\\b[A-Za-z0-9_]+(?=\\()");
-	//rule.format = functionFormat;
-	//highlightingRules.append(rule);
+	mathModeFormat.setBackground(Qt::yellow);
 	
 	mathModeStartExpression = QRegExp("\\$.");
 	mathModeEndExpression = QRegExp("\\$");
 }
 
 void Highlighter::highlightBlock(const QString &text)
-{
+{	
+	// zwei dynamische Listen
+	QList<IntervallWithFormat> keywords;
+	QList<IntervallWithFormat> mathModes;
 	
 	foreach (HighlightingRule rule, highlightingRules) {
 		QRegExp expression(rule.pattern);
 		int index = text.indexOf(expression);
 		while (index >= 0) {
 			int length = expression.matchedLength();
+			IntervallWithFormat temp;
+			temp.index = index;
+			temp.length = length;
+			temp.format = rule.format;
+			keywords.append(temp);
 			setFormat(index, length, rule.format);
-			//QString string = rule.format.background().color().name();
-			//cout << "bg-color:" + string.toStdString() + "\n";
 			index = text.indexOf(expression, index + length);
 		}
 	}
@@ -96,8 +70,24 @@ void Highlighter::highlightBlock(const QString &text)
 			mathModeLength = endIndex - startIndex
 			+ mathModeEndExpression.matchedLength();
 		}
+		IntervallWithFormat temp;
+		temp.index = startIndex;
+		temp.length = mathModeLength;
+		temp.format = mathModeFormat;
+		mathModes.append(temp);
 			setFormat(startIndex, mathModeLength, mathModeFormat);
 		startIndex = text.indexOf(mathModeStartExpression,
 								  startIndex + mathModeLength);
+	}
+	foreach (IntervallWithFormat keyword, keywords) {
+		foreach (IntervallWithFormat mathMode, mathModes) {
+			if (mathMode.index < keyword.index && mathMode.length+mathMode.index >= keyword.length+keyword.index) {
+				QTextCharFormat mixed;
+				mixed.setFontWeight(keyword.format.fontWeight());
+				mixed.setForeground(keyword.format.foreground());
+				mixed.setBackground(mathMode.format.background());
+				setFormat(keyword.index, keyword.length, mixed);
+			}
+		}
 	}
 }
