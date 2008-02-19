@@ -32,6 +32,8 @@ class MainWindow : public QMainWindow
     void closeCurrentTab();
     void openDocument();
     void newDocument();
+    void quit();
+    void reconnectTab(int);
     void save();
     void saveAll();
     void saveAs();
@@ -42,7 +44,6 @@ class MainWindow : public QMainWindow
     void createStatusbar();
     void createToolbar();
     void createWorkspace();
-    void maybeSave();
     void openDocument(QString);
     
     int newFileCount;    
@@ -56,6 +57,9 @@ class MainWindow : public QMainWindow
     QAction *action_Beenden;
     QAction *action_Rueckgaengig;
     QAction *action_Wiederherstellen;
+    QAction *action_Ausschneiden;
+    QAction *action_Kopieren;
+    QAction *action_Einfuegen;
     QHBoxLayout *hboxLayout;
     QLabel *cursorPosition;
     QList<Editor *> editorList;

@@ -20,16 +20,26 @@ class Editor : public QTextEdit
 	public:
 		Editor( QWidget * parent = 0 );
     QString getFilename();
+    bool getCopy();
+    bool getRedo();
+    bool getUndo();
     bool hasChanged();
-    void save();
-    void saveAs();
+    bool maybeSave();
+    bool save();
+    bool saveAs();
     void setChanged(bool);
     void setFilename(QString);
     
   private slots:
     void changed();
+    void setCopy(bool);
+    void setRedo(bool);
+    void setUndo(bool);
 		
-	private:
+	private: 
+    bool canCopy;
+    bool canRedo;
+    bool canUndo;
     bool changeState;
 		Highlighter *highlighter;
     QString filename;

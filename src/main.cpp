@@ -3,6 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <QTranslator> 
+#include <QLocale> 
+#include <QLibraryInfo> 
 #include "src/mainwindow.h"
 
 void output();
