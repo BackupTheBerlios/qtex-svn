@@ -166,10 +166,47 @@ bool Editor::save() {
  * des Speicherpfades.
  */
 bool Editor::saveAs() {
-  /* Zunaechst einen Dateinamen holen */
-  QString filename = QFileDialog::getSaveFileName(this->parentWidget(), trUtf8("Datei speichern - QteX"), QDir::homePath());
+  QString filename;
   
-  /* Dieser muss nichtleer sein */
+  while (true) {
+    /* Zunaechst einen Dateinamen holen */
+    QFileDialog dlg(this->parentWidget(), trUtf8("Datei speichern - QteX"), QDir::homePath());
+    dlg.setAcceptMode(QFileDialog::AcceptSave);
+    dlg.setConfirmOverwrite(false);
+    
+    /* Dialog abgebrochen? Dann nicht speichern */
+    if (dlg.exec() == QFileDialog::Rejected) {
+      return false;
+    }
+    
+    /* Keine Datei selektiert? Dann nicht speichern */
+    if (dlg.selectedFiles().size() == 0) {
+      return false;
+    }
+    
+    /* Selektierte Datei holen und QFile erzeugen */
+    filename = dlg.selectedFiles().at(0);
+    QFile temp(filename);
+    
+    /* Wurde eine andere, bereits existierende Datei gewählt? Dann nachfragen */
+    if (temp.exists() && this->filename != filename) {
+      QString text("Eine Datei namens '");
+      text += filename.mid(filename.lastIndexOf(QDir::separator()) + 1);
+      text += trUtf8("' existiert bereits. Überschreiben?");
+      
+      /* Überschreiben? Wenn ja: raus aus der Schleife. Sonst von vorne */
+      int ret = QMessageBox::question(this, trUtf8("Datei speichern - QteX"), text, QMessageBox::Yes | QMessageBox::No);
+      if (ret == QMessageBox::Yes) {
+        break;
+      } else {
+        continue;
+      }
+    } else {
+      break;
+    }
+  }
+
+  /* Der gewählte Dateiname muss nichtleer sein */
   if (filename.isEmpty() || filename.isNull()) {
     return false;
   }

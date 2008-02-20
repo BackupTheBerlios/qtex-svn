@@ -387,7 +387,6 @@ void MainWindow::newDocument() {
   
   /* Eingabefeld einrichten */
   Editor *input = new Editor();
-  input->setFilename(filename);
   
   int index = tabs->addTab(input, filename);
   input->setFocus();
