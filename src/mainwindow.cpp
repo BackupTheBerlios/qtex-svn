@@ -19,6 +19,7 @@ MainWindow::MainWindow() : QMainWindow() {
   createWorkspace();
   createConnections();
   
+  compiler = new Compiler(output);
   newFileCount = 0;
 }
 
@@ -73,6 +74,38 @@ void MainWindow::closeCurrentTab() {
 }
 
 /*
+ * Das aktuelle Dokument mit latex kompilieren lassen.
+ * Dazu MUSS das Dokument zunächst gespeichert werden.
+ */
+void MainWindow::compileLatex() {
+  Editor *curInput = getCurrentEditor();
+  if (curInput == 0) {
+    return;
+  }
+  
+  /* Das Dokument MUSS vor dem Kompilieren gespeichert werden */
+  if (curInput->save() == true) {
+    compiler->compileLatex(curInput->getFilename());
+  }
+}
+
+/*
+ * Das aktuelle Dokument mit pdflatex kompilieren lassen.
+ * Dazu MUSS das Dokument zunächst gespeichert werden.
+ */
+void MainWindow::compilePdflatex() {
+  Editor *curInput = getCurrentEditor();
+  if (curInput == 0) {
+    return;
+  }
+  
+  /* Das Dokument MUSS vor dem Kompilieren gespeichert werden */
+  if (curInput->save() == true) {
+    compiler->compilePdflatex(curInput->getFilename());
+  }
+}
+
+/*
  * Bestimmte unveränderliche Verbindungen erzeugen.
  */
 void MainWindow::createConnections() {
@@ -87,6 +120,9 @@ void MainWindow::createConnections() {
   QObject::connect(action_Schliessen, SIGNAL(triggered()), this, SLOT(closeCurrentTab()));
   QObject::connect(action_AlleSchliessen, SIGNAL(triggered()), this, SLOT(closeAllTabs()));
   QObject::connect(action_Beenden, SIGNAL(triggered()), this, SLOT(quit()));
+  
+  QObject::connect(action_kompiliereLatex, SIGNAL(triggered()), this, SLOT(compileLatex()));
+  QObject::connect(action_kompilierePdflatex, SIGNAL(triggered()), this, SLOT(compilePdflatex()));
 
   /* Inputfeldsignale einrichten */
   QObject::connect(closeButton, SIGNAL(clicked()), this, SLOT(closeCurrentTab()));
@@ -198,9 +234,30 @@ void MainWindow::createMenus() {
   menu_Bearbeiten->addAction(action_Kopieren);
   menu_Bearbeiten->addAction(action_Einfuegen);
   
+  /* Menu 'Erstellen' einrichten */
+  menu_Erstellen = new QMenu(menubar);
+  menu_Erstellen->setObjectName(QString("menu_Erstellen"));
+  menu_Erstellen->setTitle(trUtf8("Erstellen"));
+  
+  action_kompiliereLatex = new QAction(this);
+  action_kompiliereLatex->setIcon(QIcon(":/images/latex.png"));
+  action_kompiliereLatex->setObjectName(QString("action_kompiliereLatex"));
+  action_kompiliereLatex->setShortcut(QString("Alt+1"));
+  action_kompiliereLatex->setText(trUtf8("&Latex"));
+  
+  action_kompilierePdflatex = new QAction(this);
+  action_kompilierePdflatex->setIcon(QIcon(":/images/pdflatex.png"));
+  action_kompilierePdflatex->setObjectName(QString("action_kompilierePdflatex"));
+  action_kompilierePdflatex->setShortcut(QString("Alt+2"));
+  action_kompilierePdflatex->setText(trUtf8("&PdfLatex"));
+  
+  menu_Erstellen->addAction(action_kompiliereLatex);
+  menu_Erstellen->addAction(action_kompilierePdflatex);
+  
   /* Untermenus einfuegen */
   menubar->addAction(menu_Datei->menuAction());
   menubar->addAction(menu_Bearbeiten->menuAction());
+  menubar->addAction(menu_Erstellen->menuAction());
 }
 
 /*
@@ -220,6 +277,11 @@ void MainWindow::createToolbar() {
   toolbar = new QToolBar(this);
   toolbar->setObjectName(QString("toolbar"));
   this->addToolBar(Qt::TopToolBarArea, toolbar);
+  
+  toolbar->addAction(action_kompiliereLatex);
+  toolbar->addAction(action_kompilierePdflatex);
+  
+  this->addToolBar(Qt::TopToolBarArea, new QToolBar(this));
 }
 
 /*
@@ -294,10 +356,23 @@ void MainWindow::createWorkspace() {
   
   /* Ausgabefeld fuer Compilermeldungen einrichten */
   output = new QTextEdit(vSplitter);
+  output->setFont(QFont("monospace", 8));
   output->setObjectName(QString("output"));
   vSplitter->addWidget(output);
   sizePolicy1.setHeightForWidth(output->sizePolicy().hasHeightForWidth());
   output->setSizePolicy(sizePolicy1);
+}
+
+/*
+ * Liefert den aktuell offenen Editor zurück oder 0, falls
+ * noch keiner offen ist.
+ */
+Editor * MainWindow::getCurrentEditor() {
+  if (tabs->count() == 0 || editorList.size() == 0) {
+    return 0;
+  }
+  
+  return editorList.at(tabs->currentIndex());
 }
 
 /*
@@ -308,12 +383,14 @@ void MainWindow::createWorkspace() {
  */
 void MainWindow::newDocument() {
   newFileCount++;
+  QString filename = trUtf8("Unbenannt") + QString::number(newFileCount);
   
   /* Eingabefeld einrichten */
   Editor *input = new Editor();
-  input->setObjectName(QString("input"));
-  input->setFont(QFont("monospace", 10));
-  int index = tabs->addTab(input, trUtf8("Unbenannt") + QString::number(newFileCount));  
+  input->setFilename(filename);
+  
+  int index = tabs->addTab(input, filename);
+  input->setFocus();
   editorList.push_back(input);
   
   tabs->setCurrentIndex(index);
@@ -332,50 +409,27 @@ void MainWindow::newDocument() {
  * ein Datei-Öffnen-Dialog angezeigt.
  */
 void MainWindow::openDocument() {
-  QString filename = QFileDialog::getOpenFileName(this, trUtf8("Datei öffnen"));
-  if (filename.isEmpty() || filename.isNull()) {
-    statusbar->showMessage(trUtf8("Keine Datei geöffnet."), 4000);
-    return;
-  }
-  
-  openDocument(filename);
-}
-
-/*
- * Ein vorhandenes Dokument öffnen. Es wird versucht,
- * das durch den Dateinamen übergebene Dokument zu laden.
- */
-void MainWindow::openDocument(QString filename) {
-  QFile file(filename);
-  if (file.exists()) {
-    QMessageBox::critical(this, trUtf8("Fehler - QteX"), trUtf8("Die angeforderte Datei existiert nicht!"));
-    return;
-  }
-  
-  if (!file.open(QIODevice::ReadOnly)) {
-    QMessageBox::critical(this, trUtf8("Fehler - QteX"), trUtf8("Die angeforderte Datei konnte nicht geöffnet werden!"));
-    return;
-  }
-  
-  QString allData = QString::fromUtf8(file.readAll());
-  file.close();
-
-  /* Eingabefeld einrichten */
   Editor *input = new Editor();
-  input->setObjectName(QString("input"));
-  input->setText(allData);  
-  int index = tabs->addTab(input, filename.mid(filename.lastIndexOf(QDir::separator()) + 1));    
-  editorList.push_back(input);
-  
-  tabs->setCurrentIndex(index);
-  reconnectTab(index);
-  
-  action_Speichern->setEnabled(true);
-  action_SpeichernUnter->setEnabled(true);
-  action_AlleSpeichern->setEnabled(true);
-  action_Schliessen->setEnabled(true);
-  action_AlleSchliessen->setEnabled(true);
-  action_Einfuegen->setEnabled(true);
+  if (input->openDocument(QString("")) == true) {
+    QString filename = input->getFilename();
+    
+    int index = tabs->addTab(input, filename.mid(filename.lastIndexOf(QDir::separator()) + 1));
+    input->setFocus();
+    editorList.push_back(input);
+    
+    tabs->setCurrentIndex(index);
+    reconnectTab(index);
+    
+    action_Speichern->setEnabled(true);
+    action_SpeichernUnter->setEnabled(true);
+    action_AlleSpeichern->setEnabled(true);
+    action_Schliessen->setEnabled(true);
+    action_AlleSchliessen->setEnabled(true);
+    action_Einfuegen->setEnabled(true);
+  } else {
+    delete input;
+    input = 0;
+  }
 }
 
 /*
@@ -448,11 +502,7 @@ void MainWindow::reconnectTab(int newIndex) {
  * Speichert das aktuelle Dokument ab.
  */
 void MainWindow::save() {
-  if (editorList.size() == 0) {
-    return;
-  }
-  
-  Editor *curInput = editorList.at(tabs->currentIndex());
+  Editor *curInput = getCurrentEditor();
   if (curInput == 0) {
     return;
   }
@@ -495,11 +545,7 @@ void MainWindow::saveAll() {
  * einem anderen Namen zu speichern.
  */
 void MainWindow::saveAs() {
-  if (editorList.size() == 0) {
-    return;
-  }
-  
-  Editor *curInput = editorList.at(tabs->currentIndex());
+  Editor *curInput = getCurrentEditor();
   if (curInput == 0) {
     return;
   }

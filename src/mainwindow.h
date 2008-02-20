@@ -18,6 +18,7 @@
 #include <QtGui/QToolBox>
 #include <QtGui/QToolButton>
 #include <QtGui/QWidget>
+#include "src/compiler.h"
 #include "src/editor.h"
 
 class MainWindow : public QMainWindow
@@ -30,6 +31,8 @@ class MainWindow : public QMainWindow
   public slots:
     void closeAllTabs();
     void closeCurrentTab();
+    void compileLatex();
+    void compilePdflatex();
     void openDocument();
     void newDocument();
     void quit();
@@ -44,8 +47,9 @@ class MainWindow : public QMainWindow
     void createStatusbar();
     void createToolbar();
     void createWorkspace();
-    void openDocument(QString);
+    Editor * getCurrentEditor();
     
+    Compiler *compiler;
     int newFileCount;    
     QAction *action_Neu; 
     QAction *action_Oeffnen;
@@ -60,11 +64,14 @@ class MainWindow : public QMainWindow
     QAction *action_Ausschneiden;
     QAction *action_Kopieren;
     QAction *action_Einfuegen;
+    QAction *action_kompiliereLatex;
+    QAction *action_kompilierePdflatex;
     QHBoxLayout *hboxLayout;
     QLabel *cursorPosition;
     QList<Editor *> editorList;
     QMenu *menu_Datei;
     QMenu *menu_Bearbeiten;
+    QMenu *menu_Erstellen;
     QMenuBar *menubar;
     QSplitter *vSplitter;
     QSplitter *hSplitter;

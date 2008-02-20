@@ -25,6 +25,7 @@ class Editor : public QTextEdit
     bool getUndo();
     bool hasChanged();
     bool maybeSave();
+    bool openDocument(QString);
     bool save();
     bool saveAs();
     void setChanged(bool);

@@ -17,6 +17,9 @@ Editor::Editor( QWidget * parent )
 	highlighter = new Highlighter(document());
   changeState = false;
   
+  setObjectName(QString("input"));
+  setFont(QFont("monospace", 10));
+  
   QObject::connect(this, SIGNAL(textChanged()), this, SLOT(changed()));
   QObject::connect(this, SIGNAL(copyAvailable(bool)), this, SLOT(setCopy(bool)));
   QObject::connect(this, SIGNAL(redoAvailable(bool)), this, SLOT(setRedo(bool)));
@@ -89,6 +92,42 @@ bool Editor::maybeSave() {
   }
 }
 
+bool Editor::openDocument(QString filename) {
+  if (filename.isEmpty() || filename.isNull()) {
+    filename = QFileDialog::getOpenFileName(this, trUtf8("Datei öffnen"));
+  }
+  
+  if (filename.isEmpty() || filename.isNull()) {
+    return false;
+  }
+  
+  QFile file(filename);
+  if (!file.exists()) {
+    QMessageBox::critical(this, trUtf8("Fehler - QteX"), trUtf8("Die angeforderte Datei existiert nicht!"));
+    return false;
+  }
+  
+  if (!file.open(QIODevice::ReadOnly)) {
+    QMessageBox::critical(this, trUtf8("Fehler - QteX"), trUtf8("Die angeforderte Datei konnte nicht geöffnet werden!"));
+    return false;
+  }
+  
+  QString allData;
+  while (!file.atEnd()) {
+    QByteArray line = file.readLine();
+    allData += QString::fromLatin1(line);
+  }
+  
+  file.close();
+  
+  setFilename(filename);
+  setText(allData);
+  
+  setChanged(false);
+  
+  return true;
+}
+
 /*
  * Versucht, das aktuelle Dokument abzuspeichern. Der Rückgabewert
  * gibt Auskunft, ob das Speichern erfolgreich war (true) oder fehl-
@@ -108,11 +147,10 @@ bool Editor::save() {
   }
   
   /* Text holen und in char * konvertieren */
-  QString allData = toPlainText();
-  char *buffer = allData.toUtf8().data();
+  QByteArray data = toPlainText().toLatin1();
   
   /* Versuchen, die Daten zu schreiben */
-  if (file.write(buffer, qstrlen(buffer)) == -1) {
+  if (file.write(data) == -1) {
     QMessageBox::critical(this, trUtf8("Fehler - QteX"), trUtf8("Der Schreibvorgang für die aktuelle Datei war nicht erfolgreich!"));
     return false;
   }
@@ -146,11 +184,10 @@ bool Editor::saveAs() {
   setFilename(filename);
   
   /* Text holen und nach char * konvertieren */
-  QString allData = toPlainText();
-  char *buffer = allData.toUtf8().data();
+  QByteArray data = toPlainText().toLatin1();
   
   /* Versuchen, die Daten zu schreiben */
-  if (file.write(buffer, qstrlen(buffer)) == -1) {
+  if (file.write(data) == -1) {
     QMessageBox::critical(this, trUtf8("Fehler - QteX"), trUtf8("Der Schreibvorgang für die aktuelle Datei war nicht erfolgreich!"));
     return false;
   }
