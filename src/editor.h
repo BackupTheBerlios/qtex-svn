@@ -11,6 +11,7 @@
 #define EDITOR_H
 
 #include <QColor>
+#include <QFontMetrics>
 #include <QSettings>
 #include <QTextEdit>
 #include "highlighter.h"

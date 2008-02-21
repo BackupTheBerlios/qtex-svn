@@ -64,11 +64,11 @@ bool Editor::hasChanged() {
 void Editor::loadSettings() {
   QSettings settings("QteX", "QteX");
   
-  /* Schriftart setzen */
-  settings.beginGroup("font");
-  QString fontname = settings.value("name", "Monospace").toString();
-  int fontsize = settings.value("size", 10).toInt();
-  QColor fontcolor = settings.value("color", Qt::black).value<QColor>();
+  /* Schrifteigenschaften setzen */
+  settings.beginGroup(QString("font"));
+  QString fontname = settings.value(QString("name"), QString("Monospace")).toString();
+  int fontsize = settings.value(QString("size"), 10).toInt();
+  QColor fontcolor = settings.value(QString("color"), Qt::black).value<QColor>();
   settings.endGroup();
   
   setFont(QFont(fontname, fontsize));
@@ -77,7 +77,7 @@ void Editor::loadSettings() {
    * !!! ACHTUNG: Workaround !!!
    * !!!!!!!!!!!!!!!!!!!!!!!!!!!
    */
-  /*bool tmp = changeState;
+  bool tmp = changeState;
   if (toPlainText().isEmpty()) {
     setTextColor(fontcolor);
   } else {
@@ -86,8 +86,15 @@ void Editor::loadSettings() {
     setTextColor(fontcolor);
     setTextCursor(tmp);
   }
-  setChanged(tmp);*/
-  setTextColor(fontcolor);
+  setChanged(tmp);
+  
+  /* Tabulatoreigenschaften setzen */
+  settings.beginGroup(QString("tabulator"));
+  int width = settings.value(QString("width"), 14).toInt();
+  settings.endGroup();
+  
+  QFontMetrics fm(font());
+  setTabStopWidth(width * fm.width(QString(" ")));
 }
 
 /*
@@ -125,13 +132,22 @@ bool Editor::maybeSave() {
 }
 
 bool Editor::openDocument(QString filename) {
+  QSettings settings("QteX", "QteX");
+  settings.beginGroup(QString("recent"));
+  
   if (filename.isEmpty() || filename.isNull()) {
-    filename = QFileDialog::getOpenFileName(this, trUtf8("Datei öffnen"));
+    /* Letzten Pfad laden */
+    QString path = settings.value(QString("openPath"), QDir::homePath()).toString();
+    filename = QFileDialog::getOpenFileName(this, trUtf8("Datei öffnen"), path);
   }
   
   if (filename.isEmpty() || filename.isNull()) {
     return false;
   }
+  
+  /* Pfad speichern */
+  settings.setValue(QString("openPath"), QFileInfo(filename).absolutePath());
+  settings.endGroup();
   
   QFile file(filename);
   if (!file.exists()) {
@@ -198,11 +214,15 @@ bool Editor::save() {
  * des Speicherpfades.
  */
 bool Editor::saveAs() {
+  QSettings settings("QteX", "QteX");
   QString filename;
+  
+  settings.beginGroup(QString("recent"));
+  QString path = settings.value(QString("savePath"), QDir::homePath()).toString();
   
   while (true) {
     /* Zunaechst einen Dateinamen holen */
-    QFileDialog dlg(this->parentWidget(), trUtf8("Datei speichern - QteX"), QDir::homePath());
+    QFileDialog dlg(this->parentWidget(), trUtf8("Datei speichern - QteX"), path);
     dlg.setAcceptMode(QFileDialog::AcceptSave);
     dlg.setConfirmOverwrite(false);
     
@@ -219,6 +239,9 @@ bool Editor::saveAs() {
     /* Selektierte Datei holen und QFile erzeugen */
     filename = dlg.selectedFiles().at(0);
     QFile temp(filename);
+    
+    /* Pfad speichern */
+    settings.setValue(QString("savePath"), QFileInfo(filename).absolutePath());
     
     /* Wurde eine andere, bereits existierende Datei gewählt? Dann nachfragen */
     if (temp.exists() && this->filename != filename) {
@@ -237,6 +260,8 @@ bool Editor::saveAs() {
       break;
     }
   }
+  
+  settings.endGroup();
 
   /* Der gewählte Dateiname muss nichtleer sein */
   if (filename.isEmpty() || filename.isNull()) {

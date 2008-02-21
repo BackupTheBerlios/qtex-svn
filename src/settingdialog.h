@@ -42,6 +42,7 @@ class SettingDialog : public QDialog
     QPushButton *save;
     QPushButton *buttonFontColor;
     QSpinBox *fontSize;
+    QSpinBox *tabulatorWidth;
     QTabWidget *tabs;
     QVBoxLayout *vLayout;
   

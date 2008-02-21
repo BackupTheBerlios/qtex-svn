@@ -79,7 +79,26 @@ void SettingDialog::createDialog() {
   fontColorPixmap->fill(fontColor);
   buttonFontColor->setIcon(QIcon(*fontColorPixmap));
   
+  /* Tabulatorgruppe */
+  QGridLayout *groupTabulatorLayout = new QGridLayout();
+  
+  QGroupBox *groupTabulator = new QGroupBox(editorTab);
+  groupTabulator->setObjectName(QString("groupTabulator"));
+  groupTabulator->setTitle(trUtf8("Tabulator"));
+  groupTabulator->setLayout(groupTabulatorLayout);
+  
+  QLabel *labelTabulatorWidth = new QLabel(groupTabulator);
+  labelTabulatorWidth->setObjectName(QString("labelTabulatorWidth"));
+  labelTabulatorWidth->setText(trUtf8("Tabulatorbreite:"));
+  groupTabulatorLayout->addWidget(labelTabulatorWidth, 0, 0);
+  
+  tabulatorWidth = new QSpinBox(groupTabulator);
+  tabulatorWidth->setObjectName(QString("tabulatorWidth"));
+  groupTabulatorLayout->addWidget(tabulatorWidth, 0, 1);
+  
+  /* Alles zusammenbauen */
   editorLayout->addWidget(groupFont);
+  editorLayout->addWidget(groupTabulator);
   editorLayout->addStretch();
   
   tabs->addTab(editorTab, trUtf8("Editor"));
@@ -109,13 +128,18 @@ void SettingDialog::loadSettings() {
   /* Schrifteinstellungen laden */
   settings.beginGroup(QString("font"));
   
-  fontName->setEditText(settings.value("name", QString("Monospace")).toString());
-  fontSize->setValue(settings.value("size", 10).toInt());
+  fontName->setEditText(settings.value(QString("name"), QString("Monospace")).toString());
+  fontSize->setValue(settings.value(QString("size"), 10).toInt());
   
-  fontColor = settings.value("color", Qt::black).value<QColor>();
+  fontColor = settings.value(QString("color"), Qt::black).value<QColor>();
   fontColorPixmap->fill(fontColor);
   buttonFontColor->setIcon(QIcon(*fontColorPixmap));
   
+  settings.endGroup();
+  
+  /* Tabulatoreinstellungen laden */
+  settings.beginGroup(QString("tabulator"));
+  this->tabulatorWidth->setValue(settings.value(QString("width"), 2).toInt());
   settings.endGroup();
 }
 
@@ -127,6 +151,11 @@ void SettingDialog::saveSettings() {
   settings.setValue(QString("name"), fontName->currentText());
   settings.setValue(QString("size"), fontSize->value());
   settings.setValue(QString("color"), fontColor);
+  settings.endGroup();
+  
+  /* Tabulatoreinstellungen */
+  settings.beginGroup(QString("tabulator"));
+  settings.setValue(QString("width"), tabulatorWidth->value());
   settings.endGroup();
   
   accept();
