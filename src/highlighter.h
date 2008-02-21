@@ -29,9 +29,13 @@ class Highlighter : public QSyntaxHighlighter
 		
 	private:
 		struct HighlightingRule
-		{
-			QRegExp pattern;
+		{	
+			QRegExp expression;
+			QRegExp startExpression;
+			QRegExp endExpression;
 			QTextCharFormat format;
+			int priority;
+			bool block;
 		};
 		QVector<HighlightingRule> highlightingRules;
 		
@@ -43,8 +47,8 @@ class Highlighter : public QSyntaxHighlighter
 			QTextCharFormat format;
 		};
 		
-		QRegExp mathModeStartExpression;
-		QRegExp mathModeEndExpression;
+		//QRegExp mathModeStartExpression;
+		//QRegExp mathModeEndExpression;
 		
 		QTextCharFormat latexFormat;
 		QTextCharFormat singleLineCommentFormat;
