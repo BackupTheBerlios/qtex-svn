@@ -20,11 +20,16 @@ class Compiler : QThread
     
   signals:
     void outputReceived(QString);
+    void error(QString);
+    
+  private slots:
+    void promptForCommand();
     
   private:
     void compile(QString, QString, QStringList);
     void run();
      
+    QProcess *proc;
     QTextEdit *console;
     QString path, command;
     QStringList arguments;
