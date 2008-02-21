@@ -4,7 +4,9 @@
 #include <QFlags>
 #include <QMessageBox>
 #include <QStyle>
+
 #include "mainwindow.h"
+#include "settingdialog.h"
 #include <stdio.h>
 
 #define APP_TITLE "QteX"
@@ -38,6 +40,13 @@ void MainWindow::closeAllTabs() {
     }
     tabCount--;
   }
+  
+  Editor *curInput = getCurrentEditor();
+  if (curInput == 0) {
+    return;
+  }
+  
+  curInput->setFocus();
 }
 
 /*
@@ -70,6 +79,28 @@ void MainWindow::closeCurrentTab() {
     action_Ausschneiden->setEnabled(false);
     action_Kopieren->setEnabled(false);
     action_Einfuegen->setEnabled(false);
+  } else {
+    Editor *curInput = getCurrentEditor();
+    if (curInput == 0) {
+      return;
+    }
+    
+    curInput->setFocus();
+  }
+}
+
+void MainWindow::closeEvent(QCloseEvent *event) {
+  closeAllTabs();
+  if (tabs->count() > 0) {
+    event->ignore();
+    Editor *curInput = getCurrentEditor();
+    if (curInput == 0) {
+      return;
+    }
+    
+    curInput->setFocus();
+  } else {
+    event->accept();
   }
 }
 
@@ -120,6 +151,8 @@ void MainWindow::createConnections() {
   QObject::connect(action_Schliessen, SIGNAL(triggered()), this, SLOT(closeCurrentTab()));
   QObject::connect(action_AlleSchliessen, SIGNAL(triggered()), this, SLOT(closeAllTabs()));
   QObject::connect(action_Beenden, SIGNAL(triggered()), this, SLOT(quit()));
+  
+  QObject::connect(action_Einstellungen, SIGNAL(triggered()), this, SLOT(settings()));
   
   QObject::connect(action_kompiliereLatex, SIGNAL(triggered()), this, SLOT(compileLatex()));
   QObject::connect(action_kompilierePdflatex, SIGNAL(triggered()), this, SLOT(compilePdflatex()));
@@ -227,12 +260,18 @@ void MainWindow::createMenus() {
   action_Einfuegen->setShortcut(QString("Ctrl+V"));
   action_Einfuegen->setText(trUtf8("&Einfügen"));
   
+  action_Einstellungen = new QAction(this);
+  action_Einstellungen->setObjectName(QString("action_Einstellungen"));
+  action_Einstellungen->setText(trUtf8("Ei&nstellungen"));
+  
   menu_Bearbeiten->addAction(action_Rueckgaengig);
   menu_Bearbeiten->addAction(action_Wiederherstellen);
   menu_Bearbeiten->addSeparator();
   menu_Bearbeiten->addAction(action_Ausschneiden);
   menu_Bearbeiten->addAction(action_Kopieren);
   menu_Bearbeiten->addAction(action_Einfuegen);
+  menu_Bearbeiten->addSeparator();
+  menu_Bearbeiten->addAction(action_Einstellungen);
   
   /* Menu 'Erstellen' einrichten */
   menu_Erstellen = new QMenu(menubar);
@@ -274,14 +313,12 @@ void MainWindow::createStatusbar() {
  * Die Toolbar erzeugen.
  */
 void MainWindow::createToolbar() {
-  toolbar = new QToolBar(this);
+  toolbar = new QToolBar(trUtf8("Kompilierwerkzeuge"), this);
   toolbar->setObjectName(QString("toolbar"));
   this->addToolBar(Qt::TopToolBarArea, toolbar);
   
   toolbar->addAction(action_kompiliereLatex);
   toolbar->addAction(action_kompilierePdflatex);
-  
-  this->addToolBar(Qt::TopToolBarArea, new QToolBar(this));
 }
 
 /*
@@ -373,6 +410,22 @@ Editor * MainWindow::getCurrentEditor() {
   }
   
   return editorList.at(tabs->currentIndex());
+}
+
+/*
+ * Veranlasst das Neuladen der Einstellungen.
+ */
+void MainWindow::loadSettings() {
+  QSettings s("QteX", "QteX");
+  s.beginGroup("font");
+  for (int i = 0; i < editorList.size(); i++) {
+    Editor *curInput = editorList.at(i);
+    if (curInput == 0) {
+      continue;
+    }
+    
+    curInput->loadSettings();
+  }
 }
 
 /*
@@ -553,5 +606,16 @@ void MainWindow::saveAs() {
     QString filename = curInput->getFilename();
     filename = filename.mid(filename.lastIndexOf(QDir::separator()) + 1);
     tabs->setTabText(tabs->currentIndex(), filename);
+  }
+}
+
+/*
+ * Zeigt den Einstellungsdialog an und veranlsst ggf.
+ * ein Neuladen der Einstellungen.
+ */
+void MainWindow::settings() {
+  SettingDialog dlg(0);
+  if (dlg.exec() == QDialog::Accepted) {
+    loadSettings();
   }
 }

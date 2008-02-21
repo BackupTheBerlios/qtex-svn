@@ -2,6 +2,7 @@
 #define __MAINWINDOW_H__
 
 #include <QtCore/QVariant>
+#include <QtGui/QCloseEvent>
 #include <QtGui/QAction>
 #include <QtGui/QApplication>
 #include <QtGui/QButtonGroup>
@@ -40,14 +41,17 @@ class MainWindow : public QMainWindow
     void save();
     void saveAll();
     void saveAs();
+    void settings();
     
   private:
+    void closeEvent(QCloseEvent *);
     void createConnections();
     void createMenus();
     void createStatusbar();
     void createToolbar();
     void createWorkspace();
     Editor * getCurrentEditor();
+    void loadSettings();
     
     Compiler *compiler;
     int newFileCount;    
@@ -64,6 +68,7 @@ class MainWindow : public QMainWindow
     QAction *action_Ausschneiden;
     QAction *action_Kopieren;
     QAction *action_Einfuegen;
+    QAction *action_Einstellungen;
     QAction *action_kompiliereLatex;
     QAction *action_kompilierePdflatex;
     QHBoxLayout *hboxLayout;

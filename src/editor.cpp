@@ -14,16 +14,19 @@
 Editor::Editor( QWidget * parent )
 : QTextEdit(parent)
 {
+  setObjectName(QString("input"));
+  cursor = new QTextCursor(textCursor());
+  setTextCursor(*cursor);
+  
 	highlighter = new Highlighter(document());
   changeState = false;
-  
-  setObjectName(QString("input"));
-  setFont(QFont("monospace", 10));
   
   QObject::connect(this, SIGNAL(textChanged()), this, SLOT(changed()));
   QObject::connect(this, SIGNAL(copyAvailable(bool)), this, SLOT(setCopy(bool)));
   QObject::connect(this, SIGNAL(redoAvailable(bool)), this, SLOT(setRedo(bool)));
   QObject::connect(this, SIGNAL(undoAvailable(bool)), this, SLOT(setUndo(bool)));
+  
+  loadSettings();
 }
 
 /*
@@ -56,6 +59,35 @@ bool Editor::getUndo() {
 
 bool Editor::hasChanged() {
   return changeState;
+}
+
+void Editor::loadSettings() {
+  QSettings settings("QteX", "QteX");
+  
+  /* Schriftart setzen */
+  settings.beginGroup("font");
+  QString fontname = settings.value("name", "Monospace").toString();
+  int fontsize = settings.value("size", 10).toInt();
+  QColor fontcolor = settings.value("color", Qt::black).value<QColor>();
+  settings.endGroup();
+  
+  setFont(QFont(fontname, fontsize));
+  
+  /* !!!!!!!!!!!!!!!!!!!!!!!!!!!
+   * !!! ACHTUNG: Workaround !!!
+   * !!!!!!!!!!!!!!!!!!!!!!!!!!!
+   */
+  /*bool tmp = changeState;
+  if (toPlainText().isEmpty()) {
+    setTextColor(fontcolor);
+  } else {
+    QTextCursor tmp = textCursor();
+    selectAll();
+    setTextColor(fontcolor);
+    setTextCursor(tmp);
+  }
+  setChanged(tmp);*/
+  setTextColor(fontcolor);
 }
 
 /*

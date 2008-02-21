@@ -10,6 +10,8 @@
 #ifndef EDITOR_H
 #define EDITOR_H
 
+#include <QColor>
+#include <QSettings>
 #include <QTextEdit>
 #include "highlighter.h"
 
@@ -24,6 +26,7 @@ class Editor : public QTextEdit
     bool getRedo();
     bool getUndo();
     bool hasChanged();
+    void loadSettings();
     bool maybeSave();
     bool openDocument(QString);
     bool save();
@@ -44,6 +47,7 @@ class Editor : public QTextEdit
     bool changeState;
 		Highlighter *highlighter;
     QString filename;
+    QTextCursor *cursor;
 	};
 
 #endif
