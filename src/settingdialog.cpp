@@ -1,6 +1,8 @@
 #include "settingdialog.h"
 
 SettingDialog::SettingDialog(QWidget *parent) : QDialog(parent) {
+  this->setWindowTitle(trUtf8("Einstellungen"));
+  
   createDialog();
   createConnections();
   

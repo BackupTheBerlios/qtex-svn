@@ -157,8 +157,9 @@ void MainWindow::createConnections() {
   QObject::connect(action_kompiliereLatex, SIGNAL(triggered()), this, SLOT(compileLatex()));
   QObject::connect(action_kompilierePdflatex, SIGNAL(triggered()), this, SLOT(compilePdflatex()));
 
-  /* Inputfeldsignale einrichten */
+  /* Weitere Signale einrichten */
   QObject::connect(closeButton, SIGNAL(clicked()), this, SLOT(closeCurrentTab()));
+  QObject::connect(&recentFiles, SIGNAL(update()), this, SLOT(createRecentFilesMenu()));
 }
 
 /*
@@ -184,6 +185,15 @@ void MainWindow::createMenus() {
   action_Oeffnen->setObjectName(QString("action_Oeffnen"));
   action_Oeffnen->setShortcut(QString("Ctrl+O"));
   action_Oeffnen->setText(trUtf8("Ö&ffnen..."));
+  
+  action_zuletztOffen = new QAction(this);
+  action_zuletztOffen->setObjectName(QString("action_zuetztOffen"));
+  action_zuletztOffen->setText(trUtf8("&Zuletzt geöffnet"));
+  
+  // Untermenü für die letzten Dateien
+  menu_ZuletztOffen = new QMenu(menubar);
+  action_zuletztOffen->setMenu(menu_ZuletztOffen);
+  createRecentFilesMenu();
   
   action_Speichern = new QAction(this);
   action_Speichern->setEnabled(false);
@@ -218,6 +228,7 @@ void MainWindow::createMenus() {
   
   menu_Datei->addAction(action_Neu);
   menu_Datei->addAction(action_Oeffnen);
+  menu_Datei->addAction(action_zuletztOffen);
   menu_Datei->addSeparator();
   menu_Datei->addAction(action_Speichern);
   menu_Datei->addAction(action_SpeichernUnter);
@@ -297,6 +308,29 @@ void MainWindow::createMenus() {
   menubar->addAction(menu_Datei->menuAction());
   menubar->addAction(menu_Bearbeiten->menuAction());
   menubar->addAction(menu_Erstellen->menuAction());
+}
+
+void MainWindow::createRecentFilesMenu() {
+  QList<QAction*> tmp = menu_ZuletztOffen->actions();
+  for (int i = 0; i < tmp.size(); i++) {
+    QAction *a = tmp.at(i);
+    if (a == 0) {
+      continue;
+    }
+    
+    menu_ZuletztOffen->removeAction(a);
+  }
+  
+  QList<RecentFileAction*> actions = recentFiles.getActions();
+  for (int i = 0; i < actions.size(); i++) {
+    RecentFileAction *act = actions.at(i);
+    if (act == 0) {
+      continue;
+    }
+    
+    menu_ZuletztOffen->addAction(act);
+    QObject::connect(act, SIGNAL(wasTriggered(QAction *)), this, SLOT(openRecentDocument(QAction *)));
+  }
 }
 
 /*
@@ -456,14 +490,20 @@ void MainWindow::newDocument() {
   action_Einfuegen->setEnabled(true);
 }
 
+void MainWindow::openDocument() {
+  openDocument(QString());
+}
+
 /*
  * Ein vorhandenes Dokument öffnen. Es wird dazu
  * ein Datei-Öffnen-Dialog angezeigt.
  */
-void MainWindow::openDocument() {
-  Editor *input = new Editor();
-  if (input->openDocument(QString("")) == true) {
+void MainWindow::openDocument(QString filename) {
+  Editor *input = new Editor(this);
+  if (input->openDocument(filename) == true) {
     QString filename = input->getFilename();
+    
+    recentFiles.addFile(filename);
     
     int index = tabs->addTab(input, filename.mid(filename.lastIndexOf(QDir::separator()) + 1));
     input->setFocus();
@@ -482,6 +522,16 @@ void MainWindow::openDocument() {
     delete input;
     input = 0;
   }
+}
+
+void MainWindow::openRecentDocument(QAction *action) {
+  if (action == 0) {
+    return;
+  }
+  
+  QString filename = action->text();
+  filename = filename.mid(filename.indexOf(QString(":"), 0) + 1).trimmed();
+  openDocument(filename);
 }
 
 /*
@@ -559,8 +609,15 @@ void MainWindow::save() {
     return;
   }
   
+  QString oldFilename = curInput->getFilename();
   if (curInput->save() == true) {
     QString filename = curInput->getFilename();
+    
+    // Einfügen in die recent Liste
+    if (oldFilename != filename) {
+      recentFiles.addFile(filename);
+    }
+    
     filename = filename.mid(filename.lastIndexOf(QDir::separator()) + 1);
     tabs->setTabText(tabs->currentIndex(), filename);
   }
@@ -583,8 +640,15 @@ void MainWindow::saveAll() {
     
     tabs->setCurrentIndex(i);
     
+    QString oldFilename = curInput->getFilename();
     if (curInput->save() == true) {
       QString filename = curInput->getFilename();
+      
+      // Einfügen in die recent Liste
+      if (oldFilename != filename) {
+        recentFiles.addFile(filename);
+      }
+    
       filename = filename.mid(filename.lastIndexOf(QDir::separator()) + 1);
       tabs->setTabText(tabs->currentIndex(), filename);
     }
@@ -602,8 +666,15 @@ void MainWindow::saveAs() {
     return;
   }
   
+  QString oldFilename = curInput->getFilename();
   if (curInput->saveAs() == true) {
     QString filename = curInput->getFilename();
+    
+    // Einfügen in die recent Liste
+    if (oldFilename != filename) {
+      recentFiles.addFile(filename);
+    }
+    
     filename = filename.mid(filename.lastIndexOf(QDir::separator()) + 1);
     tabs->setTabText(tabs->currentIndex(), filename);
   }
@@ -614,7 +685,7 @@ void MainWindow::saveAs() {
  * ein Neuladen der Einstellungen.
  */
 void MainWindow::settings() {
-  SettingDialog dlg(0);
+  SettingDialog dlg(this);
   if (dlg.exec() == QDialog::Accepted) {
     loadSettings();
   }

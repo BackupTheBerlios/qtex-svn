@@ -21,6 +21,8 @@
 #include <QtGui/QWidget>
 #include "src/compiler.h"
 #include "src/editor.h"
+#include "src/recentfileaction.h"
+#include "src/recentfilemanager.h"
 
 class MainWindow : public QMainWindow
 {
@@ -34,7 +36,9 @@ class MainWindow : public QMainWindow
     void closeCurrentTab();
     void compileLatex();
     void compilePdflatex();
+    void createRecentFilesMenu();
     void openDocument();
+    void openRecentDocument(QAction *);
     void newDocument();
     void quit();
     void reconnectTab(int);
@@ -52,11 +56,15 @@ class MainWindow : public QMainWindow
     void createWorkspace();
     Editor * getCurrentEditor();
     void loadSettings();
+    void openDocument(QString);
     
     Compiler *compiler;
-    int newFileCount;    
+    int newFileCount;
+    RecentFileManager recentFiles;
+    //RecentFileAction **action_letzteDatei;
     QAction *action_Neu; 
     QAction *action_Oeffnen;
+    QAction *action_zuletztOffen;
     QAction *action_Speichern;
     QAction *action_SpeichernUnter;
     QAction *action_AlleSpeichern;
@@ -74,8 +82,11 @@ class MainWindow : public QMainWindow
     QHBoxLayout *hboxLayout;
     QLabel *cursorPosition;
     QList<Editor *> editorList;
+    //QList<RecentFileAction *> action_letzteDatei;
+    //QList<QString> recentFiles;
     QMenu *menu_Datei;
     QMenu *menu_Bearbeiten;
+    QMenu *menu_ZuletztOffen;
     QMenu *menu_Erstellen;
     QMenuBar *menubar;
     QSplitter *vSplitter;

@@ -42,10 +42,10 @@ void Compiler::promptForCommand() {
   emit outputReceived(trUtf8("Befehl nicht gefunden: ") + this->command);
   
   bool ok;
-  QString title = trUtf8("Befehl nicht gefunden - QteX");
+  QString title = trUtf8("Befehl nicht gefunden");
   QString message = trUtf8("Der Befehl '") + command + trUtf8("' wurde nicht gefunden! ");
   message += trUtf8("Bitte geben Sie den vollständigen Pfad an:");
-  QString command = QInputDialog::getText(0, title, message, QLineEdit::Normal, QString(), &ok);
+  QString command = QInputDialog::getText(this->console->parentWidget(), title, message, QLineEdit::Normal, QString(), &ok);
   if (ok && !command.isEmpty() && !command.isNull()) {
     this->command = command;
     start();

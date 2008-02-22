@@ -108,7 +108,7 @@ bool Editor::maybeSave() {
     return true;
   }
   
-  QString title = trUtf8("Dokument schließen - QteX");
+  QString title = trUtf8("Dokument schließen");
   
   QString text = trUtf8("Das Dokument '");
   if (getFilename().isEmpty() || getFilename().isNull()) {
@@ -138,7 +138,7 @@ bool Editor::openDocument(QString filename) {
   if (filename.isEmpty() || filename.isNull()) {
     /* Letzten Pfad laden */
     QString path = settings.value(QString("openPath"), QDir::homePath()).toString();
-    filename = QFileDialog::getOpenFileName(this, trUtf8("Datei öffnen"), path);
+    filename = QFileDialog::getOpenFileName(this->parentWidget(), trUtf8("Datei öffnen"), path);
   }
   
   if (filename.isEmpty() || filename.isNull()) {
@@ -151,12 +151,12 @@ bool Editor::openDocument(QString filename) {
   
   QFile file(filename);
   if (!file.exists()) {
-    QMessageBox::critical(this, trUtf8("Fehler - QteX"), trUtf8("Die angeforderte Datei existiert nicht!"));
+    QMessageBox::critical(this, trUtf8("Fehler"), trUtf8("Die angeforderte Datei existiert nicht!"));
     return false;
   }
   
   if (!file.open(QIODevice::ReadOnly)) {
-    QMessageBox::critical(this, trUtf8("Fehler - QteX"), trUtf8("Die angeforderte Datei konnte nicht geöffnet werden!"));
+    QMessageBox::critical(this, trUtf8("Fehler"), trUtf8("Die angeforderte Datei konnte nicht geöffnet werden!"));
     return false;
   }
   
@@ -190,7 +190,7 @@ bool Editor::save() {
   /* Die Datei muss schreibbar sein */
   QFile file(getFilename());
   if (!file.open(QIODevice::WriteOnly)) {
-    QMessageBox::critical(this, trUtf8("Fehler - QteX"), trUtf8("Die aktuelle Datei ist nicht schreibbar!"));
+    QMessageBox::critical(this, trUtf8("Fehler"), trUtf8("Die aktuelle Datei ist nicht schreibbar!"));
     return false;
   }
   
@@ -199,7 +199,7 @@ bool Editor::save() {
   
   /* Versuchen, die Daten zu schreiben */
   if (file.write(data) == -1) {
-    QMessageBox::critical(this, trUtf8("Fehler - QteX"), trUtf8("Der Schreibvorgang für die aktuelle Datei war nicht erfolgreich!"));
+    QMessageBox::critical(this, trUtf8("Fehler"), trUtf8("Der Schreibvorgang für die aktuelle Datei war nicht erfolgreich!"));
     return false;
   }
   
@@ -222,7 +222,7 @@ bool Editor::saveAs() {
   
   while (true) {
     /* Zunaechst einen Dateinamen holen */
-    QFileDialog dlg(this->parentWidget(), trUtf8("Datei speichern - QteX"), path);
+    QFileDialog dlg(this->parentWidget(), trUtf8("Datei speichern"), path);
     dlg.setAcceptMode(QFileDialog::AcceptSave);
     dlg.setConfirmOverwrite(false);
     
@@ -250,7 +250,7 @@ bool Editor::saveAs() {
       text += trUtf8("' existiert bereits. Überschreiben?");
       
       /* Überschreiben? Wenn ja: raus aus der Schleife. Sonst von vorne */
-      int ret = QMessageBox::question(this, trUtf8("Datei speichern - QteX"), text, QMessageBox::Yes | QMessageBox::No);
+      int ret = QMessageBox::question(this, trUtf8("Datei speichern"), text, QMessageBox::Yes | QMessageBox::No);
       if (ret == QMessageBox::Yes) {
         break;
       } else {
@@ -271,7 +271,7 @@ bool Editor::saveAs() {
   /* Die Datei muss schreibbar sein */
   QFile file(filename);
   if (!file.open(QIODevice::WriteOnly)) {
-    QMessageBox::critical(this, trUtf8("Fehler - QteX"), trUtf8("Die aktuelle Datei ist nicht schreibbar!"));
+    QMessageBox::critical(this, trUtf8("Fehler"), trUtf8("Die aktuelle Datei ist nicht schreibbar!"));
     return false;
   }
   
@@ -282,7 +282,7 @@ bool Editor::saveAs() {
   
   /* Versuchen, die Daten zu schreiben */
   if (file.write(data) == -1) {
-    QMessageBox::critical(this, trUtf8("Fehler - QteX"), trUtf8("Der Schreibvorgang für die aktuelle Datei war nicht erfolgreich!"));
+    QMessageBox::critical(this, trUtf8("Fehler"), trUtf8("Der Schreibvorgang für die aktuelle Datei war nicht erfolgreich!"));
     return false;
   }
   
