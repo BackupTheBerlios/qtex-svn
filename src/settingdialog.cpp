@@ -6,7 +6,6 @@ SettingDialog::SettingDialog(QWidget *parent) : QDialog(parent) {
   createDialog();
   createConnections();
   
-  qRegisterMetaType<QColor>("QColor");
   loadSettings();
 }
 

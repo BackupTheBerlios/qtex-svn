@@ -17,10 +17,10 @@ MainWindow::MainWindow() : QMainWindow() {
   
   createMenus();
   createStatusbar();
-  createToolbar();
+  createToolbars();
   createWorkspace();
   createConnections();
-  
+
   compiler = new Compiler(output);
   newFileCount = 0;
 }
@@ -177,11 +177,13 @@ void MainWindow::createMenus() {
   menu_Datei->setTitle(trUtf8("&Datei"));
   
   action_Neu = new QAction(this);
+  action_Neu->setIcon(QIcon(":/images/filenew.png"));
   action_Neu->setObjectName(QString("action_Neu"));
   action_Neu->setShortcut(QString("Ctrl+N"));
   action_Neu->setText(trUtf8("&Neu"));
   
   action_Oeffnen = new QAction(this);
+  action_Oeffnen->setIcon(QIcon(":/images/fileopen.png"));
   action_Oeffnen->setObjectName(QString("action_Oeffnen"));
   action_Oeffnen->setShortcut(QString("Ctrl+O"));
   action_Oeffnen->setText(trUtf8("Ö&ffnen..."));
@@ -197,22 +199,26 @@ void MainWindow::createMenus() {
   
   action_Speichern = new QAction(this);
   action_Speichern->setEnabled(false);
+  action_Speichern->setIcon(QIcon(":/images/filesave.png"));
   action_Speichern->setObjectName(QString("action_Speichern"));
   action_Speichern->setShortcut(QString("Ctrl+S"));
   action_Speichern->setText(trUtf8("&Speichern"));
   
   action_SpeichernUnter = new QAction(this);
   action_SpeichernUnter->setEnabled(false);
+  action_SpeichernUnter->setIcon(QIcon(":/images/filesaveas.png"));
   action_SpeichernUnter->setObjectName(QString("action_SpeichernUnter"));
   action_SpeichernUnter->setText(trUtf8("Speichern &unter..."));
   
   action_AlleSpeichern = new QAction(this);
   action_AlleSpeichern->setEnabled(false);
+  action_AlleSpeichern->setIcon(QIcon(":/images/filesaveall.png"));
   action_AlleSpeichern->setObjectName(QString("action_AlleSpeichern"));
   action_AlleSpeichern->setText(trUtf8("&Alle speichern"));
   
   action_Schliessen = new QAction(this);
   action_Schliessen->setEnabled(false);
+  action_Schliessen->setIcon(QIcon(":/images/fileclose.png"));
   action_Schliessen->setObjectName(QString("action_Schliessen"));
   action_Schliessen->setText(trUtf8("Schl&ießen"));
   
@@ -245,28 +251,33 @@ void MainWindow::createMenus() {
   menu_Bearbeiten->setTitle(trUtf8("&Bearbeiten"));
   
   action_Rueckgaengig = new QAction(this);
+  action_Rueckgaengig->setEnabled(false);
+  action_Rueckgaengig->setIcon(QIcon(":/images/undo.png"));
   action_Rueckgaengig->setObjectName(QString("action_Rueckgaengig"));
   action_Rueckgaengig->setShortcut(QString("Ctrl+R"));
   action_Rueckgaengig->setText(trUtf8("&Rückgängig"));
-  action_Rueckgaengig->setEnabled(false);
   
   action_Wiederherstellen = new QAction(this);
+  action_Wiederherstellen->setEnabled(false);
+  action_Wiederherstellen->setIcon(QIcon(":/images/redo.png"));
   action_Wiederherstellen->setObjectName(QString("action_Wiederherstellen"));
   action_Wiederherstellen->setShortcut(QString("Ctrl+Shift+R"));
   action_Wiederherstellen->setText(trUtf8("&Wiederherstellen"));
-  action_Wiederherstellen->setEnabled(false);
   
   action_Ausschneiden = new QAction(this);
+  action_Ausschneiden->setIcon(QIcon(":/images/editcut.png"));
   action_Ausschneiden->setObjectName(QString("action_Ausschneiden"));
   action_Ausschneiden->setShortcut(QString("Ctrl+X"));
   action_Ausschneiden->setText(trUtf8("&Ausschneiden"));
   
   action_Kopieren = new QAction(this);
+  action_Kopieren->setIcon(QIcon(":/images/editcopy.png"));
   action_Kopieren->setObjectName(QString("action_Kopieren"));
   action_Kopieren->setShortcut(QString("Ctrl+C"));
   action_Kopieren->setText(trUtf8("&Kopieren"));
   
   action_Einfuegen = new QAction(this);
+  action_Einfuegen->setIcon(QIcon(":/images/editpaste.png"));
   action_Einfuegen->setObjectName(QString("action_Einfuegen"));
   action_Einfuegen->setShortcut(QString("Ctrl+V"));
   action_Einfuegen->setText(trUtf8("&Einfügen"));
@@ -346,13 +357,37 @@ void MainWindow::createStatusbar() {
 /*
  * Die Toolbar erzeugen.
  */
-void MainWindow::createToolbar() {
-  toolbar = new QToolBar(trUtf8("Kompilierwerkzeuge"), this);
-  toolbar->setObjectName(QString("toolbar"));
-  this->addToolBar(Qt::TopToolBarArea, toolbar);
+void MainWindow::createToolbars() {
+  /* Datei */
+  toolbarDatei = new QToolBar(trUtf8("Datei"), this);
+  toolbarDatei->setObjectName(QString("toolbarDatei"));
+  this->addToolBar(Qt::TopToolBarArea, toolbarDatei);
   
-  toolbar->addAction(action_kompiliereLatex);
-  toolbar->addAction(action_kompilierePdflatex);
+  toolbarDatei->addAction(action_Neu);
+  toolbarDatei->addAction(action_Oeffnen);
+  toolbarDatei->addAction(action_Speichern);
+  toolbarDatei->addAction(action_SpeichernUnter);
+  toolbarDatei->addAction(action_AlleSpeichern);
+  toolbarDatei->addAction(action_Schliessen);
+  
+  /* Bearbeiten */
+  toolbarBearbeiten = new QToolBar(trUtf8("Bearbeiten"), this);
+  toolbarBearbeiten->setObjectName(QString("toolbarBearbeiten"));
+  this->addToolBar(Qt::TopToolBarArea, toolbarBearbeiten);
+  
+  toolbarBearbeiten->addAction(action_Rueckgaengig);
+  toolbarBearbeiten->addAction(action_Wiederherstellen);
+  toolbarBearbeiten->addAction(action_Ausschneiden);
+  toolbarBearbeiten->addAction(action_Kopieren);
+  toolbarBearbeiten->addAction(action_Einfuegen);
+  
+  /* Kompilierwerkzeuge */
+  toolbarKompilierwerkzeuge = new QToolBar(trUtf8("Kompilieren"), this);
+  toolbarKompilierwerkzeuge->setObjectName(QString("toolbarKompilierwerkzeuge"));
+  this->addToolBar(Qt::TopToolBarArea, toolbarKompilierwerkzeuge);
+  
+  toolbarKompilierwerkzeuge->addAction(action_kompiliereLatex);
+  toolbarKompilierwerkzeuge->addAction(action_kompilierePdflatex);
 }
 
 /*

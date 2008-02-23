@@ -19,6 +19,7 @@
 #include <QtGui/QToolBox>
 #include <QtGui/QToolButton>
 #include <QtGui/QWidget>
+
 #include "src/compiler.h"
 #include "src/editor.h"
 #include "src/recentfileaction.h"
@@ -52,7 +53,7 @@ class MainWindow : public QMainWindow
     void createConnections();
     void createMenus();
     void createStatusbar();
-    void createToolbar();
+    void createToolbars();
     void createWorkspace();
     Editor * getCurrentEditor();
     void loadSettings();
@@ -94,7 +95,9 @@ class MainWindow : public QMainWindow
     QStatusBar *statusbar;
     QTextEdit *output;
     QTabWidget *tabs;
-    QToolBar *toolbar;
+    QToolBar *toolbarBearbeiten;
+    QToolBar *toolbarDatei;
+    QToolBar *toolbarKompilierwerkzeuge;
     QToolBox *toolbox;
     QToolButton *closeButton;
     QWidget *centralwidget;

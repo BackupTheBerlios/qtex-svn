@@ -5,6 +5,8 @@ RecentFileManager::RecentFileManager() {
   settings.beginGroup(QString("recent"));
   capacity = settings.value(QString("size"), 10).toInt();
   settings.endGroup();
+  
+  importRecentFiles();
 }
 
 void RecentFileManager::addFile(QString filename) {
@@ -19,7 +21,46 @@ void RecentFileManager::addFile(QString filename) {
     recentFiles.removeLast();
   }
   
+  exportRecentFiles();
   emit update();
+}
+
+void RecentFileManager::exportRecentFiles() {
+  QSettings settings("QteX", "QteX");
+  settings.beginGroup(QString("recent"));
+  settings.beginWriteArray(QString("files"));
+  
+  for (int i = 0; i < recentFiles.size(); i++) {
+    settings.setArrayIndex(i);
+    settings.setValue(QString("filename"), recentFiles.at(i));
+  }
+  
+  settings.endArray();
+  settings.endGroup();
+}
+
+void RecentFileManager::importRecentFiles() {
+  recentFiles.clear();
+  
+  QSettings settings("QteX", "QteX");
+  settings.beginGroup(QString("recent"));
+  int size = settings.beginReadArray(QString("files"));
+  
+  for (int i = 0; i < size; i++) {
+    settings.setArrayIndex(i);
+    recentFiles.insert(i, settings.value(QString("filename"), QString()).toString());
+  }
+  
+  settings.endArray();
+  settings.endGroup();
+  
+  for (int i = 0; i < recentFiles.size(); i++) {
+    QString tmp = recentFiles.at(i);
+    if (tmp.isNull() || tmp.isEmpty()) {
+      recentFiles.removeAt(i);
+      i--;
+    }
+  }
 }
 
 QList<RecentFileAction *> RecentFileManager::getActions() {

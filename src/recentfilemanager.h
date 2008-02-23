@@ -23,6 +23,9 @@ class RecentFileManager : public QObject
     void update();
     
   private:
+    void exportRecentFiles();
+    void importRecentFiles();
+    
     int capacity;
     QList<RecentFileAction *> recentFileActions;
     QList<QString> recentFiles;
