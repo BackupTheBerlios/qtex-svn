@@ -10,6 +10,7 @@
 #ifndef HIGHLIGHTER_H
 #define HIGHLIGHTER_H
 
+#include <QSettings>
 #include <QSyntaxHighlighter>
 
 #include <QHash>
@@ -23,6 +24,7 @@ class Highlighter : public QSyntaxHighlighter
 		
 	public:
 		Highlighter(QTextDocument *parent = 0);
+    void loadHighlighting();
 		
 	protected:
 		void highlightBlock(const QString &text);

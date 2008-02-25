@@ -95,6 +95,10 @@ void Editor::loadSettings() {
   
   QFontMetrics fm(font());
   setTabStopWidth(width * fm.width(QString(" ")));
+  
+  /* Highlighting erneuern */
+  highlighter->loadHighlighting();
+  highlighter->rehighlight();
 }
 
 /*

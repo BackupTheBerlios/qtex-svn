@@ -14,30 +14,7 @@
 Highlighter::Highlighter(QTextDocument *parent)
 : QSyntaxHighlighter(parent)
 {
-	HighlightingRule rule;
-	
-	latexFormat.setFontWeight(QFont::Bold);
-	latexFormat.setForeground(Qt::darkMagenta);
-	rule.expression = QRegExp("\\\\[A-Za-z]+");
-	rule.format = latexFormat;
-	rule.block = false;
-	highlightingRules.append(rule);
-	
-	singleLineCommentFormat.setForeground(Qt::red);
-	rule.expression = QRegExp("%[^\n]*");
-	rule.format = singleLineCommentFormat;
-	rule.block = false;
-	highlightingRules.append(rule);
-	
-	mathModeFormat.setBackground(Qt::yellow);
-	
-	//mathModeStartExpression = QRegExp("\\$.");
-	//mathModeEndExpression = QRegExp("\\$");
-	rule.startExpression = QRegExp("\\$.");
-	rule.endExpression = QRegExp("\\$");
-	rule.format = mathModeFormat;
-	rule.block = true;
-	highlightingRules.append(rule);
+	loadHighlighting();
 }
 
 void Highlighter::highlightBlock(const QString &text)
@@ -106,4 +83,76 @@ void Highlighter::highlightBlock(const QString &text)
 			}
 		}
 	}
+}
+
+void Highlighter::loadHighlighting() {
+  highlightingRules.clear();
+  HighlightingRule rule;
+  
+  QSettings settings("QteX", "QteX");
+  settings.beginGroup(QString("syntaxhighlighting"));
+	
+  int state = settings.value(QString("latexBold"), Qt::Checked).toInt();
+  if (state != 0) {
+    latexFormat.setFontWeight(QFont::Bold);
+  } else {
+    latexFormat.setFontWeight(QFont::Normal);
+  }
+  state = settings.value(QString("latexItalic"), Qt::Unchecked).toInt();
+  if (state != 0) {
+    latexFormat.setFontItalic(true);
+  } else {
+    latexFormat.setFontItalic(false);
+  }
+	latexFormat.setForeground(settings.value(QString("latexForeground"), Qt::darkMagenta).value<QColor>());
+  latexFormat.setBackground(settings.value(QString("latexBackground"), Qt::white).value<QColor>());
+	rule.expression = QRegExp("\\\\[A-Za-z]+");
+	rule.format = latexFormat;
+	rule.block = false;
+	highlightingRules.append(rule);
+	
+  state = settings.value(QString("commentBold"), Qt::Unchecked).toInt();
+  if (state != 0) {
+    singleLineCommentFormat.setFontWeight(QFont::Bold);
+  } else {
+    singleLineCommentFormat.setFontWeight(QFont::Normal);
+  }
+  state = settings.value(QString("commentItalic"), Qt::Checked).toInt();
+  if (state != 0) {
+    singleLineCommentFormat.setFontItalic(true);
+  } else {
+    singleLineCommentFormat.setFontItalic(false);
+  }
+	singleLineCommentFormat.setForeground(settings.value(QString("commentForeground"), Qt::red).value<QColor>());
+  singleLineCommentFormat.setBackground(settings.value(QString("commentBackground"), Qt::white).value<QColor>());
+	rule.expression = QRegExp("%[^\n]*");
+	rule.format = singleLineCommentFormat;
+	rule.block = false;
+	highlightingRules.append(rule);
+	
+	//mathModeFormat.setBackground(Qt::yellow);
+	
+	//mathModeStartExpression = QRegExp("\\$.");
+	//mathModeEndExpression = QRegExp("\\$");
+  state = settings.value(QString("mathBold"), Qt::Unchecked).toInt();
+  if (state != 0) {
+    mathModeFormat.setFontWeight(QFont::Bold);
+  } else {
+    mathModeFormat.setFontWeight(QFont::Normal);
+  }
+  state = settings.value(QString("mathItalic"), Qt::Unchecked).toInt();
+  if (state != 0) {
+    mathModeFormat.setFontItalic(true);
+  } else {
+    mathModeFormat.setFontItalic(false);
+  }
+	mathModeFormat.setForeground(settings.value(QString("mathForeground"), Qt::black).value<QColor>());
+  mathModeFormat.setBackground(settings.value(QString("mathBackground"), Qt::yellow).value<QColor>());
+	rule.startExpression = QRegExp("\\$.");
+	rule.endExpression = QRegExp("\\$");
+	rule.format = mathModeFormat;
+	rule.block = true;
+	highlightingRules.append(rule);
+  
+  settings.endGroup();
 }

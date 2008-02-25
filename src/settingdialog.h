@@ -1,6 +1,7 @@
 #ifndef __SETTINGDIALOG_H__
 #define __SETTINGDIALOG_H__
 
+#include <QCheckBox>
 #include <QColor>
 #include <QColorDialog>
 #include <QDialog>
@@ -18,6 +19,8 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
+#include "colorchoosebutton.h"
+
 class SettingDialog : public QDialog 
 {
   Q_OBJECT
@@ -26,7 +29,6 @@ class SettingDialog : public QDialog
     SettingDialog(QWidget *);
     
   private slots:
-    void getFontColor();
     void saveSettings();
     
   private:
@@ -34,13 +36,18 @@ class SettingDialog : public QDialog
     void createDialog();
     void loadSettings();
     
-    QColor fontColor;
+    QCheckBox *buttonCommentBold, *buttonCommentItalic;
+    QCheckBox *buttonLatexBold, *buttonLatexItalic;
+    QCheckBox *buttonMathBold, *buttonMathItalic;
     QFontComboBox *fontName;
     QHBoxLayout *hLayout;
     QPixmap *fontColorPixmap;
     QPushButton *cancel;
     QPushButton *save;
-    QPushButton *buttonFontColor;
+    ColorChooseButton *buttonFontColor;
+    ColorChooseButton *buttonCommentForeground, *buttonCommentBackground;
+    ColorChooseButton *buttonLatexForeground, *buttonLatexBackground;
+    ColorChooseButton *buttonMathForeground, *buttonMathBackground;
     QSpinBox *fontSize;
     QSpinBox *tabulatorWidth;
     QTabWidget *tabs;

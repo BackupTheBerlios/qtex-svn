@@ -76,6 +76,8 @@ void MainWindow::closeCurrentTab() {
     action_AlleSpeichern->setEnabled(false);
     action_Schliessen->setEnabled(false);
     action_AlleSchliessen->setEnabled(false);
+    action_Rueckgaengig->setEnabled(false);
+    action_Wiederherstellen->setEnabled(false);
     action_Ausschneiden->setEnabled(false);
     action_Kopieren->setEnabled(false);
     action_Einfuegen->setEnabled(false);
@@ -485,8 +487,6 @@ Editor * MainWindow::getCurrentEditor() {
  * Veranlasst das Neuladen der Einstellungen.
  */
 void MainWindow::loadSettings() {
-  QSettings s("QteX", "QteX");
-  s.beginGroup("font");
   for (int i = 0; i < editorList.size(); i++) {
     Editor *curInput = editorList.at(i);
     if (curInput == 0) {
