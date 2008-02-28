@@ -2,8 +2,10 @@
 #define __COMPILER_H__
 
 #include <QDir>
+#include <QMessageBox>
 #include <QObject>
 #include <QProcess>
+#include <QSettings>
 #include <QString>
 #include <QStringList>
 #include <QTextEdit>
@@ -15,6 +17,7 @@ class Compiler : QThread
   
   public:
     Compiler(QTextEdit *);
+    void checkEnvironment();
     void compileLatex(QString);
     void compilePdflatex(QString);
     
@@ -23,7 +26,7 @@ class Compiler : QThread
     void error(QString);
     
   private slots:
-    void promptForCommand();
+    void commandNotFound();
     
   private:
     void compile(QString, QString, QStringList);

@@ -12,6 +12,8 @@
 
 #include <QColor>
 #include <QFontMetrics>
+#include <QHBoxLayout>
+#include <QLabel>
 #include <QSettings>
 #include <QTextEdit>
 #include "highlighter.h"
@@ -35,8 +37,12 @@ class Editor : public QTextEdit
     void setChanged(bool);
     void setFilename(QString);
     
+  signals:
+    void newCursorPosition(QString);
+    
   private slots:
     void changed();
+    void dummy();
     void setCopy(bool);
     void setRedo(bool);
     void setUndo(bool);
@@ -47,6 +53,7 @@ class Editor : public QTextEdit
     bool canUndo;
     bool changeState;
 		Highlighter *highlighter;
+    QLabel *lineNumbers;
     QString filename;
     QTextCursor *cursor;
 	};

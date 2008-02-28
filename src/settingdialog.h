@@ -10,6 +10,7 @@
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QLineEdit>
 #include <QPixmap>
 #include <QPushButton>
 #include <QSettings>
@@ -41,6 +42,7 @@ class SettingDialog : public QDialog
     QCheckBox *buttonMathBold, *buttonMathItalic;
     QFontComboBox *fontName;
     QHBoxLayout *hLayout;
+    QLineEdit *latexCommandInput, *pdflatexCommandInput;
     QPixmap *fontColorPixmap;
     QPushButton *cancel;
     QPushButton *save;

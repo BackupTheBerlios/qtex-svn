@@ -26,6 +26,8 @@ Editor::Editor( QWidget * parent )
   QObject::connect(this, SIGNAL(redoAvailable(bool)), this, SLOT(setRedo(bool)));
   QObject::connect(this, SIGNAL(undoAvailable(bool)), this, SLOT(setUndo(bool)));
   
+  QObject::connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(dummy()));
+  
   loadSettings();
 }
 
@@ -34,6 +36,17 @@ Editor::Editor( QWidget * parent )
  */
 void Editor::changed() {
   setChanged(true);
+}
+
+void Editor::dummy() {
+  int index = textCursor().position();
+  QString text = toPlainText().mid(0, index);
+  int lastIndex = text.lastIndexOf(QString("\n"));
+  
+  int line = text.count(QString("\n")) + 1;
+  int col = index - lastIndex;
+  
+  emit newCursorPosition(trUtf8("Zeile ") + QString::number(line) + trUtf8(", Spalte ") + QString::number(col)); 
 }
 
 /* ============================
@@ -319,4 +332,5 @@ void Editor::setRedo(bool bRedo) {
 void Editor::setUndo(bool bUndo) {
   canUndo = bUndo;
 }
+
 

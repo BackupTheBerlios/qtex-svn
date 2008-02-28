@@ -22,6 +22,8 @@ MainWindow::MainWindow() : QMainWindow() {
   createConnections();
 
   compiler = new Compiler(output);
+  compiler->checkEnvironment();
+  
   newFileCount = 0;
 }
 
@@ -181,13 +183,13 @@ void MainWindow::createMenus() {
   action_Neu = new QAction(this);
   action_Neu->setIcon(QIcon(":/images/filenew.png"));
   action_Neu->setObjectName(QString("action_Neu"));
-  action_Neu->setShortcut(QString("Ctrl+N"));
+  action_Neu->setShortcut(tr("Ctrl+N"));
   action_Neu->setText(trUtf8("&Neu"));
   
   action_Oeffnen = new QAction(this);
   action_Oeffnen->setIcon(QIcon(":/images/fileopen.png"));
   action_Oeffnen->setObjectName(QString("action_Oeffnen"));
-  action_Oeffnen->setShortcut(QString("Ctrl+O"));
+  action_Oeffnen->setShortcut(tr("Ctrl+O"));
   action_Oeffnen->setText(trUtf8("Ö&ffnen..."));
   
   action_zuletztOffen = new QAction(this);
@@ -203,7 +205,7 @@ void MainWindow::createMenus() {
   action_Speichern->setEnabled(false);
   action_Speichern->setIcon(QIcon(":/images/filesave.png"));
   action_Speichern->setObjectName(QString("action_Speichern"));
-  action_Speichern->setShortcut(QString("Ctrl+S"));
+  action_Speichern->setShortcut(tr("Ctrl+S"));
   action_Speichern->setText(trUtf8("&Speichern"));
   
   action_SpeichernUnter = new QAction(this);
@@ -231,7 +233,7 @@ void MainWindow::createMenus() {
   
   action_Beenden = new QAction(this);
   action_Beenden->setObjectName(QString("action_Beenden"));
-  action_Beenden->setShortcut(QString("Ctrl+B"));
+  action_Beenden->setShortcut(tr("Ctrl+B"));
   action_Beenden->setText(trUtf8("&Beenden"));
   
   menu_Datei->addAction(action_Neu);
@@ -256,32 +258,32 @@ void MainWindow::createMenus() {
   action_Rueckgaengig->setEnabled(false);
   action_Rueckgaengig->setIcon(QIcon(":/images/undo.png"));
   action_Rueckgaengig->setObjectName(QString("action_Rueckgaengig"));
-  action_Rueckgaengig->setShortcut(QString("Ctrl+R"));
+  action_Rueckgaengig->setShortcut(tr("Ctrl+R"));
   action_Rueckgaengig->setText(trUtf8("&Rückgängig"));
   
   action_Wiederherstellen = new QAction(this);
   action_Wiederherstellen->setEnabled(false);
   action_Wiederherstellen->setIcon(QIcon(":/images/redo.png"));
   action_Wiederherstellen->setObjectName(QString("action_Wiederherstellen"));
-  action_Wiederherstellen->setShortcut(QString("Ctrl+Shift+R"));
+  action_Wiederherstellen->setShortcut(tr("Ctrl+Shift+R"));
   action_Wiederherstellen->setText(trUtf8("&Wiederherstellen"));
   
   action_Ausschneiden = new QAction(this);
   action_Ausschneiden->setIcon(QIcon(":/images/editcut.png"));
   action_Ausschneiden->setObjectName(QString("action_Ausschneiden"));
-  action_Ausschneiden->setShortcut(QString("Ctrl+X"));
+  action_Ausschneiden->setShortcut(tr("Ctrl+X"));
   action_Ausschneiden->setText(trUtf8("&Ausschneiden"));
   
   action_Kopieren = new QAction(this);
   action_Kopieren->setIcon(QIcon(":/images/editcopy.png"));
   action_Kopieren->setObjectName(QString("action_Kopieren"));
-  action_Kopieren->setShortcut(QString("Ctrl+C"));
+  action_Kopieren->setShortcut(tr("Ctrl+C"));
   action_Kopieren->setText(trUtf8("&Kopieren"));
   
   action_Einfuegen = new QAction(this);
   action_Einfuegen->setIcon(QIcon(":/images/editpaste.png"));
   action_Einfuegen->setObjectName(QString("action_Einfuegen"));
-  action_Einfuegen->setShortcut(QString("Ctrl+V"));
+  action_Einfuegen->setShortcut(tr("Ctrl+V"));
   action_Einfuegen->setText(trUtf8("&Einfügen"));
   
   action_Einstellungen = new QAction(this);
@@ -305,13 +307,13 @@ void MainWindow::createMenus() {
   action_kompiliereLatex = new QAction(this);
   action_kompiliereLatex->setIcon(QIcon(":/images/latex.png"));
   action_kompiliereLatex->setObjectName(QString("action_kompiliereLatex"));
-  action_kompiliereLatex->setShortcut(QString("Alt+1"));
+  action_kompiliereLatex->setShortcut(tr("Alt+1"));
   action_kompiliereLatex->setText(trUtf8("&Latex"));
   
   action_kompilierePdflatex = new QAction(this);
   action_kompilierePdflatex->setIcon(QIcon(":/images/pdflatex.png"));
   action_kompilierePdflatex->setObjectName(QString("action_kompilierePdflatex"));
-  action_kompilierePdflatex->setShortcut(QString("Alt+2"));
+  action_kompilierePdflatex->setShortcut(tr("Alt+2"));
   action_kompilierePdflatex->setText(trUtf8("&PdfLatex"));
   
   menu_Erstellen->addAction(action_kompiliereLatex);
@@ -628,11 +630,15 @@ void MainWindow::reconnectTab(int newIndex) {
   QObject::connect(action_Kopieren, SIGNAL(triggered()), curInput, SLOT(copy()));
   QObject::connect(action_Einfuegen, SIGNAL(triggered()), curInput, SLOT(paste()));
   
+  QObject::connect(curInput, SIGNAL(newCursorPosition(QString)), statusbar, SLOT(showMessage(QString)));
+  
   /* Abschließend können einige Menupunkt wieder aktiviert werden */
   action_Rueckgaengig->setEnabled(curInput->getUndo());
   action_Wiederherstellen->setEnabled(curInput->getRedo());
   action_Ausschneiden->setEnabled(curInput->getCopy());
   action_Kopieren->setEnabled(curInput->getCopy());
+  
+  statusbar->showMessage(trUtf8("Zeile 1, Spalte 1"));
 }
 
 /* 

@@ -101,6 +101,32 @@ void SettingDialog::createDialog() {
   editorLayout->addWidget(groupTabulator);
   editorLayout->addStretch();
   
+  /* Das 'Erstellen' - Tabs */
+  QWidget *erstellenTab = new QWidget(this);
+  QVBoxLayout *erstellenLayout = new QVBoxLayout(erstellenTab);
+  erstellenTab->setLayout(erstellenLayout);
+  
+  QGridLayout *erstellenTableLayout = new QGridLayout();
+  
+  QLabel *latexCommandLabel = new QLabel(erstellenTab);
+  latexCommandLabel->setText(trUtf8("Latex:"));
+  erstellenTableLayout->addWidget(latexCommandLabel, 0, 0);
+  
+  latexCommandInput = new QLineEdit(erstellenTab);
+  latexCommandInput->setObjectName(QString("latexCommandInput"));
+  erstellenTableLayout->addWidget(latexCommandInput, 0, 1);
+  
+  QLabel *pdflatexCommandLabel = new QLabel(erstellenTab);
+  pdflatexCommandLabel->setText(trUtf8("Pdflatex:"));
+  erstellenTableLayout->addWidget(pdflatexCommandLabel, 1, 0);
+  
+  pdflatexCommandInput = new QLineEdit(erstellenTab);
+  pdflatexCommandInput->setObjectName(QString("pdflatexCommandInput"));
+  erstellenTableLayout->addWidget(pdflatexCommandInput, 1, 1);
+  
+  erstellenLayout->addLayout(erstellenTableLayout);
+  erstellenLayout->addStretch();
+  
   /* Das 'Synatx-Highlighting' - Tab */
   QWidget *syntaxTab = new QWidget(this);
   QVBoxLayout *syntaxLayout = new QVBoxLayout(syntaxTab);
@@ -204,6 +230,7 @@ void SettingDialog::createDialog() {
   
   
   tabs->addTab(editorTab, trUtf8("Editor"));
+  tabs->addTab(erstellenTab, trUtf8("Erstellen"));
   tabs->addTab(syntaxTab, trUtf8("Syntax Highlighting"));
 }
 
@@ -229,6 +256,12 @@ void SettingDialog::loadSettings() {
   /* Tabulatoreinstellungen laden */
   settings.beginGroup(QString("tabulator"));
   this->tabulatorWidth->setValue(settings.value(QString("width"), 2).toInt());
+  settings.endGroup();
+  
+  /* Erstellen-Einstellungen laden */
+  settings.beginGroup(QString("compiler"));
+  latexCommandInput->setText(settings.value(QString("latex"), QString("latex")).toString());
+  pdflatexCommandInput->setText(settings.value(QString("pdflatex"), QString("pdflatex")).toString());
   settings.endGroup();
   
   /* Synatx-Highlighting-Einstellungen laden */
@@ -294,6 +327,12 @@ void SettingDialog::saveSettings() {
   /* Tabulatoreinstellungen */
   settings.beginGroup(QString("tabulator"));
   settings.setValue(QString("width"), tabulatorWidth->value());
+  settings.endGroup();
+  
+  /* Erstellen-Einstellungen */
+  settings.beginGroup(QString("compiler"));
+  settings.setValue(QString("latex"), latexCommandInput->text());
+  settings.setValue(QString("pdflatex"), pdflatexCommandInput->text());
   settings.endGroup();
   
   /* Synatxhighlighting-Einstellungen */
