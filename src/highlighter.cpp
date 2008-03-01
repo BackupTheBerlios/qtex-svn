@@ -72,8 +72,9 @@ void Highlighter::highlightBlock(const QString &text)
 			}
 		}
 	}
-	foreach (IntervallWithFormat keyword, keywords) {
-		foreach (IntervallWithFormat mathMode, mathModes) {
+	
+	foreach (IntervallWithFormat mathMode, mathModes) {
+    foreach (IntervallWithFormat keyword, keywords) {
 			if (mathMode.index < keyword.index && mathMode.length+mathMode.index >= keyword.length+keyword.index) {
 				QTextCharFormat mixed;
 				mixed.setFontWeight(keyword.format.fontWeight());
@@ -130,10 +131,6 @@ void Highlighter::loadHighlighting() {
 	rule.block = false;
 	highlightingRules.append(rule);
 	
-	//mathModeFormat.setBackground(Qt::yellow);
-	
-	//mathModeStartExpression = QRegExp("\\$.");
-	//mathModeEndExpression = QRegExp("\\$");
   state = settings.value(QString("mathBold"), Qt::Unchecked).toInt();
   if (state != 0) {
     mathModeFormat.setFontWeight(QFont::Bold);

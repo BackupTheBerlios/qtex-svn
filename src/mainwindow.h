@@ -22,6 +22,7 @@
 
 #include "src/compiler.h"
 #include "src/editor.h"
+#include "src/finddialog.h"
 #include "src/recentfileaction.h"
 #include "src/recentfilemanager.h"
 
@@ -38,6 +39,9 @@ class MainWindow : public QMainWindow
     void compileLatex();
     void compilePdflatex();
     void createRecentFilesMenu();
+    void find();
+    void findNext();
+    void findPrevious();
     void openDocument();
     void openRecentDocument(QAction *);
     void newDocument();
@@ -60,9 +64,10 @@ class MainWindow : public QMainWindow
     void openDocument(QString);
     
     Compiler *compiler;
+    FindDialog *findDialog;
     int newFileCount;
     RecentFileManager recentFiles;
-    //RecentFileAction **action_letzteDatei;
+    
     QAction *action_Neu; 
     QAction *action_Oeffnen;
     QAction *action_zuletztOffen;
@@ -77,14 +82,15 @@ class MainWindow : public QMainWindow
     QAction *action_Ausschneiden;
     QAction *action_Kopieren;
     QAction *action_Einfuegen;
+    QAction *action_Suchen;
+    QAction *action_NaechsteSuchen;
+    QAction *action_LetzteSuchen;
     QAction *action_Einstellungen;
     QAction *action_kompiliereLatex;
     QAction *action_kompilierePdflatex;
     QHBoxLayout *hboxLayout;
     QLabel *cursorPosition;
     QList<Editor *> editorList;
-    //QList<RecentFileAction *> action_letzteDatei;
-    //QList<QString> recentFiles;
     QMenu *menu_Datei;
     QMenu *menu_Bearbeiten;
     QMenu *menu_ZuletztOffen;
