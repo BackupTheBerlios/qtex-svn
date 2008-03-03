@@ -11,11 +11,16 @@
 #define EDITOR_H
 
 #include <QColor>
+#include <QEvent>
 #include <QFontMetrics>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QPainter>
+#include <QRectF>
+#include <QScrollBar>
 #include <QSettings>
 #include <QTextEdit>
+#include <QTextLayout>
 #include "highlighter.h"
 
 class Editor : public QTextEdit
@@ -28,6 +33,7 @@ class Editor : public QTextEdit
     bool getCopy();
     bool getRedo();
     bool getUndo();
+    bool gotoLine(int);
     bool hasChanged();
     void loadSettings();
     bool maybeSave();
@@ -48,11 +54,14 @@ class Editor : public QTextEdit
     void setUndo(bool);
 		
 	private: 
+    bool event(QEvent *);
+    
     bool canCopy;
     bool canRedo;
     bool canUndo;
     bool changeState;
 		Highlighter *highlighter;
+    int lineMargin;
     QLabel *lineNumbers;
     QString filename;
     QTextCursor *cursor;

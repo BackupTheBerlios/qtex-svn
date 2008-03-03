@@ -14,9 +14,12 @@
 Editor::Editor( QWidget * parent )
 : QTextEdit(parent)
 {
+  lineMargin = 60;
+  
   setObjectName(QString("input"));
   cursor = new QTextCursor(textCursor());
   setTextCursor(*cursor);
+  setViewportMargins(lineMargin, 0, 0, 0);
   
 	highlighter = new Highlighter(document());
   changeState = false;
@@ -27,6 +30,9 @@ Editor::Editor( QWidget * parent )
   QObject::connect(this, SIGNAL(undoAvailable(bool)), this, SLOT(setUndo(bool)));
   
   QObject::connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(dummy()));
+  
+  QObject::connect(verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(update())); 
+  QObject::connect(this, SIGNAL(textChanged()), this, SLOT(update())); 
   
   loadSettings();
 }
@@ -49,6 +55,38 @@ void Editor::dummy() {
   emit newCursorPosition(trUtf8("Zeile ") + QString::number(line) + trUtf8(", Spalte ") + QString::number(col)); 
 }
 
+bool Editor::event(QEvent *event) {
+  if (event->type() == QEvent::Paint) {
+    QPainter painter(this);
+    painter.fillRect(0, 0, lineMargin, height(), QColor(255, 255, 210));
+    
+    int contentsY = verticalScrollBar()->value(); 
+    qreal pageBottom = contentsY + viewport()->height(); 
+    int lineNumber = 1; 
+    QFontMetrics fm = fontMetrics(); 
+    int ascent = fontMetrics().ascent() + 1; 
+       
+    for (QTextBlock block = document()->begin(); block.isValid(); block = block.next(), lineNumber++) { 
+      QTextLayout *layout = block.layout(); 
+      const QRectF boundingRect = layout->boundingRect(); 
+      QPointF position = layout->position(); 
+      if ( position.y() + boundingRect.height() < contentsY ) { 
+        continue; 
+      } 
+      
+      if ( position.y() > pageBottom ) {
+        lineNumber++; 
+        break; 
+      }
+      
+      QString str = QString::number(lineNumber); 
+      painter.drawText(lineMargin - fm.width(str) - 5, qRound(position.y()) - contentsY + ascent + 1, str); 
+    }
+  }
+  
+  return QTextEdit::event(event);
+}
+
 /* ============================
  * == Einige getter-Methoden ==
  * ============================
@@ -68,6 +106,29 @@ bool Editor::getRedo() {
 
 bool Editor::getUndo() {
   return canUndo;
+}
+
+/*
+ * Springt zur angegebenen Zeile des Eingabefeldes. Liefert true,
+ * falls der Sprung erfolgreich ausgeführt wurde, ansonsten false
+ * (etwa, wenn zu wenig Zeilen vorhanden sind).
+ */
+bool Editor::gotoLine(int line) {
+  int lineCount = this->toPlainText().count(QString("\n")) + 1;
+  if (lineCount < line) {
+    return false;
+  }
+  
+  int cursorPos = 0;
+  QString str = toPlainText();
+  for (; line > 1; cursorPos = str.indexOf(QString("\n"), cursorPos) + 1, line--) {
+  }
+  
+  QTextCursor tmp = textCursor();
+  tmp.setPosition(cursorPos);
+  setTextCursor(tmp);
+  
+  return true;
 }
 
 bool Editor::hasChanged() {
