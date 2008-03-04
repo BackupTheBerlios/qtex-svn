@@ -25,6 +25,7 @@ MainWindow::MainWindow() : QMainWindow() {
   compiler->checkEnvironment();
   
   findDialog = new FindDialog(this);
+  replaceDialog = new ReplaceDialog(this);
   
   newFileCount = 0;
 }
@@ -161,6 +162,7 @@ void MainWindow::createConnections() {
   QObject::connect(action_Suchen, SIGNAL(triggered()), this, SLOT(find()));
   QObject::connect(action_NaechsteSuchen, SIGNAL(triggered()), this, SLOT(findNext()));
   QObject::connect(action_LetzteSuchen, SIGNAL(triggered()), this, SLOT(findPrevious()));
+  QObject::connect(action_Ersetzen, SIGNAL(triggered()), this, SLOT(replace()));
   QObject::connect(action_Einstellungen, SIGNAL(triggered()), this, SLOT(settings()));
   
   QObject::connect(action_kompiliereLatex, SIGNAL(triggered()), this, SLOT(compileLatex()));
@@ -263,14 +265,14 @@ void MainWindow::createMenus() {
   action_Rueckgaengig->setEnabled(false);
   action_Rueckgaengig->setIcon(QIcon(":/images/undo.png"));
   action_Rueckgaengig->setObjectName(QString("action_Rueckgaengig"));
-  action_Rueckgaengig->setShortcut(tr("Ctrl+R"));
+  action_Rueckgaengig->setShortcut(tr("Ctrl+Z"));
   action_Rueckgaengig->setText(trUtf8("&Rückgängig"));
   
   action_Wiederherstellen = new QAction(this);
   action_Wiederherstellen->setEnabled(false);
   action_Wiederherstellen->setIcon(QIcon(":/images/redo.png"));
   action_Wiederherstellen->setObjectName(QString("action_Wiederherstellen"));
-  action_Wiederherstellen->setShortcut(tr("Ctrl+Shift+R"));
+  action_Wiederherstellen->setShortcut(tr("Ctrl+Shift+Z"));
   action_Wiederherstellen->setText(trUtf8("&Wiederherstellen"));
   
   action_Ausschneiden = new QAction(this);
@@ -307,6 +309,11 @@ void MainWindow::createMenus() {
   action_LetzteSuchen->setShortcut(tr("Shift+F3"));
   action_LetzteSuchen->setText(trUtf8("&Frühere suchen"));
   
+  action_Ersetzen = new QAction(this);
+  action_Ersetzen->setObjectName(QString("action_Ersetzen"));
+  action_Ersetzen->setShortcut(tr("Ctrl+R"));
+  action_Ersetzen->setText(tr("&Ersetzen"));
+  
   action_Einstellungen = new QAction(this);
   action_Einstellungen->setObjectName(QString("action_Einstellungen"));
   action_Einstellungen->setText(trUtf8("Ei&nstellungen"));
@@ -321,6 +328,7 @@ void MainWindow::createMenus() {
   menu_Bearbeiten->addAction(action_Suchen);
   menu_Bearbeiten->addAction(action_NaechsteSuchen);
   menu_Bearbeiten->addAction(action_LetzteSuchen);
+  menu_Bearbeiten->addAction(action_Ersetzen);
   menu_Bearbeiten->addSeparator();
   menu_Bearbeiten->addAction(action_Einstellungen);
   
@@ -509,12 +517,7 @@ void MainWindow::find() {
     return;
   }
   
-  QString searchText = findDialog->getSearchText();
-  QTextDocument::FindFlags searchFlags = findDialog->getSearchFlags();
-  
-  if (!curInput->find(searchText, searchFlags)) {
-    QMessageBox::information(this, trUtf8("Text suchen"), trUtf8("Der Suchbegriff '") + searchText + trUtf8("' wurde nicht gefunden!"));
-  }
+  curInput->find(findDialog->getSearchText(), findDialog->getSearchFlags());
 }
 
 void MainWindow::findNext() {
@@ -527,13 +530,12 @@ void MainWindow::findNext() {
   QTextDocument::FindFlags searchFlags = findDialog->getSearchFlags();
   
   if (searchText.isEmpty() || searchText.isNull()) {
-    find();
-    return;
+    if (findDialog->exec() == QDialog::Rejected) {
+      return;
+    }
   }
   
-  if (!curInput->find(searchText, searchFlags)) {
-    QMessageBox::information(this, trUtf8("Text suchen"), trUtf8("Der Suchbegriff '") + searchText + trUtf8("' wurde nicht gefunden!"));
-  }
+  curInput->find(findDialog->getSearchText(), findDialog->getSearchFlags());
 }
 
 void MainWindow::findPrevious() {
@@ -546,13 +548,12 @@ void MainWindow::findPrevious() {
   QTextDocument::FindFlags searchFlags = findDialog->getSearchFlags() | QTextDocument::FindBackward;
   
   if (searchText.isEmpty() || searchText.isNull()) {
-    find();
-    return;
+    if (findDialog->exec() == QDialog::Rejected) {
+      return;
+    }
   }
   
-  if (!curInput->find(searchText, searchFlags)) {
-    QMessageBox::information(this, trUtf8("Text suchen"), trUtf8("Der Suchbegriff '") + searchText + trUtf8("' wurde nicht gefunden!"));
-  }
+  curInput->find(findDialog->getSearchText(), findDialog->getSearchFlags() ^ QTextDocument::FindBackward);
 }
 
 /*
@@ -721,6 +722,19 @@ void MainWindow::reconnectTab(int newIndex) {
   action_Kopieren->setEnabled(curInput->getCopy());
   
   statusbar->showMessage(trUtf8("Zeile 1, Spalte 1"));
+}
+
+void MainWindow::replace() {
+  Editor *curInput = getCurrentEditor();
+  if (curInput == 0) {
+    return;
+  }
+  
+  if (replaceDialog->exec() == QDialog::Rejected) {
+    return;
+  }
+  
+  curInput->replace(replaceDialog->getSearchText(), replaceDialog->getReplacementText(), replaceDialog->getSearchFlags(), replaceDialog->getPromptOnReplace());
 }
 
 /* 

@@ -1,24 +1,24 @@
-#include "finddialog.h"
+#include "replacedialog.h"
 
-FindDialog::FindDialog(QWidget *parent) : QDialog(parent) {
+ReplaceDialog::ReplaceDialog(QWidget *parent) : QDialog(parent) {
   setModal(true);
   setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
-  setWindowTitle(trUtf8("Text suchen"));
+  setWindowTitle(trUtf8("Text ersetzen"));
   hide();
   
   createDialog();
   
   QObject::connect(close, SIGNAL(clicked()), this, SLOT(reject()));
-  QObject::connect(search, SIGNAL(clicked()), this, SLOT(searchButtonClicked()));
-  QObject::connect(searchTextInput, SIGNAL(textChanged(QString)), this, SLOT(toggleSearchButton(QString)));
+  QObject::connect(replace, SIGNAL(clicked()), this, SLOT(replaceButtonClicked()));
+  QObject::connect(searchTextInput, SIGNAL(textChanged(QString)), this, SLOT(toggleReplaceButton(QString)));
 }
 
-void FindDialog::closeEvent(QCloseEvent event) {
+void ReplaceDialog::closeEvent(QCloseEvent event) {
   event.ignore();
   hide();
 }
 
-void FindDialog::createDialog() {
+void ReplaceDialog::createDialog() {
   QVBoxLayout *layout = new QVBoxLayout(this);
   setLayout(layout);
   
@@ -31,6 +31,15 @@ void FindDialog::createDialog() {
   searchTextInput->setObjectName(QString("searchTextInput"));
   searchTextInput->setText(searchText);
   searchTextInput->selectAll();
+  
+  /* Ersatztext */
+  QLabel *labelReplaceText = new QLabel(this);
+  labelReplaceText->setText(trUtf8("Ersetzen durch:"));
+  
+  replaceTextInput = new QLineEdit(this);
+  replaceTextInput->setFocus();
+  replaceTextInput->setObjectName(QString("replaceTextInput"));
+  replaceTextInput->setText(replaceText);
   
   /* Flags */
   QGroupBox *groupFlags = new QGroupBox(this);
@@ -53,11 +62,16 @@ void FindDialog::createDialog() {
   backward->setText(trUtf8("rückwärts suchen"));
   groupFlagsLayout->addWidget(backward);
   
+  promptOnReplace = new QCheckBox(groupFlags);
+  promptOnReplace->setObjectName(QString("promptOnReplace"));
+  promptOnReplace->setText(trUtf8("vor dem Ersetzen nachfragen"));
+  groupFlagsLayout->addWidget(promptOnReplace);
+  
   /* Buttons */
-  search = new QPushButton(this);
-  search->setEnabled(false);
-  search->setObjectName(QString("search"));
-  search->setText(trUtf8("Suchen"));
+  replace = new QPushButton(this);
+  replace->setEnabled(false);
+  replace->setObjectName(QString("replace"));
+  replace->setText(trUtf8("Ersetzen"));
   
   close = new QPushButton(this);
   close->setObjectName(QString("close"));
@@ -65,23 +79,33 @@ void FindDialog::createDialog() {
   
   QHBoxLayout *buttonLayout = new QHBoxLayout();
   buttonLayout->addStretch();
-  buttonLayout->addWidget(search);
+  buttonLayout->addWidget(replace);
   buttonLayout->addWidget(close);
   
   /* zusammenbauen */
   layout->addWidget(labelSearchText);
   layout->addWidget(searchTextInput);
+  layout->addWidget(labelReplaceText);
+  layout->addWidget(replaceTextInput);
   layout->addWidget(groupFlags);
   layout->addLayout(buttonLayout);
 }
 
-int FindDialog::exec() {
+int ReplaceDialog::exec() {
   searchTextInput->setFocus();
   searchTextInput->selectAll();
   return QDialog::exec();
 }
 
-QTextDocument::FindFlags FindDialog::getSearchFlags() {
+bool ReplaceDialog::getPromptOnReplace() {
+  return promptOnReplace->isChecked();
+}
+
+QString ReplaceDialog::getReplacementText() {
+  return replaceText;
+}
+
+QTextDocument::FindFlags ReplaceDialog::getSearchFlags() {
   QTextDocument::FindFlags flags = 0;
   
   if (caseSensitive->isChecked()) {
@@ -99,19 +123,21 @@ QTextDocument::FindFlags FindDialog::getSearchFlags() {
   return flags;
 }
 
-QString FindDialog::getSearchText() {
+QString ReplaceDialog::getSearchText() {
   return searchText;
 }
 
-void FindDialog::searchButtonClicked() {
+void ReplaceDialog::replaceButtonClicked() {
+  replaceText = replaceTextInput->text();
   searchText = searchTextInput->text();
   accept();
 }
 
-void FindDialog::toggleSearchButton(QString text) {
+void ReplaceDialog::toggleReplaceButton(QString text) {
   if (text.isEmpty() || text.isNull()) {
-    search->setEnabled(false);
+    replace->setEnabled(false);
   } else {
-    search->setEnabled(true);
+    replace->setEnabled(true);
   }
 }
+

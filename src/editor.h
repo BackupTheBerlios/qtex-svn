@@ -29,6 +29,7 @@ class Editor : public QTextEdit
 		
 	public:
 		Editor( QWidget * parent = 0 );
+    bool find(QString, QTextDocument::FindFlags);
     QString getFilename();
     bool getCopy();
     bool getRedo();
@@ -38,6 +39,7 @@ class Editor : public QTextEdit
     void loadSettings();
     bool maybeSave();
     bool openDocument(QString);
+    void replace(QString, QString, QTextDocument::FindFlags, bool);
     bool save();
     bool saveAs();
     void setChanged(bool);
@@ -55,6 +57,7 @@ class Editor : public QTextEdit
 		
 	private: 
     bool event(QEvent *);
+    void setCursorPos(int);
     
     bool canCopy;
     bool canRedo;

@@ -1,5 +1,5 @@
-#ifndef __FINDDIALOG_H__
-#define __FINDDIALOG_H__
+#ifndef __REPLACEDIALOG_H__
+#define __REPLACEDIALOG_H__
 
 #include <QCheckBox>
 #include <QCloseEvent>
@@ -15,12 +15,14 @@
 #include <QTextDocument>
 #include <QVBoxLayout>
 
-class FindDialog : public QDialog 
+class ReplaceDialog : public QDialog 
 {
   Q_OBJECT
   
   public:
-    FindDialog(QWidget *parent = 0);
+    ReplaceDialog(QWidget *parent = 0);
+    bool getPromptOnReplace();
+    QString getReplacementText();
     QTextDocument::FindFlags getSearchFlags();
     QString getSearchText();
     
@@ -31,18 +33,21 @@ class FindDialog : public QDialog
     void closeEvent(QCloseEvent);
     
   private slots:
-    void searchButtonClicked();
-    void toggleSearchButton(QString);
+    void replaceButtonClicked();
+    void toggleReplaceButton(QString);
     
   private:
     void createDialog();
     
     QCheckBox *backward;
     QCheckBox *caseSensitive;
+    QCheckBox *promptOnReplace;
     QCheckBox *wholeWords;
+    QLineEdit *replaceTextInput;
     QLineEdit *searchTextInput;
     QPushButton *close;
-    QPushButton *search;
+    QPushButton *replace;
+    QString replaceText;
     QString searchText;
 };
 

@@ -55,6 +55,9 @@ void Editor::dummy() {
   emit newCursorPosition(trUtf8("Zeile ") + QString::number(line) + trUtf8(", Spalte ") + QString::number(col)); 
 }
 
+/*
+ * Sorgt für das Anzeigen der Zeilennummern
+ */
 bool Editor::event(QEvent *event) {
   if (event->type() == QEvent::Paint) {
     QPainter painter(this);
@@ -85,6 +88,41 @@ bool Editor::event(QEvent *event) {
   }
   
   return QTextEdit::event(event);
+}
+
+bool Editor::find(QString exp, QTextDocument::FindFlags flags) {
+  int cursorPos = textCursor().position();
+  if (QTextEdit::find(exp, flags)) {
+    return true;
+  }
+  
+  if (flags & QTextDocument::FindBackward) {
+    if (cursorPos < toPlainText().length()) {
+      int ret = QMessageBox::question(0, trUtf8("Text suchen"), trUtf8("Der Anfang des Textes wurde erreicht. Suche am Ende fortsetzen?"), QMessageBox::Yes | QMessageBox::No);
+      if (ret == QMessageBox::Yes) {
+        setCursorPos(toPlainText().length());
+      } else {
+        return false;
+      }
+    } else {
+      QMessageBox::information(this, trUtf8("Text suchen"), trUtf8("Der Suchbegriff '") + exp + trUtf8("' wurde nicht gefunden!"));
+      return false;
+    }
+  } else {
+    if (cursorPos > 0) {
+      int ret = QMessageBox::question(0, trUtf8("Text suchen"), trUtf8("Das Ende des Textes wurde erreicht. Suche am Anfang fortsetzen?"), QMessageBox::Yes | QMessageBox::No);
+      if (ret == QMessageBox::Yes) {
+        setCursorPos(0);
+      } else {
+        return false;
+      }
+    } else {
+      QMessageBox::information(this, trUtf8("Text suchen"), trUtf8("Der Suchbegriff '") + exp + trUtf8("' wurde nicht gefunden!"));
+      return false;
+    }
+  }
+  
+  return find(exp, flags);
 }
 
 /* ============================
@@ -124,9 +162,7 @@ bool Editor::gotoLine(int line) {
   for (; line > 1; cursorPos = str.indexOf(QString("\n"), cursorPos) + 1, line--) {
   }
   
-  QTextCursor tmp = textCursor();
-  tmp.setPosition(cursorPos);
-  setTextCursor(tmp);
+  setCursorPos(cursorPos);
   
   return true;
 }
@@ -252,6 +288,39 @@ bool Editor::openDocument(QString filename) {
   setChanged(false);
   
   return true;
+}
+
+void Editor::replace(QString exp, QString rep, QTextDocument::FindFlags flags, bool bPromptOnReplace) {
+  QMessageBox prompt;
+  prompt.setIcon(QMessageBox::Question);
+  prompt.setWindowTitle(tr("Text ersetzen"));
+  prompt.setText(trUtf8("Der Suchbegriff wurde gefunden. Was wollen Sie tun?"));
+  prompt.addButton(trUtf8("Ersetzen"), QMessageBox::ActionRole);
+  QPushButton *replaceAll = prompt.addButton(trUtf8("Alle ersetzen"), QMessageBox::ActionRole);
+  QPushButton *findNext = prompt.addButton(trUtf8("Weitersuchen"), QMessageBox::ActionRole);
+  QPushButton *close = prompt.addButton(QMessageBox::Close);
+  
+  int count = 0;
+  while (find(exp, flags)) {
+    count++;
+    if (bPromptOnReplace) {
+      prompt.exec();
+      QAbstractButton *clickedButton = prompt.clickedButton();
+      if (clickedButton == (QAbstractButton*)close) {
+        break;
+      } else if (clickedButton == (QAbstractButton*)findNext) {
+        continue;
+      } else if (clickedButton == (QAbstractButton*)replaceAll) {
+        bPromptOnReplace = false;
+      }
+    }
+    
+    /* Ersetzung durchführen */
+    this->textCursor().removeSelectedText();
+    this->textCursor().insertText(rep);
+  }
+  
+  QMessageBox::information(0, tr("Text ersetzen"), tr("Es wurden ") + QString::number(count) + trUtf8(" Ersetzungen durchgeführt."));
 }
 
 /*
@@ -392,6 +461,12 @@ void Editor::setRedo(bool bRedo) {
 
 void Editor::setUndo(bool bUndo) {
   canUndo = bUndo;
+}
+
+void Editor::setCursorPos(int pos) {
+  QTextCursor tmp = textCursor();
+  tmp.setPosition(pos);
+  setTextCursor(tmp);
 }
 
 

@@ -25,6 +25,7 @@
 #include "src/finddialog.h"
 #include "src/recentfileaction.h"
 #include "src/recentfilemanager.h"
+#include "src/replacedialog.h"
 
 class MainWindow : public QMainWindow
 {
@@ -42,11 +43,12 @@ class MainWindow : public QMainWindow
     void find();
     void findNext();
     void findPrevious();
+    void newDocument();
     void openDocument();
     void openRecentDocument(QAction *);
-    void newDocument();
     void quit();
     void reconnectTab(int);
+    void replace();
     void save();
     void saveAll();
     void saveAs();
@@ -67,6 +69,7 @@ class MainWindow : public QMainWindow
     FindDialog *findDialog;
     int newFileCount;
     RecentFileManager recentFiles;
+    ReplaceDialog *replaceDialog;
     
     QAction *action_Neu; 
     QAction *action_Oeffnen;
@@ -85,6 +88,7 @@ class MainWindow : public QMainWindow
     QAction *action_Suchen;
     QAction *action_NaechsteSuchen;
     QAction *action_LetzteSuchen;
+    QAction *action_Ersetzen;
     QAction *action_Einstellungen;
     QAction *action_kompiliereLatex;
     QAction *action_kompilierePdflatex;

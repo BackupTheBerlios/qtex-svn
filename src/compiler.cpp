@@ -20,28 +20,27 @@ void Compiler::checkEnvironment() {
   QString pdflatex = settings.value(QString("pdflatex"), QString("pdflatex")).toString();
   settings.endGroup();
   
-  QProcess *p = new QProcess();
-  p->setEnvironment(QProcess::systemEnvironment());
-  
   QString missingPrograms;
-  QStringList arguments;
   
-  arguments << latex << "-version";  
-  p->start(latex, arguments);
-  p->waitForStarted();
-  if (p->error() == QProcess::FailedToStart) {
+  /* Test auf latex */
+  QProcess *pLatex = new QProcess();
+  pLatex->setEnvironment(QProcess::systemEnvironment());
+  pLatex->start(latex, QStringList("-version"));
+  pLatex->waitForFinished(1000);
+  if (pLatex->error() == QProcess::FailedToStart) {
     missingPrograms += QString("Latex\n");
   }
-  p->terminate();
+  pLatex->terminate();
   
-  arguments.clear();
-  arguments << pdflatex << "-version";
-  p->start(pdflatex, arguments);
-  p->waitForStarted();
-  if (p->error() == QProcess::FailedToStart) {
+  /* Test auf pdflatex */
+  QProcess *pPdflatex = new QProcess();
+  pPdflatex->setEnvironment(QProcess::systemEnvironment());
+  pPdflatex->start(pdflatex, QStringList("-version"));
+  pPdflatex->waitForFinished(1000);
+  if (pPdflatex->error() == QProcess::FailedToStart) {
     missingPrograms += QString("Pdflatex\n");
   }
-  p->terminate();
+  pPdflatex->terminate();
   
   if (missingPrograms.isNull() || missingPrograms.isEmpty()) {
     return;
