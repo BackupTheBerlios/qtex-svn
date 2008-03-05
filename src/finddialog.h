@@ -9,7 +9,6 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
-#include <QShowEvent>
 #include <QSizePolicy>
 #include <QString>
 #include <QTextDocument>
@@ -25,25 +24,25 @@ class FindDialog : public QDialog
     QString getSearchText();
     
   public slots:
-    int exec();
+    int slotExec();
     
   protected:
     void closeEvent(QCloseEvent);
     
   private slots:
-    void searchButtonClicked();
-    void toggleSearchButton(QString);
+    void slotSearchButtonClicked();
+    void slotToggleSearchButton(QString);
     
   private:
     void createDialog();
     
-    QCheckBox *backward;
-    QCheckBox *caseSensitive;
-    QCheckBox *wholeWords;
-    QLineEdit *searchTextInput;
-    QPushButton *close;
-    QPushButton *search;
-    QString searchText;
+    QCheckBox *m_backward;
+    QCheckBox *m_caseSensitive;
+    QCheckBox *m_wholeWords;
+    QLineEdit *m_searchTextInput;
+    QPushButton *m_close;
+    QPushButton *m_search;
+    QString m_searchText;
 };
 
 #endif

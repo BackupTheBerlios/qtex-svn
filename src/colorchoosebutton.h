@@ -16,11 +16,12 @@ class ColorChooseButton : public QPushButton
   
   
   private slots:
-    void dummy();
+    void slotOnClicked();
     
   private:
     void updateColor();
-    QColor color;
+    
+    QColor m_color;
   
 };
 

@@ -9,7 +9,6 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
-#include <QShowEvent>
 #include <QSizePolicy>
 #include <QString>
 #include <QTextDocument>
@@ -27,28 +26,22 @@ class ReplaceDialog : public QDialog
     QString getSearchText();
     
   public slots:
-    int exec();
+    int slotExec();
     
   protected:
     void closeEvent(QCloseEvent);
     
   private slots:
-    void replaceButtonClicked();
-    void toggleReplaceButton(QString);
+    void slotReplaceButtonClicked();
+    void slotToggleReplaceButton(QString);
     
   private:
     void createDialog();
     
-    QCheckBox *backward;
-    QCheckBox *caseSensitive;
-    QCheckBox *promptOnReplace;
-    QCheckBox *wholeWords;
-    QLineEdit *replaceTextInput;
-    QLineEdit *searchTextInput;
-    QPushButton *close;
-    QPushButton *replace;
-    QString replaceText;
-    QString searchText;
+    QCheckBox *m_backward, *m_caseSensitive, *m_promptOnReplace, *m_wholeWords;
+    QLineEdit *m_replaceTextInput, *m_searchTextInput;
+    QPushButton *m_close, *m_replace;
+    QString m_replaceText, m_searchText;
 };
 
 #endif

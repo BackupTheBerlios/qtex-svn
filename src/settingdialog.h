@@ -30,30 +30,29 @@ class SettingDialog : public QDialog
     SettingDialog(QWidget *);
     
   private slots:
-    void saveSettings();
+    void slotSaveSettings();
     
   private:
     void createConnections();
     void createDialog();
     void loadSettings();
     
-    QCheckBox *buttonCommentBold, *buttonCommentItalic;
-    QCheckBox *buttonLatexBold, *buttonLatexItalic;
-    QCheckBox *buttonMathBold, *buttonMathItalic;
-    QFontComboBox *fontName;
-    QHBoxLayout *hLayout;
-    QLineEdit *latexCommandInput, *pdflatexCommandInput;
-    QPixmap *fontColorPixmap;
-    QPushButton *cancel;
-    QPushButton *save;
-    ColorChooseButton *buttonFontColor;
-    ColorChooseButton *buttonCommentForeground, *buttonCommentBackground;
-    ColorChooseButton *buttonLatexForeground, *buttonLatexBackground;
-    ColorChooseButton *buttonMathForeground, *buttonMathBackground;
-    QSpinBox *fontSize;
-    QSpinBox *tabulatorWidth;
-    QTabWidget *tabs;
-    QVBoxLayout *vLayout;
+    QCheckBox *m_buttonCommentBold, *m_buttonCommentItalic;
+    QCheckBox *m_buttonLatexBold, *m_buttonLatexItalic;
+    QCheckBox *m_buttonMathBold, *m_buttonMathItalic;
+    QFontComboBox *m_fontName;
+    QHBoxLayout *m_hLayout;
+    QLineEdit *m_latexCommandInput, *m_pdflatexCommandInput;
+    QPixmap *m_fontColorPixmap;
+    QPushButton *m_cancel, *m_save;
+    ColorChooseButton *m_buttonFontColor;
+    ColorChooseButton *m_buttonCommentForeground, *m_buttonCommentBackground;
+    ColorChooseButton *m_buttonLatexForeground, *m_buttonLatexBackground;
+    ColorChooseButton *m_buttonMathForeground, *m_buttonMathBackground;
+    QSpinBox *m_fontSize;
+    QSpinBox *m_tabulatorWidth;
+    QTabWidget *m_tabs;
+    QVBoxLayout *m_vLayout;
   
 };
 

@@ -1,16 +1,14 @@
-#include <QApplication>
-#include <QInputDialog>
 #include "compiler.h"
 
 Compiler::Compiler(QTextEdit *console) {
-  this->console = console;
-  proc = new QProcess();
+  m_console = console;
+  m_proc = new QProcess();
   
   qRegisterMetaType<QProcess::ProcessError>("QProcess::ProcessError");
   qRegisterMetaType<QProcess::ExitStatus>("QProcess::ExitStatus");
   
-  QObject::connect(this, SIGNAL(outputReceived(QString)), console, SLOT(setText(QString)));
-  QObject::connect(proc, SIGNAL(error(QProcess::ProcessError)), this, SLOT(commandNotFound()));
+  connect(this, SIGNAL(signalOutputReceived(QString)), m_console, SLOT(setText(QString)));
+  connect(m_proc, SIGNAL(error(QProcess::ProcessError)), this, SLOT(slotCommandNotFound()));
 }
 
 void Compiler::checkEnvironment() {
@@ -50,53 +48,53 @@ void Compiler::checkEnvironment() {
 }
 
 void Compiler::compileLatex(QString filename) {
-  path = filename.mid(0, filename.lastIndexOf(QDir::separator()) + 1);
-  filename = filename.mid(path.length());
+  m_path = filename.mid(0, filename.lastIndexOf(QDir::separator()) + 1);
+  filename = filename.mid(m_path.length());
   
-  arguments.clear();
-  arguments << "-interaction=nonstopmode" << filename;
+  m_arguments.clear();
+  m_arguments << "-interaction=nonstopmode" << filename;
   
   QSettings settings("QteX", "QteX");
   settings.beginGroup(QString("compiler"));
-  command = settings.value(QString("latex"), QString("latex")).toString();
+  m_command = settings.value(QString("latex"), QString("latex")).toString();
   settings.endGroup();
   
   start();
 }
 
 void Compiler::compilePdflatex(QString filename) {
-  path = filename.mid(0, filename.lastIndexOf(QDir::separator()) + 1);
-  filename = filename.mid(path.length());
+  m_path = filename.mid(0, filename.lastIndexOf(QDir::separator()) + 1);
+  filename = filename.mid(m_path.length());
   
-  arguments.clear();
-  arguments << "-interaction=nonstopmode" << filename;
+  m_arguments.clear();
+  m_arguments << "-interaction=nonstopmode" << filename;
   
   QSettings settings("QteX", "QteX");
   settings.beginGroup(QString("compiler"));
-  command = settings.value(QString("pdflatex"), QString("pdflatex")).toString();
+  m_command = settings.value(QString("pdflatex"), QString("pdflatex")).toString();
   settings.endGroup();
   
   start();
 }
 
-void Compiler::commandNotFound() {
-  this->terminate();
-  emit outputReceived(trUtf8("Befehl nicht gefunden: ") + this->command);
+void Compiler::run() { 
+  m_proc->setWorkingDirectory(m_path);
+  m_proc->setEnvironment(QProcess::systemEnvironment());
   
-  QString title = trUtf8("Befehl nicht gefunden");
-  QString message = trUtf8("Der Befehl '") + command + trUtf8("' wurde nicht gefunden! Bitte setzen Sie in den Einstellungen den richtigen Pfad!");
-  QMessageBox::critical(0, title, message);
+  m_proc->start(m_command, m_arguments);
+  m_proc->waitForFinished();
+  
+  QString allData = m_proc->readAll();
+  if (!allData.isEmpty() && !allData.isNull()) {
+    emit signalOutputReceived(allData);
+  }
 }
 
-void Compiler::run() { 
-  proc->setWorkingDirectory(path);
-  proc->setEnvironment(QProcess::systemEnvironment());
+void Compiler::slotCommandNotFound() {
+  terminate();
+  emit signalOutputReceived(trUtf8("Befehl nicht gefunden: ") + m_command);
   
-  proc->start(command, arguments);
-  proc->waitForFinished();
-  
-  QString allData = proc->readAll();
-  if (!allData.isEmpty() && !allData.isNull()) {
-    emit outputReceived(allData);
-  }
+  QString title = trUtf8("Befehl nicht gefunden");
+  QString message = trUtf8("Der Befehl '") + m_command + trUtf8("' wurde nicht gefunden! Bitte setzen Sie in den Einstellungen den richtigen Pfad!");
+  QMessageBox::critical(0, title, message);
 }

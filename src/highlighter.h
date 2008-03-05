@@ -10,52 +10,46 @@
 #ifndef HIGHLIGHTER_H
 #define HIGHLIGHTER_H
 
+#include <QHash>
 #include <QSettings>
 #include <QSyntaxHighlighter>
-
-#include <QHash>
 #include <QTextCharFormat>
 
 class QTextDocument;
 
 class Highlighter : public QSyntaxHighlighter
-	{
-		Q_OBJECT
-		
-	public:
-		Highlighter(QTextDocument *parent = 0);
+{
+	Q_OBJECT
+	
+  public:
+  	Highlighter(QTextDocument *parent = 0);
     void loadHighlighting();
-		
-	protected:
-		void highlightBlock(const QString &text);
-		
-	private:
-		struct HighlightingRule
-		{	
-			QRegExp expression;
-			QRegExp startExpression;
-			QRegExp endExpression;
-			QTextCharFormat format;
-			int priority;
-			bool block;
-		};
-		QVector<HighlightingRule> highlightingRules;
-		
-		// Sktuktur, die ein Intevall(begin und länge) sowie ein dezugehörigs format aufnimmt
-		struct IntervallWithFormat
-		{
-			int index;
-			int length;
-			QTextCharFormat format;
-		};
-		
-		//QRegExp mathModeStartExpression;
-		//QRegExp mathModeEndExpression;
-		
-		QTextCharFormat latexFormat;
-		QTextCharFormat singleLineCommentFormat;
-		QTextCharFormat mathModeFormat;
-	};
+  	
+  protected:
+  	void highlightBlock(const QString &text);
+  	
+  private:
+  	struct HighlightingRule
+  	{	
+  		QRegExp expression;
+  		QRegExp startExpression;
+  		QRegExp endExpression;
+  		QTextCharFormat format;
+  		int priority;
+  		bool block;
+  	};
+  	
+  	// Sktuktur, die ein Intevall(begin und länge) sowie ein dazugehöriges format aufnimmt
+  	struct IntervallWithFormat
+  	{
+  		int index;
+  		int length;
+  		QTextCharFormat format;
+  	};
+    
+  	QTextCharFormat m_latexFormat, m_singleLineCommentFormat, m_mathModeFormat;
+    QVector<HighlightingRule> m_highlightingRules;
+};
 
 #endif
 

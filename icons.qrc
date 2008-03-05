@@ -12,6 +12,7 @@
   <file>images/find.png</file>
   <file>images/latex.png</file>
   <file>images/pdflatex.png</file>
+  <file>images/qtexlogo.png</file>
   <file>images/redo.png</file>
   <file>images/undo.png</file>
 </qresource>

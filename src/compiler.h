@@ -2,8 +2,8 @@
 #define __COMPILER_H__
 
 #include <QDir>
+#include <QInputDialog>
 #include <QMessageBox>
-#include <QObject>
 #include <QProcess>
 #include <QSettings>
 #include <QString>
@@ -22,20 +22,20 @@ class Compiler : QThread
     void compilePdflatex(QString);
     
   signals:
-    void outputReceived(QString);
-    void error(QString);
+    void signalOutputReceived(QString);
+    void signalError(QString);
     
   private slots:
-    void commandNotFound();
+    void slotCommandNotFound();
     
   private:
     void compile(QString, QString, QStringList);
     void run();
      
-    QProcess *proc;
-    QTextEdit *console;
-    QString path, command;
-    QStringList arguments;
+    QProcess *m_proc;
+    QString m_path, m_command;
+    QStringList m_arguments;
+    QTextEdit *m_console;
 };
 
 #endif

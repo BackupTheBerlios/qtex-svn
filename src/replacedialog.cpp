@@ -8,9 +8,9 @@ ReplaceDialog::ReplaceDialog(QWidget *parent) : QDialog(parent) {
   
   createDialog();
   
-  QObject::connect(close, SIGNAL(clicked()), this, SLOT(reject()));
-  QObject::connect(replace, SIGNAL(clicked()), this, SLOT(replaceButtonClicked()));
-  QObject::connect(searchTextInput, SIGNAL(textChanged(QString)), this, SLOT(toggleReplaceButton(QString)));
+  connect(m_close, SIGNAL(clicked()), this, SLOT(reject()));
+  connect(m_replace, SIGNAL(clicked()), this, SLOT(slotReplaceButtonClicked()));
+  connect(m_searchTextInput, SIGNAL(textChanged(QString)), this, SLOT(slotToggleReplaceButton(QString)));
 }
 
 void ReplaceDialog::closeEvent(QCloseEvent event) {
@@ -26,20 +26,20 @@ void ReplaceDialog::createDialog() {
   QLabel *labelSearchText = new QLabel(this);
   labelSearchText->setText(trUtf8("Suchen nach:"));
   
-  searchTextInput = new QLineEdit(this);
-  searchTextInput->setFocus();
-  searchTextInput->setObjectName(QString("searchTextInput"));
-  searchTextInput->setText(searchText);
-  searchTextInput->selectAll();
+  m_searchTextInput = new QLineEdit(this);
+  m_searchTextInput->setFocus();
+  m_searchTextInput->setObjectName(QString("m_searchTextInput"));
+  m_searchTextInput->setText(m_searchText);
+  m_searchTextInput->selectAll();
   
   /* Ersatztext */
   QLabel *labelReplaceText = new QLabel(this);
   labelReplaceText->setText(trUtf8("Ersetzen durch:"));
   
-  replaceTextInput = new QLineEdit(this);
-  replaceTextInput->setFocus();
-  replaceTextInput->setObjectName(QString("replaceTextInput"));
-  replaceTextInput->setText(replaceText);
+  m_replaceTextInput = new QLineEdit(this);
+  m_replaceTextInput->setFocus();
+  m_replaceTextInput->setObjectName(QString("m_replaceTextInput"));
+  m_replaceTextInput->setText(m_replaceText);
   
   /* Flags */
   QGroupBox *groupFlags = new QGroupBox(this);
@@ -47,76 +47,70 @@ void ReplaceDialog::createDialog() {
   QVBoxLayout *groupFlagsLayout = new QVBoxLayout(groupFlags);
   groupFlags->setLayout(groupFlagsLayout);
   
-  caseSensitive = new QCheckBox(groupFlags);
-  caseSensitive->setObjectName(QString("caseSensitive"));
-  caseSensitive->setText(trUtf8("Groß- und Kleinschreibung unterscheiden"));
-  groupFlagsLayout->addWidget(caseSensitive);
+  m_caseSensitive = new QCheckBox(groupFlags);
+  m_caseSensitive->setObjectName(QString("m_caseSensitive"));
+  m_caseSensitive->setText(trUtf8("Groß- und Kleinschreibung unterscheiden"));
+  groupFlagsLayout->addWidget(m_caseSensitive);
   
-  wholeWords = new QCheckBox(groupFlags);
-  wholeWords->setObjectName(QString("wholeWord"));
-  wholeWords->setText(trUtf8("nur ganze Wörter"));
-  groupFlagsLayout->addWidget(wholeWords);
+  m_wholeWords = new QCheckBox(groupFlags);
+  m_wholeWords->setObjectName(QString("m_wholeWord"));
+  m_wholeWords->setText(trUtf8("nur ganze Wörter"));
+  groupFlagsLayout->addWidget(m_wholeWords);
   
-  backward = new QCheckBox(groupFlags);
-  backward->setObjectName(QString("backward"));
-  backward->setText(trUtf8("rückwärts suchen"));
-  groupFlagsLayout->addWidget(backward);
+  m_backward = new QCheckBox(groupFlags);
+  m_backward->setObjectName(QString("m_backward"));
+  m_backward->setText(trUtf8("rückwärts suchen"));
+  groupFlagsLayout->addWidget(m_backward);
   
-  promptOnReplace = new QCheckBox(groupFlags);
-  promptOnReplace->setObjectName(QString("promptOnReplace"));
-  promptOnReplace->setText(trUtf8("vor dem Ersetzen nachfragen"));
-  groupFlagsLayout->addWidget(promptOnReplace);
+  m_promptOnReplace = new QCheckBox(groupFlags);
+  m_promptOnReplace->setObjectName(QString("m_promptOnReplace"));
+  m_promptOnReplace->setText(trUtf8("vor dem Ersetzen nachfragen"));
+  groupFlagsLayout->addWidget(m_promptOnReplace);
   
   /* Buttons */
-  replace = new QPushButton(this);
-  replace->setEnabled(false);
-  replace->setObjectName(QString("replace"));
-  replace->setText(trUtf8("Ersetzen"));
+  m_replace = new QPushButton(this);
+  m_replace->setEnabled(false);
+  m_replace->setObjectName(QString("m_replace"));
+  m_replace->setText(trUtf8("Ersetzen"));
   
-  close = new QPushButton(this);
-  close->setObjectName(QString("close"));
-  close->setText(trUtf8("Schließen"));
+  m_close = new QPushButton(this);
+  m_close->setObjectName(QString("m_close"));
+  m_close->setText(trUtf8("Schließen"));
   
   QHBoxLayout *buttonLayout = new QHBoxLayout();
   buttonLayout->addStretch();
-  buttonLayout->addWidget(replace);
-  buttonLayout->addWidget(close);
+  buttonLayout->addWidget(m_replace);
+  buttonLayout->addWidget(m_close);
   
   /* zusammenbauen */
   layout->addWidget(labelSearchText);
-  layout->addWidget(searchTextInput);
+  layout->addWidget(m_searchTextInput);
   layout->addWidget(labelReplaceText);
-  layout->addWidget(replaceTextInput);
+  layout->addWidget(m_replaceTextInput);
   layout->addWidget(groupFlags);
   layout->addLayout(buttonLayout);
 }
 
-int ReplaceDialog::exec() {
-  searchTextInput->setFocus();
-  searchTextInput->selectAll();
-  return QDialog::exec();
-}
-
 bool ReplaceDialog::getPromptOnReplace() {
-  return promptOnReplace->isChecked();
+  return m_promptOnReplace->isChecked();
 }
 
 QString ReplaceDialog::getReplacementText() {
-  return replaceText;
+  return m_replaceText;
 }
 
 QTextDocument::FindFlags ReplaceDialog::getSearchFlags() {
   QTextDocument::FindFlags flags = 0;
   
-  if (caseSensitive->isChecked()) {
+  if (m_caseSensitive->isChecked()) {
     flags |= QTextDocument::FindCaseSensitively;
   }
   
-  if (wholeWords->isChecked()) {
+  if (m_wholeWords->isChecked()) {
     flags |= QTextDocument::FindWholeWords;
   }
   
-  if (backward->isChecked()) {
+  if (m_backward->isChecked()) {
     flags |= QTextDocument::FindBackward;
   }
   
@@ -124,20 +118,26 @@ QTextDocument::FindFlags ReplaceDialog::getSearchFlags() {
 }
 
 QString ReplaceDialog::getSearchText() {
-  return searchText;
+  return m_searchText;
 }
 
-void ReplaceDialog::replaceButtonClicked() {
-  replaceText = replaceTextInput->text();
-  searchText = searchTextInput->text();
+int ReplaceDialog::slotExec() {
+  m_searchTextInput->setFocus();
+  m_searchTextInput->selectAll();
+  return QDialog::exec();
+}
+
+void ReplaceDialog::slotReplaceButtonClicked() {
+  m_replaceText = m_replaceTextInput->text();
+  m_searchText = m_searchTextInput->text();
   accept();
 }
 
-void ReplaceDialog::toggleReplaceButton(QString text) {
+void ReplaceDialog::slotToggleReplaceButton(QString text) {
   if (text.isEmpty() || text.isNull()) {
-    replace->setEnabled(false);
+    m_replace->setEnabled(false);
   } else {
-    replace->setEnabled(true);
+    m_replace->setEnabled(true);
   }
 }
 

@@ -1,19 +1,10 @@
-#include <QDir>
-#include <QFile>
-#include <QFileDialog>
-#include <QFlags>
-#include <QMessageBox>
-#include <QStyle>
-
 #include "mainwindow.h"
-#include "settingdialog.h"
-#include <stdio.h>
 
-#define APP_TITLE "QteX"
 #define BUF_SIZE 1024
 
 MainWindow::MainWindow() : QMainWindow() {
-  this->setWindowTitle(trUtf8(APP_TITLE));
+  setWindowIcon(QIcon(":/images/qtexlogo.png"));
+  setWindowTitle(trUtf8("QteX"));
   
   createMenus();
   createStatusbar();
@@ -21,13 +12,425 @@ MainWindow::MainWindow() : QMainWindow() {
   createWorkspace();
   createConnections();
 
-  compiler = new Compiler(output);
-  compiler->checkEnvironment();
+  m_compiler = new Compiler(m_output);
+  m_compiler->checkEnvironment();
   
-  findDialog = new FindDialog(this);
-  replaceDialog = new ReplaceDialog(this);
+  m_findDialog = new FindDialog(this);
+  m_replaceDialog = new ReplaceDialog(this);
   
-  newFileCount = 0;
+  m_newFileCount = 0;
+}
+
+void MainWindow::closeEvent(QCloseEvent *event) {
+  slotCloseAllTabs();
+  if (m_tabs->count() > 0) {
+    event->ignore();
+    Editor *curInput = getCurrentEditor();
+    if (curInput == 0) {
+      return;
+    }
+    
+    curInput->setFocus();
+  } else {
+    event->accept();
+  }
+}
+
+/*
+ * Bestimmte unveränderliche Verbindungen erzeugen.
+ */
+void MainWindow::createConnections() {
+  connect(m_tabs, SIGNAL(currentChanged(int)), this, SLOT(slotReconnectTab(int)));
+  
+  /* Menusignale einrichten */
+  connect(m_actionNew, SIGNAL(triggered()), this, SLOT(slotNewDocument()));
+  connect(m_actionOpen, SIGNAL(triggered()), this, SLOT(slotOpenDocument()));
+  connect(m_actionSave, SIGNAL(triggered()), this, SLOT(slotSave()));
+  connect(m_actionSaveAs, SIGNAL(triggered()), this, SLOT(slotSaveAs()));
+  connect(m_actionSaveAll, SIGNAL(triggered()), this, SLOT(slotSaveAll()));
+  connect(m_actionClose, SIGNAL(triggered()), this, SLOT(slotCloseCurrentTab()));
+  connect(m_actionCloseAll, SIGNAL(triggered()), this, SLOT(slotCloseAllTabs()));
+  connect(m_actionQuit, SIGNAL(triggered()), this, SLOT(slotQuit()));
+  
+  connect(m_actionFind, SIGNAL(triggered()), this, SLOT(slotFind()));
+  connect(m_actionFindNext, SIGNAL(triggered()), this, SLOT(slotFindNext()));
+  connect(m_actionFindPrevious, SIGNAL(triggered()), this, SLOT(slotFindPrevious()));
+  connect(m_actionReplace, SIGNAL(triggered()), this, SLOT(slotReplace()));
+  connect(m_actionSettings, SIGNAL(triggered()), this, SLOT(slotSettings()));
+  
+  connect(m_actionCompileLatex, SIGNAL(triggered()), this, SLOT(slotCompileLatex()));
+  connect(m_actionCompilePdflatex, SIGNAL(triggered()), this, SLOT(slotCompilePdflatex()));
+
+  /* Weitere Signale einrichten */
+  connect(m_closeButton, SIGNAL(clicked()), this, SLOT(slotCloseCurrentTab()));
+  connect(&m_recentFiles, SIGNAL(signalUpdate()), this, SLOT(slotCreateRecentFilesMenu()));
+}
+
+/*
+ * Die Menustruktur erzeugen.
+ */
+void MainWindow::createMenus() {
+  /* Menuleiste erzeugen */
+  m_menubar = new QMenuBar(this);
+  m_menubar->setObjectName(QString("m_menubar"));
+  setMenuBar(m_menubar);
+  
+  /* Menu 'Datei' einrichten */
+  m_menuFile = new QMenu(m_menubar);
+  m_menuFile->setObjectName(QString("m_menuFile"));
+  m_menuFile->setTitle(trUtf8("&Datei"));
+  
+  m_actionNew = new QAction(this);
+  m_actionNew->setIcon(QIcon(":/images/filenew.png"));
+  m_actionNew->setObjectName(QString("m_actionNew"));
+  m_actionNew->setShortcut(tr("Ctrl+N"));
+  m_actionNew->setText(trUtf8("&Neu"));
+  
+  m_actionOpen = new QAction(this);
+  m_actionOpen->setIcon(QIcon(":/images/fileopen.png"));
+  m_actionOpen->setObjectName(QString("m_actionOpen"));
+  m_actionOpen->setShortcut(tr("Ctrl+O"));
+  m_actionOpen->setText(trUtf8("Ö&ffnen..."));
+  
+  m_actionRecentlyOpen = new QAction(this);
+  m_actionRecentlyOpen->setObjectName(QString("m_actionRecentlyOpen"));
+  m_actionRecentlyOpen->setText(trUtf8("&Zuletzt geöffnet"));
+  
+  // Untermenü für die letzten Dateien
+  m_menuRecentlyOpen = new QMenu(m_menubar);
+  m_actionRecentlyOpen->setMenu(m_menuRecentlyOpen);
+  slotCreateRecentFilesMenu();
+  
+  m_actionSave = new QAction(this);
+  m_actionSave->setEnabled(false);
+  m_actionSave->setIcon(QIcon(":/images/filesave.png"));
+  m_actionSave->setObjectName(QString("m_actionSave"));
+  m_actionSave->setShortcut(tr("Ctrl+S"));
+  m_actionSave->setText(trUtf8("&Speichern"));
+  
+  m_actionSaveAs = new QAction(this);
+  m_actionSaveAs->setEnabled(false);
+  m_actionSaveAs->setIcon(QIcon(":/images/filesaveas.png"));
+  m_actionSaveAs->setObjectName(QString("m_actionSaveAs"));
+  m_actionSaveAs->setText(trUtf8("Speichern &unter..."));
+  
+  m_actionSaveAll = new QAction(this);
+  m_actionSaveAll->setEnabled(false);
+  m_actionSaveAll->setIcon(QIcon(":/images/filesaveall.png"));
+  m_actionSaveAll->setObjectName(QString("m_actionSaveAll"));
+  m_actionSaveAll->setText(trUtf8("&Alle speichern"));
+  
+  m_actionClose = new QAction(this);
+  m_actionClose->setEnabled(false);
+  m_actionClose->setIcon(QIcon(":/images/fileclose.png"));
+  m_actionClose->setObjectName(QString("m_actionClose"));
+  m_actionClose->setText(trUtf8("Schl&ießen"));
+  
+  m_actionCloseAll = new QAction(this);
+  m_actionCloseAll->setEnabled(false);
+  m_actionCloseAll->setObjectName(QString("m_actionCloseAll"));
+  m_actionCloseAll->setText(trUtf8("Alle schließen"));
+  
+  m_actionQuit = new QAction(this);
+  m_actionQuit->setObjectName(QString("m_actionQuit"));
+  m_actionQuit->setShortcut(tr("Ctrl+B"));
+  m_actionQuit->setText(trUtf8("&Beenden"));
+  
+  m_menuFile->addAction(m_actionNew);
+  m_menuFile->addAction(m_actionOpen);
+  m_menuFile->addAction(m_actionRecentlyOpen);
+  m_menuFile->addSeparator();
+  m_menuFile->addAction(m_actionSave);
+  m_menuFile->addAction(m_actionSaveAs);
+  m_menuFile->addSeparator();
+  m_menuFile->addAction(m_actionSaveAll);
+  m_menuFile->addAction(m_actionClose);
+  m_menuFile->addAction(m_actionCloseAll);
+  m_menuFile->addSeparator();
+  m_menuFile->addAction(m_actionQuit);
+  
+  /* Menu 'Bearbeiten' einrichten */
+  m_menuEdit = new QMenu(m_menubar);
+  m_menuEdit->setObjectName(QString("m_menuEdit"));
+  m_menuEdit->setTitle(trUtf8("&Bearbeiten"));
+  
+  m_actionUndo = new QAction(this);
+  m_actionUndo->setEnabled(false);
+  m_actionUndo->setIcon(QIcon(":/images/undo.png"));
+  m_actionUndo->setObjectName(QString("m_actionUndo"));
+  m_actionUndo->setShortcut(tr("Ctrl+Z"));
+  m_actionUndo->setText(trUtf8("&Rückgängig"));
+  
+  m_actionRedo = new QAction(this);
+  m_actionRedo->setEnabled(false);
+  m_actionRedo->setIcon(QIcon(":/images/redo.png"));
+  m_actionRedo->setObjectName(QString("m_actionRedo"));
+  m_actionRedo->setShortcut(tr("Ctrl+Shift+Z"));
+  m_actionRedo->setText(trUtf8("&Wiederherstellen"));
+  
+  m_actionCut = new QAction(this);
+  m_actionCut->setIcon(QIcon(":/images/editcut.png"));
+  m_actionCut->setObjectName(QString("m_actionCut"));
+  m_actionCut->setShortcut(tr("Ctrl+X"));
+  m_actionCut->setText(trUtf8("&Ausschneiden"));
+  
+  m_actionCopy = new QAction(this);
+  m_actionCopy->setIcon(QIcon(":/images/editcopy.png"));
+  m_actionCopy->setObjectName(QString("m_actionCopy"));
+  m_actionCopy->setShortcut(tr("Ctrl+C"));
+  m_actionCopy->setText(trUtf8("&Kopieren"));
+  
+  m_actionPaste = new QAction(this);
+  m_actionPaste->setIcon(QIcon(":/images/editpaste.png"));
+  m_actionPaste->setObjectName(QString("m_actionPaste"));
+  m_actionPaste->setShortcut(tr("Ctrl+V"));
+  m_actionPaste->setText(trUtf8("&Einfügen"));
+  
+  m_actionFind = new QAction(this);
+  m_actionFind->setIcon(QIcon(":/images/find.png"));
+  m_actionFind->setObjectName(QString("m_actionFind"));
+  m_actionFind->setShortcut(tr("Ctrl+F"));
+  m_actionFind->setText(trUtf8("&Suchen..."));
+  
+  m_actionFindNext = new QAction(this);
+  m_actionFindNext->setObjectName(QString("m_actionFindNext"));
+  m_actionFindNext->setShortcut(tr("F3"));
+  m_actionFindNext->setText(trUtf8("&Weitersuchen"));
+  
+  m_actionFindPrevious = new QAction(this);
+  m_actionFindPrevious->setObjectName(QString("m_actionFindPrevious"));
+  m_actionFindPrevious->setShortcut(tr("Shift+F3"));
+  m_actionFindPrevious->setText(trUtf8("&Frühere suchen"));
+  
+  m_actionReplace = new QAction(this);
+  m_actionReplace->setObjectName(QString("m_actionReplace"));
+  m_actionReplace->setShortcut(tr("Ctrl+R"));
+  m_actionReplace->setText(tr("&Ersetzen"));
+  
+  m_actionSettings = new QAction(this);
+  m_actionSettings->setObjectName(QString("m_actionSettings"));
+  m_actionSettings->setText(trUtf8("Ei&nstellungen"));
+  
+  m_menuEdit->addAction(m_actionUndo);
+  m_menuEdit->addAction(m_actionRedo);
+  m_menuEdit->addSeparator();
+  m_menuEdit->addAction(m_actionCut);
+  m_menuEdit->addAction(m_actionCopy);
+  m_menuEdit->addAction(m_actionPaste);
+  m_menuEdit->addSeparator();
+  m_menuEdit->addAction(m_actionFind);
+  m_menuEdit->addAction(m_actionFindNext);
+  m_menuEdit->addAction(m_actionFindPrevious);
+  m_menuEdit->addAction(m_actionReplace);
+  m_menuEdit->addSeparator();
+  m_menuEdit->addAction(m_actionSettings);
+  
+  /* Menu 'Erstellen' einrichten */
+  m_menuBuild = new QMenu(m_menubar);
+  m_menuBuild->setObjectName(QString("m_menuBuild"));
+  m_menuBuild->setTitle(trUtf8("Erstellen"));
+  
+  m_actionCompileLatex = new QAction(this);
+  m_actionCompileLatex->setIcon(QIcon(":/images/latex.png"));
+  m_actionCompileLatex->setObjectName(QString("m_actionCompileLatex"));
+  m_actionCompileLatex->setShortcut(tr("Alt+1"));
+  m_actionCompileLatex->setText(trUtf8("&Latex"));
+  
+  m_actionCompilePdflatex = new QAction(this);
+  m_actionCompilePdflatex->setIcon(QIcon(":/images/pdflatex.png"));
+  m_actionCompilePdflatex->setObjectName(QString("m_actionCompilePdflatex"));
+  m_actionCompilePdflatex->setShortcut(tr("Alt+2"));
+  m_actionCompilePdflatex->setText(trUtf8("&PdfLatex"));
+  
+  m_menuBuild->addAction(m_actionCompileLatex);
+  m_menuBuild->addAction(m_actionCompilePdflatex);
+  
+  /* Untermenus einfuegen */
+  m_menubar->addAction(m_menuFile->menuAction());
+  m_menubar->addAction(m_menuEdit->menuAction());
+  m_menubar->addAction(m_menuBuild->menuAction());
+}
+
+/*
+ * Die Statusbar erzeugen. 
+ */
+void MainWindow::createStatusbar() {
+  m_statusbar = new QStatusBar(this);
+  m_statusbar->setObjectName(QString("m_statusbar"));
+  m_statusbar->setContentsMargins(2,2,4,2);
+  setStatusBar(m_statusbar);
+}
+
+/*
+ * Die Toolbar erzeugen.
+ */
+void MainWindow::createToolbars() {
+  /* Datei */
+  m_toolbarFile = new QToolBar(trUtf8("Datei"), this);
+  m_toolbarFile->setObjectName(QString("m_toolbarFile"));
+  this->addToolBar(Qt::TopToolBarArea, m_toolbarFile);
+  
+  m_toolbarFile->addAction(m_actionNew);
+  m_toolbarFile->addAction(m_actionOpen);
+  m_toolbarFile->addAction(m_actionSave);
+  m_toolbarFile->addAction(m_actionSaveAs);
+  m_toolbarFile->addAction(m_actionSaveAll);
+  m_toolbarFile->addAction(m_actionClose);
+  
+  /* Bearbeiten */
+  m_toolbarEdit = new QToolBar(trUtf8("Bearbeiten"), this);
+  m_toolbarEdit->setObjectName(QString("m_toolbarEdit"));
+  this->addToolBar(Qt::TopToolBarArea, m_toolbarEdit);
+  
+  m_toolbarEdit->addAction(m_actionUndo);
+  m_toolbarEdit->addAction(m_actionRedo);
+  m_toolbarEdit->addAction(m_actionCut);
+  m_toolbarEdit->addAction(m_actionCopy);
+  m_toolbarEdit->addAction(m_actionPaste);
+  m_toolbarEdit->addAction(m_actionFind);
+  
+  /* Kompilierwerkzeuge */
+  m_toolbarBuild = new QToolBar(trUtf8("Erstellen"), this);
+  m_toolbarBuild->setObjectName(QString("m_toolbarBuild"));
+  this->addToolBar(Qt::TopToolBarArea, m_toolbarBuild);
+  
+  m_toolbarBuild->addAction(m_actionCompileLatex);
+  m_toolbarBuild->addAction(m_actionCompilePdflatex);
+}
+
+/*
+ * Den Arbeitsbereich erzeugen.
+ */
+void MainWindow::createWorkspace() {
+  /* Das zentrale Widget einrichten */
+  m_centralwidget = new QWidget(this);
+  m_centralwidget->setObjectName(QString("m_centralwidget"));
+  this->setCentralWidget(m_centralwidget);
+  
+  /* Das Grundlayout fuer die Arbeitsflaeche einrichten */
+  m_hboxLayout = new QHBoxLayout(m_centralwidget);
+  m_hboxLayout->setObjectName(QString("m_hboxLayout"));
+  m_hboxLayout->setContentsMargins(0, 0, 0, 0);
+  
+  /* Splitter zwischen Eingabe und Ausgabe einrichten */
+  m_vSplitter = new QSplitter(m_centralwidget);
+  m_vSplitter->setObjectName(QString("m_vSplitter"));
+  m_vSplitter->setOrientation(Qt::Vertical);
+  m_hboxLayout->addWidget(m_vSplitter);
+  
+  /* Splitter zwischen Toolbox und Tabs einrichten */
+  m_hSplitter = new QSplitter(m_vSplitter);
+  m_hSplitter->setObjectName(QString("m_hSplitter"));
+  m_vSplitter->addWidget(m_hSplitter);
+  
+  /* SizePolicy fuer den Splitter setzen */
+  QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+  sizePolicy.setHorizontalStretch(1);
+  sizePolicy.setVerticalStretch(5);
+  sizePolicy.setHeightForWidth(m_hSplitter->sizePolicy().hasHeightForWidth());
+  m_hSplitter->setSizePolicy(sizePolicy);
+  m_hSplitter->setOrientation(Qt::Horizontal);
+  
+  /* Einrichten der Toolbox */
+  m_toolbox = new QToolBox(m_hSplitter);
+  m_toolbox->setObjectName(QString("m_toolbox"));
+  m_hSplitter->addWidget(m_toolbox);
+  
+  /* SizePolicy fuer die Toolbox setzen */
+  QSizePolicy sizePolicy1(QSizePolicy::Preferred, QSizePolicy::Preferred);
+  sizePolicy1.setHorizontalStretch(1);
+  sizePolicy1.setVerticalStretch(1);
+  sizePolicy1.setHeightForWidth(m_toolbox->sizePolicy().hasHeightForWidth());
+  m_toolbox->setSizePolicy(sizePolicy1);
+  
+  /* Seiten in die Toolbox einfuegen */
+  m_page = new QWidget();
+  m_page->setObjectName(QString("m_page"));
+  m_toolbox->addItem(m_page, trUtf8("Seite 1"));
+  m_page2 = new QWidget();
+  m_page2->setObjectName(QString("m_page_2"));
+  m_toolbox->addItem(m_page2, trUtf8("Seite 2"));
+  m_toolbox->setCurrentIndex(0);
+  
+  /* Einrichten des Tab */
+  m_tabs = new QTabWidget(m_hSplitter);
+  m_tabs->setObjectName(QString("m_tabs"));
+  m_hSplitter->addWidget(m_tabs);
+  
+  m_closeButton = new QToolButton(m_tabs);
+  m_closeButton->setIcon(style()->standardIcon(QStyle::SP_TitleBarCloseButton));
+  m_tabs->setCornerWidget(m_closeButton);
+  
+  /* SizePolicy fuer das Tab setzen */
+  QSizePolicy sizePolicy2(QSizePolicy::Preferred, QSizePolicy::Preferred);
+  sizePolicy2.setHorizontalStretch(12);
+  sizePolicy2.setVerticalStretch(1);
+  sizePolicy2.setHeightForWidth(m_tabs->sizePolicy().hasHeightForWidth());
+  m_tabs->setSizePolicy(sizePolicy2);
+  
+  /* Ausgabefeld fuer Compilermeldungen einrichten */
+  m_output = new QTextEdit(m_vSplitter);
+  m_output->setFont(QFont("monospace", 8));
+  m_output->setObjectName(QString("m_output"));
+  m_vSplitter->addWidget(m_output);
+  sizePolicy1.setHeightForWidth(m_output->sizePolicy().hasHeightForWidth());
+  m_output->setSizePolicy(sizePolicy1);
+}
+
+/*
+ * Liefert den aktuell offenen Editor zurück oder 0, falls
+ * noch keiner offen ist.
+ */
+Editor * MainWindow::getCurrentEditor() {
+  if (m_tabs->count() == 0 || m_editorList.size() == 0) {
+    return 0;
+  }
+  
+  return m_editorList.at(m_tabs->currentIndex());
+}
+
+/*
+ * Veranlasst das Neuladen der Einstellungen.
+ */
+void MainWindow::loadSettings() {
+  for (int i = 0; i < m_editorList.size(); i++) {
+    Editor *curInput = m_editorList.at(i);
+    if (curInput == 0) {
+      continue;
+    }
+    
+    curInput->loadSettings();
+  }
+}
+
+/*
+ * Ein vorhandenes Dokument öffnen. Es wird dazu
+ * ein Datei-Öffnen-Dialog angezeigt.
+ */
+void MainWindow::openDocument(QString filename) {
+  Editor *input = new Editor(this);
+  if (input->openDocument(filename) == true) {
+    QString filename = input->getFilename();
+    
+    m_recentFiles.addFile(filename);
+    
+    int index = m_tabs->addTab(input, filename.mid(filename.lastIndexOf(QDir::separator()) + 1));
+    input->setFocus();
+    m_editorList.push_back(input);
+    
+    m_tabs->setCurrentIndex(index);
+    slotReconnectTab(index);
+    
+    m_actionSave->setEnabled(true);
+    m_actionSaveAs->setEnabled(true);
+    m_actionSaveAll->setEnabled(true);
+    m_actionClose->setEnabled(true);
+    m_actionCloseAll->setEnabled(true);
+    m_actionPaste->setEnabled(true);
+  } else {
+    delete input;
+    input = 0;
+  }
 }
 
 /*
@@ -35,12 +438,12 @@ MainWindow::MainWindow() : QMainWindow() {
  * eventuellen Speichervorgang 'Abbrechen' gewählt
  * wird, werden keine weiteren Tabs geschlossen.
  */ 
-void MainWindow::closeAllTabs() {
-  int tabCount = tabs->count();
+void MainWindow::slotCloseAllTabs() {
+  int tabCount = m_tabs->count();
   while (tabCount > 0) {
-    int oldTabCount = tabs->count();
-    closeCurrentTab();
-    if (tabs->count() == oldTabCount) {
+    int oldTabCount = m_tabs->count();
+    slotCloseCurrentTab();
+    if (m_tabs->count() == oldTabCount) {
       break;
     }
     tabCount--;
@@ -59,33 +462,33 @@ void MainWindow::closeAllTabs() {
  * vorhandene Dokument speichern lassen, vgl.
  * dazu Editor::maybeSave()
  */
-void MainWindow::closeCurrentTab() {
-  int curIndex = tabs->currentIndex();
+void MainWindow::slotCloseCurrentTab() {
+  int curIndex = m_tabs->currentIndex();
   if (curIndex >= 0) {
-    Editor *curInput = editorList.at(curIndex);
+    Editor *curInput = m_editorList.at(curIndex);
     if (curInput == 0) {
-      tabs->removeTab(tabs->currentIndex());
+      m_tabs->removeTab(m_tabs->currentIndex());
       return;
     }
     
     if (curInput->maybeSave() == true) {
-      editorList.removeAt(curIndex);
-      tabs->removeTab(curIndex);
+      m_editorList.removeAt(curIndex);
+      m_tabs->removeTab(curIndex);
     }
   }
   
   /* Alle Tabs geschlossen */
-  if (tabs->count() == 0) {
-    action_Speichern->setEnabled(false);
-    action_SpeichernUnter->setEnabled(false);
-    action_AlleSpeichern->setEnabled(false);
-    action_Schliessen->setEnabled(false);
-    action_AlleSchliessen->setEnabled(false);
-    action_Rueckgaengig->setEnabled(false);
-    action_Wiederherstellen->setEnabled(false);
-    action_Ausschneiden->setEnabled(false);
-    action_Kopieren->setEnabled(false);
-    action_Einfuegen->setEnabled(false);
+  if (m_tabs->count() == 0) {
+    m_actionSave->setEnabled(false);
+    m_actionSaveAs->setEnabled(false);
+    m_actionSaveAll->setEnabled(false);
+    m_actionClose->setEnabled(false);
+    m_actionCloseAll->setEnabled(false);
+    m_actionUndo->setEnabled(false);
+    m_actionRedo->setEnabled(false);
+    m_actionCut->setEnabled(false);
+    m_actionCopy->setEnabled(false);
+    m_actionPaste->setEnabled(false);
   } else {
     Editor *curInput = getCurrentEditor();
     if (curInput == 0) {
@@ -93,21 +496,6 @@ void MainWindow::closeCurrentTab() {
     }
     
     curInput->setFocus();
-  }
-}
-
-void MainWindow::closeEvent(QCloseEvent *event) {
-  closeAllTabs();
-  if (tabs->count() > 0) {
-    event->ignore();
-    Editor *curInput = getCurrentEditor();
-    if (curInput == 0) {
-      return;
-    }
-    
-    curInput->setFocus();
-  } else {
-    event->accept();
   }
 }
 
@@ -115,7 +503,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
  * Das aktuelle Dokument mit latex kompilieren lassen.
  * Dazu MUSS das Dokument zunächst gespeichert werden.
  */
-void MainWindow::compileLatex() {
+void MainWindow::slotCompileLatex() {
   Editor *curInput = getCurrentEditor();
   if (curInput == 0) {
     return;
@@ -123,7 +511,7 @@ void MainWindow::compileLatex() {
   
   /* Das Dokument MUSS vor dem Kompilieren gespeichert werden */
   if (curInput->save() == true) {
-    compiler->compileLatex(curInput->getFilename());
+    m_compiler->compileLatex(curInput->getFilename());
   }
 }
 
@@ -131,7 +519,7 @@ void MainWindow::compileLatex() {
  * Das aktuelle Dokument mit pdflatex kompilieren lassen.
  * Dazu MUSS das Dokument zunächst gespeichert werden.
  */
-void MainWindow::compilePdflatex() {
+void MainWindow::slotCompilePdflatex() {
   Editor *curInput = getCurrentEditor();
   if (curInput == 0) {
     return;
@@ -139,447 +527,84 @@ void MainWindow::compilePdflatex() {
   
   /* Das Dokument MUSS vor dem Kompilieren gespeichert werden */
   if (curInput->save() == true) {
-    compiler->compilePdflatex(curInput->getFilename());
+    m_compiler->compilePdflatex(curInput->getFilename());
   }
 }
 
-/*
- * Bestimmte unveränderliche Verbindungen erzeugen.
- */
-void MainWindow::createConnections() {
-  QObject::connect(tabs, SIGNAL(currentChanged(int)), this, SLOT(reconnectTab(int)));
-  
-  /* Menusignale einrichten */
-  QObject::connect(action_Neu, SIGNAL(triggered()), this, SLOT(newDocument()));
-  QObject::connect(action_Oeffnen, SIGNAL(triggered()), this, SLOT(openDocument()));
-  QObject::connect(action_Speichern, SIGNAL(triggered()), this, SLOT(save()));
-  QObject::connect(action_SpeichernUnter, SIGNAL(triggered()), this, SLOT(saveAs()));
-  QObject::connect(action_AlleSpeichern, SIGNAL(triggered()), this, SLOT(saveAll()));
-  QObject::connect(action_Schliessen, SIGNAL(triggered()), this, SLOT(closeCurrentTab()));
-  QObject::connect(action_AlleSchliessen, SIGNAL(triggered()), this, SLOT(closeAllTabs()));
-  QObject::connect(action_Beenden, SIGNAL(triggered()), this, SLOT(quit()));
-  
-  QObject::connect(action_Suchen, SIGNAL(triggered()), this, SLOT(find()));
-  QObject::connect(action_NaechsteSuchen, SIGNAL(triggered()), this, SLOT(findNext()));
-  QObject::connect(action_LetzteSuchen, SIGNAL(triggered()), this, SLOT(findPrevious()));
-  QObject::connect(action_Ersetzen, SIGNAL(triggered()), this, SLOT(replace()));
-  QObject::connect(action_Einstellungen, SIGNAL(triggered()), this, SLOT(settings()));
-  
-  QObject::connect(action_kompiliereLatex, SIGNAL(triggered()), this, SLOT(compileLatex()));
-  QObject::connect(action_kompilierePdflatex, SIGNAL(triggered()), this, SLOT(compilePdflatex()));
-
-  /* Weitere Signale einrichten */
-  QObject::connect(closeButton, SIGNAL(clicked()), this, SLOT(closeCurrentTab()));
-  QObject::connect(&recentFiles, SIGNAL(update()), this, SLOT(createRecentFilesMenu()));
-}
-
-/*
- * Die Menustruktur erzeugen.
- */
-void MainWindow::createMenus() {
-  /* Menuleiste erzeugen */
-  menubar = new QMenuBar(this);
-  menubar->setObjectName(QString("menubar"));
-  this->setMenuBar(menubar);
-  
-  /* Menu 'Datei' einrichten */
-  menu_Datei = new QMenu(menubar);
-  menu_Datei->setObjectName(QString("menu_Datei"));
-  menu_Datei->setTitle(trUtf8("&Datei"));
-  
-  action_Neu = new QAction(this);
-  action_Neu->setIcon(QIcon(":/images/filenew.png"));
-  action_Neu->setObjectName(QString("action_Neu"));
-  action_Neu->setShortcut(tr("Ctrl+N"));
-  action_Neu->setText(trUtf8("&Neu"));
-  
-  action_Oeffnen = new QAction(this);
-  action_Oeffnen->setIcon(QIcon(":/images/fileopen.png"));
-  action_Oeffnen->setObjectName(QString("action_Oeffnen"));
-  action_Oeffnen->setShortcut(tr("Ctrl+O"));
-  action_Oeffnen->setText(trUtf8("Ö&ffnen..."));
-  
-  action_zuletztOffen = new QAction(this);
-  action_zuletztOffen->setObjectName(QString("action_zuetztOffen"));
-  action_zuletztOffen->setText(trUtf8("&Zuletzt geöffnet"));
-  
-  // Untermenü für die letzten Dateien
-  menu_ZuletztOffen = new QMenu(menubar);
-  action_zuletztOffen->setMenu(menu_ZuletztOffen);
-  createRecentFilesMenu();
-  
-  action_Speichern = new QAction(this);
-  action_Speichern->setEnabled(false);
-  action_Speichern->setIcon(QIcon(":/images/filesave.png"));
-  action_Speichern->setObjectName(QString("action_Speichern"));
-  action_Speichern->setShortcut(tr("Ctrl+S"));
-  action_Speichern->setText(trUtf8("&Speichern"));
-  
-  action_SpeichernUnter = new QAction(this);
-  action_SpeichernUnter->setEnabled(false);
-  action_SpeichernUnter->setIcon(QIcon(":/images/filesaveas.png"));
-  action_SpeichernUnter->setObjectName(QString("action_SpeichernUnter"));
-  action_SpeichernUnter->setText(trUtf8("Speichern &unter..."));
-  
-  action_AlleSpeichern = new QAction(this);
-  action_AlleSpeichern->setEnabled(false);
-  action_AlleSpeichern->setIcon(QIcon(":/images/filesaveall.png"));
-  action_AlleSpeichern->setObjectName(QString("action_AlleSpeichern"));
-  action_AlleSpeichern->setText(trUtf8("&Alle speichern"));
-  
-  action_Schliessen = new QAction(this);
-  action_Schliessen->setEnabled(false);
-  action_Schliessen->setIcon(QIcon(":/images/fileclose.png"));
-  action_Schliessen->setObjectName(QString("action_Schliessen"));
-  action_Schliessen->setText(trUtf8("Schl&ießen"));
-  
-  action_AlleSchliessen = new QAction(this);
-  action_AlleSchliessen->setEnabled(false);
-  action_AlleSchliessen->setObjectName(QString("action_AlleSchliessen"));
-  action_AlleSchliessen->setText(trUtf8("Alle schließen"));
-  
-  action_Beenden = new QAction(this);
-  action_Beenden->setObjectName(QString("action_Beenden"));
-  action_Beenden->setShortcut(tr("Ctrl+B"));
-  action_Beenden->setText(trUtf8("&Beenden"));
-  
-  menu_Datei->addAction(action_Neu);
-  menu_Datei->addAction(action_Oeffnen);
-  menu_Datei->addAction(action_zuletztOffen);
-  menu_Datei->addSeparator();
-  menu_Datei->addAction(action_Speichern);
-  menu_Datei->addAction(action_SpeichernUnter);
-  menu_Datei->addSeparator();
-  menu_Datei->addAction(action_AlleSpeichern);
-  menu_Datei->addAction(action_Schliessen);
-  menu_Datei->addAction(action_AlleSchliessen);
-  menu_Datei->addSeparator();
-  menu_Datei->addAction(action_Beenden);
-  
-  /* Menu 'Bearbeiten' einrichten */
-  menu_Bearbeiten = new QMenu(menubar);
-  menu_Bearbeiten->setObjectName(QString("menu_Bearbeiten"));
-  menu_Bearbeiten->setTitle(trUtf8("&Bearbeiten"));
-  
-  action_Rueckgaengig = new QAction(this);
-  action_Rueckgaengig->setEnabled(false);
-  action_Rueckgaengig->setIcon(QIcon(":/images/undo.png"));
-  action_Rueckgaengig->setObjectName(QString("action_Rueckgaengig"));
-  action_Rueckgaengig->setShortcut(tr("Ctrl+Z"));
-  action_Rueckgaengig->setText(trUtf8("&Rückgängig"));
-  
-  action_Wiederherstellen = new QAction(this);
-  action_Wiederherstellen->setEnabled(false);
-  action_Wiederherstellen->setIcon(QIcon(":/images/redo.png"));
-  action_Wiederherstellen->setObjectName(QString("action_Wiederherstellen"));
-  action_Wiederherstellen->setShortcut(tr("Ctrl+Shift+Z"));
-  action_Wiederherstellen->setText(trUtf8("&Wiederherstellen"));
-  
-  action_Ausschneiden = new QAction(this);
-  action_Ausschneiden->setIcon(QIcon(":/images/editcut.png"));
-  action_Ausschneiden->setObjectName(QString("action_Ausschneiden"));
-  action_Ausschneiden->setShortcut(tr("Ctrl+X"));
-  action_Ausschneiden->setText(trUtf8("&Ausschneiden"));
-  
-  action_Kopieren = new QAction(this);
-  action_Kopieren->setIcon(QIcon(":/images/editcopy.png"));
-  action_Kopieren->setObjectName(QString("action_Kopieren"));
-  action_Kopieren->setShortcut(tr("Ctrl+C"));
-  action_Kopieren->setText(trUtf8("&Kopieren"));
-  
-  action_Einfuegen = new QAction(this);
-  action_Einfuegen->setIcon(QIcon(":/images/editpaste.png"));
-  action_Einfuegen->setObjectName(QString("action_Einfuegen"));
-  action_Einfuegen->setShortcut(tr("Ctrl+V"));
-  action_Einfuegen->setText(trUtf8("&Einfügen"));
-  
-  action_Suchen = new QAction(this);
-  action_Suchen->setIcon(QIcon(":/images/find.png"));
-  action_Suchen->setObjectName(QString("action_Suchen"));
-  action_Suchen->setShortcut(tr("Ctrl+F"));
-  action_Suchen->setText(trUtf8("&Suchen..."));
-  
-  action_NaechsteSuchen = new QAction(this);
-  action_NaechsteSuchen->setObjectName(QString("action_NaechsteSuchen"));
-  action_NaechsteSuchen->setShortcut(tr("F3"));
-  action_NaechsteSuchen->setText(trUtf8("&Weitersuchen"));
-  
-  action_LetzteSuchen = new QAction(this);
-  action_LetzteSuchen->setObjectName(QString("action_LetzteSuchen"));
-  action_LetzteSuchen->setShortcut(tr("Shift+F3"));
-  action_LetzteSuchen->setText(trUtf8("&Frühere suchen"));
-  
-  action_Ersetzen = new QAction(this);
-  action_Ersetzen->setObjectName(QString("action_Ersetzen"));
-  action_Ersetzen->setShortcut(tr("Ctrl+R"));
-  action_Ersetzen->setText(tr("&Ersetzen"));
-  
-  action_Einstellungen = new QAction(this);
-  action_Einstellungen->setObjectName(QString("action_Einstellungen"));
-  action_Einstellungen->setText(trUtf8("Ei&nstellungen"));
-  
-  menu_Bearbeiten->addAction(action_Rueckgaengig);
-  menu_Bearbeiten->addAction(action_Wiederherstellen);
-  menu_Bearbeiten->addSeparator();
-  menu_Bearbeiten->addAction(action_Ausschneiden);
-  menu_Bearbeiten->addAction(action_Kopieren);
-  menu_Bearbeiten->addAction(action_Einfuegen);
-  menu_Bearbeiten->addSeparator();
-  menu_Bearbeiten->addAction(action_Suchen);
-  menu_Bearbeiten->addAction(action_NaechsteSuchen);
-  menu_Bearbeiten->addAction(action_LetzteSuchen);
-  menu_Bearbeiten->addAction(action_Ersetzen);
-  menu_Bearbeiten->addSeparator();
-  menu_Bearbeiten->addAction(action_Einstellungen);
-  
-  /* Menu 'Erstellen' einrichten */
-  menu_Erstellen = new QMenu(menubar);
-  menu_Erstellen->setObjectName(QString("menu_Erstellen"));
-  menu_Erstellen->setTitle(trUtf8("Erstellen"));
-  
-  action_kompiliereLatex = new QAction(this);
-  action_kompiliereLatex->setIcon(QIcon(":/images/latex.png"));
-  action_kompiliereLatex->setObjectName(QString("action_kompiliereLatex"));
-  action_kompiliereLatex->setShortcut(tr("Alt+1"));
-  action_kompiliereLatex->setText(trUtf8("&Latex"));
-  
-  action_kompilierePdflatex = new QAction(this);
-  action_kompilierePdflatex->setIcon(QIcon(":/images/pdflatex.png"));
-  action_kompilierePdflatex->setObjectName(QString("action_kompilierePdflatex"));
-  action_kompilierePdflatex->setShortcut(tr("Alt+2"));
-  action_kompilierePdflatex->setText(trUtf8("&PdfLatex"));
-  
-  menu_Erstellen->addAction(action_kompiliereLatex);
-  menu_Erstellen->addAction(action_kompilierePdflatex);
-  
-  /* Untermenus einfuegen */
-  menubar->addAction(menu_Datei->menuAction());
-  menubar->addAction(menu_Bearbeiten->menuAction());
-  menubar->addAction(menu_Erstellen->menuAction());
-}
-
-void MainWindow::createRecentFilesMenu() {
-  QList<QAction*> tmp = menu_ZuletztOffen->actions();
+void MainWindow::slotCreateRecentFilesMenu() {
+  QList<QAction*> tmp = m_menuRecentlyOpen->actions();
   for (int i = 0; i < tmp.size(); i++) {
     QAction *a = tmp.at(i);
     if (a == 0) {
       continue;
     }
     
-    menu_ZuletztOffen->removeAction(a);
+    m_menuRecentlyOpen->removeAction(a);
   }
   
-  QList<RecentFileAction*> actions = recentFiles.getActions();
+  QList<RecentFileAction*> actions = m_recentFiles.getActions();
   for (int i = 0; i < actions.size(); i++) {
     RecentFileAction *act = actions.at(i);
     if (act == 0) {
       continue;
     }
     
-    menu_ZuletztOffen->addAction(act);
-    QObject::connect(act, SIGNAL(wasTriggered(QAction *)), this, SLOT(openRecentDocument(QAction *)));
+    m_menuRecentlyOpen->addAction(act);
+    connect(act, SIGNAL(signalWasTriggered(QAction *)), this, SLOT(slotOpenRecentDocument(QAction *)));
   }
 }
 
 /*
- * Die Statusbar erzeugen. 
+ * Zeigt den Suchdialog an und sucht anschließend
+ * nach dem ersten Treffer ab Cursorposition
  */
-void MainWindow::createStatusbar() {
-  statusbar = new QStatusBar(this);
-  statusbar->setObjectName(QString("statusbar"));
-  statusbar->setContentsMargins(2,2,4,2);
-  this->setStatusBar(statusbar);
-}
-
-/*
- * Die Toolbar erzeugen.
- */
-void MainWindow::createToolbars() {
-  /* Datei */
-  toolbarDatei = new QToolBar(trUtf8("Datei"), this);
-  toolbarDatei->setObjectName(QString("toolbarDatei"));
-  this->addToolBar(Qt::TopToolBarArea, toolbarDatei);
-  
-  toolbarDatei->addAction(action_Neu);
-  toolbarDatei->addAction(action_Oeffnen);
-  toolbarDatei->addAction(action_Speichern);
-  toolbarDatei->addAction(action_SpeichernUnter);
-  toolbarDatei->addAction(action_AlleSpeichern);
-  toolbarDatei->addAction(action_Schliessen);
-  
-  /* Bearbeiten */
-  toolbarBearbeiten = new QToolBar(trUtf8("Bearbeiten"), this);
-  toolbarBearbeiten->setObjectName(QString("toolbarBearbeiten"));
-  this->addToolBar(Qt::TopToolBarArea, toolbarBearbeiten);
-  
-  toolbarBearbeiten->addAction(action_Rueckgaengig);
-  toolbarBearbeiten->addAction(action_Wiederherstellen);
-  toolbarBearbeiten->addAction(action_Ausschneiden);
-  toolbarBearbeiten->addAction(action_Kopieren);
-  toolbarBearbeiten->addAction(action_Einfuegen);
-  toolbarBearbeiten->addAction(action_Suchen);
-  
-  /* Kompilierwerkzeuge */
-  toolbarKompilierwerkzeuge = new QToolBar(trUtf8("Erstellen"), this);
-  toolbarKompilierwerkzeuge->setObjectName(QString("toolbarKompilierwerkzeuge"));
-  this->addToolBar(Qt::TopToolBarArea, toolbarKompilierwerkzeuge);
-  
-  toolbarKompilierwerkzeuge->addAction(action_kompiliereLatex);
-  toolbarKompilierwerkzeuge->addAction(action_kompilierePdflatex);
-}
-
-/*
- * Den Arbeitsbereich erzeugen.
- */
-void MainWindow::createWorkspace() {
-  /* Das zentrale Widget einrichten */
-  centralwidget = new QWidget(this);
-  centralwidget->setObjectName(QString("centralwidget"));
-  this->setCentralWidget(centralwidget);
-  
-  /* Das Grundlayout fuer die Arbeitsflaeche einrichten */
-  hboxLayout = new QHBoxLayout(centralwidget);
-  hboxLayout->setObjectName(QString("hboxLayout"));
-  hboxLayout->setContentsMargins(0, 0, 0, 0);
-  
-  /* Splitter zwischen Eingabe und Ausgabe einrichten */
-  vSplitter = new QSplitter(centralwidget);
-  vSplitter->setObjectName(QString("vSplitter"));
-  vSplitter->setOrientation(Qt::Vertical);
-  hboxLayout->addWidget(vSplitter);
-  
-  /* Splitter zwischen Toolbox und Tabs einrichten */
-  hSplitter = new QSplitter(vSplitter);
-  hSplitter->setObjectName(QString("hSplitter"));
-  vSplitter->addWidget(hSplitter);
-  
-  /* SizePolicy fuer den Splitter setzen */
-  QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-  sizePolicy.setHorizontalStretch(1);
-  sizePolicy.setVerticalStretch(5);
-  sizePolicy.setHeightForWidth(hSplitter->sizePolicy().hasHeightForWidth());
-  hSplitter->setSizePolicy(sizePolicy);
-  hSplitter->setOrientation(Qt::Horizontal);
-  
-  /* Einrichten der Toolbox */
-  toolbox = new QToolBox(hSplitter);
-  toolbox->setObjectName(QString("toolbox"));
-  hSplitter->addWidget(toolbox);
-  
-  /* SizePolicy fuer die Toolbox setzen */
-  QSizePolicy sizePolicy1(QSizePolicy::Preferred, QSizePolicy::Preferred);
-  sizePolicy1.setHorizontalStretch(1);
-  sizePolicy1.setVerticalStretch(1);
-  sizePolicy1.setHeightForWidth(toolbox->sizePolicy().hasHeightForWidth());
-  toolbox->setSizePolicy(sizePolicy1);
-  
-  /* Seiten in die Toolbox einfuegen */
-  page = new QWidget();
-  page->setObjectName(QString("page"));
-  toolbox->addItem(page, trUtf8("Seite 1"));
-  page_2 = new QWidget();
-  page_2->setObjectName(QString("page_2"));
-  toolbox->addItem(page_2, trUtf8("Seite 2"));
-  toolbox->setCurrentIndex(0);
-  
-  /* Einrichten des Tab */
-  tabs = new QTabWidget(hSplitter);
-  tabs->setObjectName(QString("tabs"));
-  hSplitter->addWidget(tabs);
-  
-  closeButton = new QToolButton(tabs);
-  closeButton->setIcon(style()->standardIcon(QStyle::SP_TitleBarCloseButton));
-  tabs->setCornerWidget(closeButton);
-  
-  /* SizePolicy fuer das Tab setzen */
-  QSizePolicy sizePolicy2(QSizePolicy::Preferred, QSizePolicy::Preferred);
-  sizePolicy2.setHorizontalStretch(12);
-  sizePolicy2.setVerticalStretch(1);
-  sizePolicy2.setHeightForWidth(tabs->sizePolicy().hasHeightForWidth());
-  tabs->setSizePolicy(sizePolicy2);
-  
-  /* Ausgabefeld fuer Compilermeldungen einrichten */
-  output = new QTextEdit(vSplitter);
-  output->setFont(QFont("monospace", 8));
-  output->setObjectName(QString("output"));
-  vSplitter->addWidget(output);
-  sizePolicy1.setHeightForWidth(output->sizePolicy().hasHeightForWidth());
-  output->setSizePolicy(sizePolicy1);
-}
-
-void MainWindow::find() {
+void MainWindow::slotFind() {
   Editor *curInput = getCurrentEditor();
   if (curInput == 0) {
     return;
   }
   
-  if (findDialog->exec() == QDialog::Rejected) {
+  if (m_findDialog->slotExec() == QDialog::Rejected) {
     return;
   }
   
-  curInput->find(findDialog->getSearchText(), findDialog->getSearchFlags());
+  curInput->find(m_findDialog->getSearchText(), m_findDialog->getSearchFlags());
 }
 
-void MainWindow::findNext() {
+void MainWindow::slotFindNext() {
   Editor *curInput = getCurrentEditor();
   if (curInput == 0) {
     return;
   }
   
-  QString searchText = findDialog->getSearchText();
-  QTextDocument::FindFlags searchFlags = findDialog->getSearchFlags();
+  QString searchText = m_findDialog->getSearchText();
+  QTextDocument::FindFlags searchFlags = m_findDialog->getSearchFlags();
   
   if (searchText.isEmpty() || searchText.isNull()) {
-    if (findDialog->exec() == QDialog::Rejected) {
+    if (m_findDialog->slotExec() == QDialog::Rejected) {
       return;
     }
   }
   
-  curInput->find(findDialog->getSearchText(), findDialog->getSearchFlags());
+  curInput->find(m_findDialog->getSearchText(), m_findDialog->getSearchFlags());
 }
 
-void MainWindow::findPrevious() {
+void MainWindow::slotFindPrevious() {
   Editor *curInput = getCurrentEditor();
   if (curInput == 0) {
     return;
   }
   
-  QString searchText = findDialog->getSearchText();
-  QTextDocument::FindFlags searchFlags = findDialog->getSearchFlags() | QTextDocument::FindBackward;
+  QString searchText = m_findDialog->getSearchText();
+  QTextDocument::FindFlags searchFlags = m_findDialog->getSearchFlags() | QTextDocument::FindBackward;
   
   if (searchText.isEmpty() || searchText.isNull()) {
-    if (findDialog->exec() == QDialog::Rejected) {
+    if (m_findDialog->slotExec() == QDialog::Rejected) {
       return;
     }
   }
   
-  curInput->find(findDialog->getSearchText(), findDialog->getSearchFlags() ^ QTextDocument::FindBackward);
-}
-
-/*
- * Liefert den aktuell offenen Editor zurück oder 0, falls
- * noch keiner offen ist.
- */
-Editor * MainWindow::getCurrentEditor() {
-  if (tabs->count() == 0 || editorList.size() == 0) {
-    return 0;
-  }
-  
-  return editorList.at(tabs->currentIndex());
-}
-
-/*
- * Veranlasst das Neuladen der Einstellungen.
- */
-void MainWindow::loadSettings() {
-  for (int i = 0; i < editorList.size(); i++) {
-    Editor *curInput = editorList.at(i);
-    if (curInput == 0) {
-      continue;
-    }
-    
-    curInput->loadSettings();
-  }
+  curInput->find(m_findDialog->getSearchText(), m_findDialog->getSearchFlags() ^ QTextDocument::FindBackward);
 }
 
 /*
@@ -588,63 +613,33 @@ void MainWindow::loadSettings() {
  * überschrieben um Vorlagen auswählen
  * zu können.
  */
-void MainWindow::newDocument() {
-  newFileCount++;
-  QString filename = trUtf8("Unbenannt") + QString::number(newFileCount);
+void MainWindow::slotNewDocument() {
+  m_newFileCount++;
+  QString filename = trUtf8("Unbenannt") + QString::number(m_newFileCount);
   
   /* Eingabefeld einrichten */
   Editor *input = new Editor();
   
-  int index = tabs->addTab(input, filename);
+  int index = m_tabs->addTab(input, filename);
   input->setFocus();
-  editorList.push_back(input);
+  m_editorList.push_back(input);
   
-  tabs->setCurrentIndex(index);
-  reconnectTab(index);
+  m_tabs->setCurrentIndex(index);
+  slotReconnectTab(index);
   
-  action_Speichern->setEnabled(true);
-  action_SpeichernUnter->setEnabled(true);
-  action_AlleSpeichern->setEnabled(true);
-  action_Schliessen->setEnabled(true);
-  action_AlleSchliessen->setEnabled(true);
-  action_Einfuegen->setEnabled(true);
+  m_actionSave->setEnabled(true);
+  m_actionSaveAs->setEnabled(true);
+  m_actionSaveAll->setEnabled(true);
+  m_actionClose->setEnabled(true);
+  m_actionCloseAll->setEnabled(true);
+  m_actionPaste->setEnabled(true);
 }
 
-void MainWindow::openDocument() {
+void MainWindow::slotOpenDocument() {
   openDocument(QString());
 }
 
-/*
- * Ein vorhandenes Dokument öffnen. Es wird dazu
- * ein Datei-Öffnen-Dialog angezeigt.
- */
-void MainWindow::openDocument(QString filename) {
-  Editor *input = new Editor(this);
-  if (input->openDocument(filename) == true) {
-    QString filename = input->getFilename();
-    
-    recentFiles.addFile(filename);
-    
-    int index = tabs->addTab(input, filename.mid(filename.lastIndexOf(QDir::separator()) + 1));
-    input->setFocus();
-    editorList.push_back(input);
-    
-    tabs->setCurrentIndex(index);
-    reconnectTab(index);
-    
-    action_Speichern->setEnabled(true);
-    action_SpeichernUnter->setEnabled(true);
-    action_AlleSpeichern->setEnabled(true);
-    action_Schliessen->setEnabled(true);
-    action_AlleSchliessen->setEnabled(true);
-    action_Einfuegen->setEnabled(true);
-  } else {
-    delete input;
-    input = 0;
-  }
-}
-
-void MainWindow::openRecentDocument(QAction *action) {
+void MainWindow::slotOpenRecentDocument(QAction *action) {
   if (action == 0) {
     return;
   }
@@ -659,9 +654,9 @@ void MainWindow::openRecentDocument(QAction *action) {
  * schließen und eventuell ein Speichern bestimmter
  * Dokumente veranlassen, vgl. closeAllTabs().
  */
-void MainWindow::quit() {
-  closeAllTabs();
-  if (tabs->count() > 0) {
+void MainWindow::slotQuit() {
+  slotCloseAllTabs();
+  if (m_tabs->count() > 0) {
     return;
   }
   
@@ -674,73 +669,73 @@ void MainWindow::quit() {
  * und redo() im richtigen Editor ausgeführt werden. Das
  * wird in dieser Funktion erledigt.
  */
-void MainWindow::reconnectTab(int newIndex) {
+void MainWindow::slotReconnectTab(int newIndex) {
   /* Zunächst alle Menupunkt entkoppeln */
-  QObject::disconnect(action_Rueckgaengig, 0, 0, 0);
-  QObject::disconnect(action_Wiederherstellen, 0, 0, 0);
-  QObject::disconnect(action_Ausschneiden, 0, 0, 0);
-  QObject::disconnect(action_Kopieren, 0, 0, 0);
-  QObject::disconnect(action_Einfuegen, 0, 0, 0);
+  disconnect(m_actionUndo, 0, 0, 0);
+  disconnect(m_actionRedo, 0, 0, 0);
+  disconnect(m_actionCut, 0, 0, 0);
+  disconnect(m_actionCopy, 0, 0, 0);
+  disconnect(m_actionPaste, 0, 0, 0);
   
   /* Dann jeden Editor durchgehen und die wichtigen Verbindungen
   kappen */
   Editor *curInput;
-  for (int i = 0; i < editorList.size(); i++) {
-    curInput = editorList.at(i);
+  for (int i = 0; i < m_editorList.size(); i++) {
+    curInput = m_editorList.at(i);
     if (curInput == 0) {
       continue;
     }
     
-    QObject::disconnect(curInput, 0, action_Rueckgaengig, 0);
-    QObject::disconnect(curInput, 0, action_Wiederherstellen, 0);
+    disconnect(curInput, 0, m_actionUndo, 0);
+    disconnect(curInput, 0, m_actionRedo, 0);
   }
   
   /* Nun den neuen Editor laden */
-  curInput = editorList.at(newIndex);
+  curInput = m_editorList.at(newIndex);
   if (curInput == 0) {
     return;
   }
   
   /* Und für diesen alle wichtigen Verbindungen neu erzeugen */
-  QObject::connect(curInput, SIGNAL(undoAvailable(bool)), action_Rueckgaengig, SLOT(setEnabled(bool)));
-  QObject::connect(curInput, SIGNAL(redoAvailable(bool)), action_Wiederherstellen, SLOT(setEnabled(bool)));
-  QObject::connect(curInput, SIGNAL(copyAvailable(bool)), action_Ausschneiden, SLOT(setEnabled(bool)));
-  QObject::connect(curInput, SIGNAL(copyAvailable(bool)), action_Kopieren, SLOT(setEnabled(bool)));
+  connect(curInput, SIGNAL(undoAvailable(bool)), m_actionUndo, SLOT(setEnabled(bool)));
+  connect(curInput, SIGNAL(redoAvailable(bool)), m_actionRedo, SLOT(setEnabled(bool)));
+  connect(curInput, SIGNAL(copyAvailable(bool)), m_actionCut, SLOT(setEnabled(bool)));
+  connect(curInput, SIGNAL(copyAvailable(bool)), m_actionCopy, SLOT(setEnabled(bool)));
   
-  QObject::connect(action_Rueckgaengig, SIGNAL(triggered()), curInput, SLOT(undo()));
-  QObject::connect(action_Wiederherstellen, SIGNAL(triggered()), curInput, SLOT(redo()));
-  QObject::connect(action_Ausschneiden, SIGNAL(triggered()), curInput, SLOT(cut()));
-  QObject::connect(action_Kopieren, SIGNAL(triggered()), curInput, SLOT(copy()));
-  QObject::connect(action_Einfuegen, SIGNAL(triggered()), curInput, SLOT(paste()));
+  connect(m_actionUndo, SIGNAL(triggered()), curInput, SLOT(undo()));
+  connect(m_actionRedo, SIGNAL(triggered()), curInput, SLOT(redo()));
+  connect(m_actionCut, SIGNAL(triggered()), curInput, SLOT(cut()));
+  connect(m_actionCopy, SIGNAL(triggered()), curInput, SLOT(copy()));
+  connect(m_actionPaste, SIGNAL(triggered()), curInput, SLOT(paste()));
   
-  QObject::connect(curInput, SIGNAL(newCursorPosition(QString)), statusbar, SLOT(showMessage(QString)));
+  connect(curInput, SIGNAL(signalCursorPositionChanged(QString)), m_statusbar, SLOT(showMessage(QString)));
   
   /* Abschließend können einige Menupunkt wieder aktiviert werden */
-  action_Rueckgaengig->setEnabled(curInput->getUndo());
-  action_Wiederherstellen->setEnabled(curInput->getRedo());
-  action_Ausschneiden->setEnabled(curInput->getCopy());
-  action_Kopieren->setEnabled(curInput->getCopy());
+  m_actionUndo->setEnabled(curInput->getUndo());
+  m_actionRedo->setEnabled(curInput->getRedo());
+  m_actionCut->setEnabled(curInput->getCopy());
+  m_actionCopy->setEnabled(curInput->getCopy());
   
-  statusbar->showMessage(trUtf8("Zeile 1, Spalte 1"));
+  m_statusbar->showMessage(trUtf8("Zeile 1, Spalte 1"));
 }
 
-void MainWindow::replace() {
+void MainWindow::slotReplace() {
   Editor *curInput = getCurrentEditor();
   if (curInput == 0) {
     return;
   }
   
-  if (replaceDialog->exec() == QDialog::Rejected) {
+  if (m_replaceDialog->slotExec() == QDialog::Rejected) {
     return;
   }
   
-  curInput->replace(replaceDialog->getSearchText(), replaceDialog->getReplacementText(), replaceDialog->getSearchFlags(), replaceDialog->getPromptOnReplace());
+  curInput->replace(m_replaceDialog->getSearchText(), m_replaceDialog->getReplacementText(), m_replaceDialog->getSearchFlags(), m_replaceDialog->getPromptOnReplace());
 }
 
 /* 
  * Speichert das aktuelle Dokument ab.
  */
-void MainWindow::save() {
+void MainWindow::slotSave() {
   Editor *curInput = getCurrentEditor();
   if (curInput == 0) {
     return;
@@ -752,30 +747,30 @@ void MainWindow::save() {
     
     // Einfügen in die recent Liste
     if (oldFilename != filename) {
-      recentFiles.addFile(filename);
+      m_recentFiles.addFile(filename);
     }
     
     filename = filename.mid(filename.lastIndexOf(QDir::separator()) + 1);
-    tabs->setTabText(tabs->currentIndex(), filename);
+    m_tabs->setTabText(m_tabs->currentIndex(), filename);
   }
 }
 
 /*
  * Speichert alle offenen Dokumente ab.
  */
-void MainWindow::saveAll() {
-  if (editorList.size() == 0) {
+void MainWindow::slotSaveAll() {
+  if (m_editorList.size() == 0) {
     return;
   }
   
   Editor *curInput;
-  for (int i = 0; i < editorList.size(); i++) {
-    curInput = editorList.at(i);
+  for (int i = 0; i < m_editorList.size(); i++) {
+    curInput = m_editorList.at(i);
     if (curInput == 0) {
       continue;
     }
     
-    tabs->setCurrentIndex(i);
+    m_tabs->setCurrentIndex(i);
     
     QString oldFilename = curInput->getFilename();
     if (curInput->save() == true) {
@@ -783,11 +778,11 @@ void MainWindow::saveAll() {
       
       // Einfügen in die recent Liste
       if (oldFilename != filename) {
-        recentFiles.addFile(filename);
+        m_recentFiles.addFile(filename);
       }
     
       filename = filename.mid(filename.lastIndexOf(QDir::separator()) + 1);
-      tabs->setTabText(tabs->currentIndex(), filename);
+      m_tabs->setTabText(m_tabs->currentIndex(), filename);
     }
   }
 }
@@ -797,7 +792,7 @@ void MainWindow::saveAll() {
  * Dateinamen-Auswahldialog, um es unter
  * einem anderen Namen zu speichern.
  */
-void MainWindow::saveAs() {
+void MainWindow::slotSaveAs() {
   Editor *curInput = getCurrentEditor();
   if (curInput == 0) {
     return;
@@ -809,11 +804,11 @@ void MainWindow::saveAs() {
     
     // Einfügen in die recent Liste
     if (oldFilename != filename) {
-      recentFiles.addFile(filename);
+      m_recentFiles.addFile(filename);
     }
     
     filename = filename.mid(filename.lastIndexOf(QDir::separator()) + 1);
-    tabs->setTabText(tabs->currentIndex(), filename);
+    m_tabs->setTabText(m_tabs->currentIndex(), filename);
   }
 }
 
@@ -821,7 +816,7 @@ void MainWindow::saveAs() {
  * Zeigt den Einstellungsdialog an und veranlsst ggf.
  * ein Neuladen der Einstellungen.
  */
-void MainWindow::settings() {
+void MainWindow::slotSettings() {
   SettingDialog dlg(this);
   if (dlg.exec() == QDialog::Accepted) {
     loadSettings();

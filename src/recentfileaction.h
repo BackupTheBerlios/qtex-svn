@@ -11,10 +11,10 @@ class RecentFileAction : public QAction
     RecentFileAction(QWidget *parent = 0);
     
   signals:
-    void wasTriggered(QAction *);
+    void signalWasTriggered(QAction *);
     
   private slots:
-    void dummy();
+    void slotWasTriggered();
     
   
 };

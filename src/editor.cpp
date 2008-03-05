@@ -7,52 +7,33 @@
  *
  */
 
-#include <QFileDialog>
-#include <QMessageBox>
 #include "editor.h"
 
 Editor::Editor( QWidget * parent )
 : QTextEdit(parent)
 {
-  lineMargin = 60;
+  m_lineMargin = 60;
   
   setObjectName(QString("input"));
-  cursor = new QTextCursor(textCursor());
-  setTextCursor(*cursor);
-  setViewportMargins(lineMargin, 0, 0, 0);
+  m_cursor = new QTextCursor(textCursor());
+  setTextCursor(*m_cursor);
+  setViewportMargins(m_lineMargin, 0, 0, 0);
   
-	highlighter = new Highlighter(document());
-  changeState = false;
+	m_highlighter = new Highlighter(document());
+  m_changeState = false;
   
-  QObject::connect(this, SIGNAL(textChanged()), this, SLOT(changed()));
-  QObject::connect(this, SIGNAL(copyAvailable(bool)), this, SLOT(setCopy(bool)));
-  QObject::connect(this, SIGNAL(redoAvailable(bool)), this, SLOT(setRedo(bool)));
-  QObject::connect(this, SIGNAL(undoAvailable(bool)), this, SLOT(setUndo(bool)));
+  /* eigene Slots */
+  connect(this, SIGNAL(textChanged()), this, SLOT(slotChanged()));
+  connect(this, SIGNAL(copyAvailable(bool)), this, SLOT(slotCopyAvailable(bool)));
+  connect(this, SIGNAL(redoAvailable(bool)), this, SLOT(slotRedoAvailable(bool)));
+  connect(this, SIGNAL(undoAvailable(bool)), this, SLOT(slotUndoAvailable(bool)));
+  connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(slotCursorPositionChanged()));
   
-  QObject::connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(dummy()));
-  
-  QObject::connect(verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(update())); 
-  QObject::connect(this, SIGNAL(textChanged()), this, SLOT(update())); 
+  /* vorhandene Slots */
+  connect(verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(update())); 
+  connect(this, SIGNAL(textChanged()), this, SLOT(update())); 
   
   loadSettings();
-}
-
-/*
- * Interne Methode, um den Veränderungsstatus auf true zu setzen.
- */
-void Editor::changed() {
-  setChanged(true);
-}
-
-void Editor::dummy() {
-  int index = textCursor().position();
-  QString text = toPlainText().mid(0, index);
-  int lastIndex = text.lastIndexOf(QString("\n"));
-  
-  int line = text.count(QString("\n")) + 1;
-  int col = index - lastIndex;
-  
-  emit newCursorPosition(trUtf8("Zeile ") + QString::number(line) + trUtf8(", Spalte ") + QString::number(col)); 
 }
 
 /*
@@ -61,7 +42,7 @@ void Editor::dummy() {
 bool Editor::event(QEvent *event) {
   if (event->type() == QEvent::Paint) {
     QPainter painter(this);
-    painter.fillRect(0, 0, lineMargin, height(), QColor(255, 255, 210));
+    painter.fillRect(0, 0, m_lineMargin, height(), QColor(255, 255, 210));
     
     int contentsY = verticalScrollBar()->value(); 
     qreal pageBottom = contentsY + viewport()->height(); 
@@ -83,7 +64,7 @@ bool Editor::event(QEvent *event) {
       }
       
       QString str = QString::number(lineNumber); 
-      painter.drawText(lineMargin - fm.width(str) - 5, qRound(position.y()) - contentsY + ascent + 1, str); 
+      painter.drawText(m_lineMargin - fm.width(str) - 5, qRound(position.y()) - contentsY + ascent + 1, str); 
     }
   }
   
@@ -131,19 +112,19 @@ bool Editor::find(QString exp, QTextDocument::FindFlags flags) {
  */
 
 bool Editor::getCopy() {
-  return canCopy;
+  return m_canCopy;
 }
 
 QString Editor::getFilename() {
-  return filename;
+  return m_filename;
 }
 
 bool Editor::getRedo() {
-  return canRedo;
+  return m_canRedo;
 }
 
 bool Editor::getUndo() {
-  return canUndo;
+  return m_canUndo;
 }
 
 /*
@@ -168,7 +149,7 @@ bool Editor::gotoLine(int line) {
 }
 
 bool Editor::hasChanged() {
-  return changeState;
+  return m_changeState;
 }
 
 void Editor::loadSettings() {
@@ -187,7 +168,7 @@ void Editor::loadSettings() {
    * !!! ACHTUNG: Workaround !!!
    * !!!!!!!!!!!!!!!!!!!!!!!!!!!
    */
-  bool tmp = changeState;
+  bool tmp = m_changeState;
   if (toPlainText().isEmpty()) {
     setTextColor(fontcolor);
   } else {
@@ -207,8 +188,8 @@ void Editor::loadSettings() {
   setTabStopWidth(width * fm.width(QString(" ")));
   
   /* Highlighting erneuern */
-  highlighter->loadHighlighting();
-  highlighter->rehighlight();
+  m_highlighter->loadHighlighting();
+  m_highlighter->rehighlight();
 }
 
 /*
@@ -222,8 +203,7 @@ bool Editor::maybeSave() {
     return true;
   }
   
-  QString title = trUtf8("Dokument schließen");
-  
+  QString title = trUtf8("Dokument schließen");  
   QString text = trUtf8("Das Dokument '");
   if (getFilename().isEmpty() || getFilename().isNull()) {
     text += trUtf8("Unbenannt");
@@ -351,7 +331,7 @@ bool Editor::save() {
   }
   
   file.close();  
-  changeState = false;
+  m_changeState = false;
   
   return true;
 }
@@ -391,7 +371,7 @@ bool Editor::saveAs() {
     settings.setValue(QString("savePath"), QFileInfo(filename).absolutePath());
     
     /* Wurde eine andere, bereits existierende Datei gewählt? Dann nachfragen */
-    if (temp.exists() && this->filename != filename) {
+    if (temp.exists() && m_filename != filename) {
       QString text("Eine Datei namens '");
       text += filename.mid(filename.lastIndexOf(QDir::separator()) + 1);
       text += trUtf8("' existiert bereits. Überschreiben?");
@@ -434,7 +414,7 @@ bool Editor::saveAs() {
   }
   
   file.close();
-  changeState = false;
+  m_changeState = false;
   
   return true;
 }
@@ -443,24 +423,8 @@ bool Editor::saveAs() {
  * == Einige setter-Methoden ==
  * ============================
  */
-void Editor::setChanged(bool bChanged) {
-  changeState = bChanged;
-}
-
-void Editor::setCopy(bool bCopy) {
-  canCopy = bCopy;
-}
-
-void Editor::setFilename(QString filename) {
-  this->filename = filename;
-}
-
-void Editor::setRedo(bool bRedo) {
-  canRedo = bRedo;
-}
-
-void Editor::setUndo(bool bUndo) {
-  canUndo = bUndo;
+void Editor::setChanged(bool changeState) {
+  m_changeState = changeState;
 }
 
 void Editor::setCursorPos(int pos) {
@@ -469,4 +433,36 @@ void Editor::setCursorPos(int pos) {
   setTextCursor(tmp);
 }
 
+void Editor::setFilename(QString filename) {
+  m_filename = filename;
+}
 
+/*
+ * Interne Methode, um den Veränderungsstatus auf true zu setzen.
+ */
+void Editor::slotChanged() {
+  setChanged(true);
+}
+
+void Editor::slotCopyAvailable(bool canCopy) {
+  m_canCopy = canCopy;
+}
+
+void Editor::slotCursorPositionChanged() {
+  int index = textCursor().position();
+  QString text = toPlainText().mid(0, index);
+  int lastIndex = text.lastIndexOf(QString("\n"));
+  
+  int line = text.count(QString("\n")) + 1;
+  int col = index - lastIndex;
+  
+  emit signalCursorPositionChanged(trUtf8("Zeile ") + QString::number(line) + trUtf8(", Spalte ") + QString::number(col)); 
+}
+
+void Editor::slotRedoAvailable(bool canRedo) {
+  m_canRedo = canRedo;
+}
+
+void Editor::slotUndoAvailable(bool canUndo) {
+  m_canUndo = canUndo;
+}

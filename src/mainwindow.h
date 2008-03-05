@@ -1,31 +1,33 @@
 #ifndef __MAINWINDOW_H__
 #define __MAINWINDOW_H__
 
-#include <QtCore/QVariant>
-#include <QtGui/QCloseEvent>
-#include <QtGui/QAction>
-#include <QtGui/QApplication>
-#include <QtGui/QButtonGroup>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QMainWindow>
-#include <QtGui/QMenu>
-#include <QtGui/QMenuBar>
-#include <QtGui/QSplitter>
-#include <QtGui/QStatusBar>
-#include <QtGui/QTabWidget>
-#include <QtGui/QTextEdit>
-#include <QtGui/QToolBar>
-#include <QtGui/QToolBox>
-#include <QtGui/QToolButton>
-#include <QtGui/QWidget>
+#include <QAction>
+#include <QCloseEvent>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QList>
+#include <QMainWindow>
+#include <QMenu>
+#include <QMenuBar>
+#include <QMessageBox>
+#include <QSplitter>
+#include <QStatusBar>
+#include <QString>
+#include <QStyle>
+#include <QTabWidget>
+#include <QTextEdit>
+#include <QToolBar>
+#include <QToolBox>
+#include <QToolButton>
+#include <QWidget>
 
-#include "src/compiler.h"
-#include "src/editor.h"
-#include "src/finddialog.h"
-#include "src/recentfileaction.h"
-#include "src/recentfilemanager.h"
-#include "src/replacedialog.h"
+#include "compiler.h"
+#include "editor.h"
+#include "finddialog.h"
+#include "recentfileaction.h"
+#include "recentfilemanager.h"
+#include "replacedialog.h"
+#include "settingdialog.h"
 
 class MainWindow : public QMainWindow
 {
@@ -35,24 +37,24 @@ class MainWindow : public QMainWindow
     MainWindow();
     
   public slots:
-    void closeAllTabs();
-    void closeCurrentTab();
-    void compileLatex();
-    void compilePdflatex();
-    void createRecentFilesMenu();
-    void find();
-    void findNext();
-    void findPrevious();
-    void newDocument();
-    void openDocument();
-    void openRecentDocument(QAction *);
-    void quit();
-    void reconnectTab(int);
-    void replace();
-    void save();
-    void saveAll();
-    void saveAs();
-    void settings();
+    void slotCloseAllTabs();
+    void slotCloseCurrentTab();
+    void slotCompileLatex();
+    void slotCompilePdflatex();
+    void slotCreateRecentFilesMenu();
+    void slotFind();
+    void slotFindNext();
+    void slotFindPrevious();
+    void slotNewDocument();
+    void slotOpenDocument();
+    void slotOpenRecentDocument(QAction *);
+    void slotQuit();
+    void slotReconnectTab(int);
+    void slotReplace();
+    void slotSave();
+    void slotSaveAll();
+    void slotSaveAs();
+    void slotSettings();
     
   private:
     void closeEvent(QCloseEvent *);
@@ -65,54 +67,34 @@ class MainWindow : public QMainWindow
     void loadSettings();
     void openDocument(QString);
     
-    Compiler *compiler;
-    FindDialog *findDialog;
-    int newFileCount;
-    RecentFileManager recentFiles;
-    ReplaceDialog *replaceDialog;
-    
-    QAction *action_Neu; 
-    QAction *action_Oeffnen;
-    QAction *action_zuletztOffen;
-    QAction *action_Speichern;
-    QAction *action_SpeichernUnter;
-    QAction *action_AlleSpeichern;
-    QAction *action_Schliessen;
-    QAction *action_AlleSchliessen;
-    QAction *action_Beenden;
-    QAction *action_Rueckgaengig;
-    QAction *action_Wiederherstellen;
-    QAction *action_Ausschneiden;
-    QAction *action_Kopieren;
-    QAction *action_Einfuegen;
-    QAction *action_Suchen;
-    QAction *action_NaechsteSuchen;
-    QAction *action_LetzteSuchen;
-    QAction *action_Ersetzen;
-    QAction *action_Einstellungen;
-    QAction *action_kompiliereLatex;
-    QAction *action_kompilierePdflatex;
-    QHBoxLayout *hboxLayout;
-    QLabel *cursorPosition;
-    QList<Editor *> editorList;
-    QMenu *menu_Datei;
-    QMenu *menu_Bearbeiten;
-    QMenu *menu_ZuletztOffen;
-    QMenu *menu_Erstellen;
-    QMenuBar *menubar;
-    QSplitter *vSplitter;
-    QSplitter *hSplitter;
-    QStatusBar *statusbar;
-    QTextEdit *output;
-    QTabWidget *tabs;
-    QToolBar *toolbarBearbeiten;
-    QToolBar *toolbarDatei;
-    QToolBar *toolbarKompilierwerkzeuge;
-    QToolBox *toolbox;
-    QToolButton *closeButton;
-    QWidget *centralwidget;
-    QWidget *page;
-    QWidget *page_2;
+    Compiler *m_compiler;
+    FindDialog *m_findDialog;
+    int m_newFileCount;
+    QAction *m_actionNew, *m_actionOpen, *m_actionRecentlyOpen;
+    QAction *m_actionSave, *m_actionSaveAs, *m_actionSaveAll;
+    QAction *m_actionClose, *m_actionCloseAll, *m_actionQuit;
+    QAction *m_actionUndo, *m_actionRedo;
+    QAction *m_actionCut, *m_actionCopy, *m_actionPaste;
+    QAction *m_actionFind, *m_actionFindNext, *m_actionFindPrevious, *m_actionReplace;
+    QAction *m_actionSettings;
+    QAction *m_actionCompileLatex, *m_actionCompilePdflatex;
+    QHBoxLayout *m_hboxLayout;
+    QLabel *m_cursorPosition;
+    QList<Editor *> m_editorList;
+    QMenu *m_menuFile, *m_menuEdit, *m_menuRecentlyOpen, *m_menuBuild;
+    QMenuBar *m_menubar;
+    QSplitter *m_hSplitter, *m_vSplitter;
+    QStatusBar *m_statusbar;
+    QTextEdit *m_output;
+    QTabWidget *m_tabs;
+    QToolBar *m_toolbarEdit, *m_toolbarFile, *m_toolbarBuild;
+    QToolBox *m_toolbox;
+    QToolButton *m_closeButton;
+    QWidget *m_centralwidget;
+    QWidget *m_page;
+    QWidget *m_page2;
+    RecentFileManager m_recentFiles;
+    ReplaceDialog *m_replaceDialog;
 };
 
 #endif

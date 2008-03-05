@@ -3,8 +3,6 @@
 
 #include <QObject>
 #include <QList>
-#include <QMenu>
-#include <QMenuBar>
 #include <QSettings>
 #include <QString>
 
@@ -20,15 +18,15 @@ class RecentFileManager : public QObject
     QList<RecentFileAction *> getActions();
     
   signals:
-    void update();
+    void signalUpdate();
     
   private:
     void exportRecentFiles();
     void importRecentFiles();
     
-    int capacity;
-    QList<RecentFileAction *> recentFileActions;
-    QList<QString> recentFiles;
+    int m_capacity;
+    QList<RecentFileAction *> m_recentFileActions;
+    QList<QString> m_recentFiles;
 };
 
 #endif

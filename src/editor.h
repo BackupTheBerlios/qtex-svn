@@ -12,15 +12,17 @@
 
 #include <QColor>
 #include <QEvent>
+#include <QFileDialog>
 #include <QFontMetrics>
 #include <QHBoxLayout>
-#include <QLabel>
+#include <QMessageBox>
 #include <QPainter>
 #include <QRectF>
 #include <QScrollBar>
 #include <QSettings>
 #include <QTextEdit>
 #include <QTextLayout>
+
 #include "highlighter.h"
 
 class Editor : public QTextEdit
@@ -46,28 +48,27 @@ class Editor : public QTextEdit
     void setFilename(QString);
     
   signals:
-    void newCursorPosition(QString);
+    void signalCursorPositionChanged(QString);
     
   private slots:
-    void changed();
-    void dummy();
-    void setCopy(bool);
-    void setRedo(bool);
-    void setUndo(bool);
+    void slotChanged();
+    void slotCursorPositionChanged();
+    void slotCopyAvailable(bool);
+    void slotRedoAvailable(bool);
+    void slotUndoAvailable(bool);
 		
 	private: 
     bool event(QEvent *);
     void setCursorPos(int);
     
-    bool canCopy;
-    bool canRedo;
-    bool canUndo;
-    bool changeState;
-		Highlighter *highlighter;
-    int lineMargin;
-    QLabel *lineNumbers;
-    QString filename;
-    QTextCursor *cursor;
+    bool m_canCopy;
+    bool m_canRedo;
+    bool m_canUndo;
+    bool m_changeState;
+		Highlighter *m_highlighter;
+    int m_lineMargin;
+    QString m_filename;
+    QTextCursor *m_cursor;
 	};
 
 #endif

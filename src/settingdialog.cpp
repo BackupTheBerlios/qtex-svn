@@ -1,7 +1,7 @@
 #include "settingdialog.h"
 
 SettingDialog::SettingDialog(QWidget *parent) : QDialog(parent) {
-  this->setWindowTitle(trUtf8("Einstellungen"));
+  setWindowTitle(trUtf8("Einstellungen"));
   
   createDialog();
   createConnections();
@@ -13,34 +13,34 @@ void SettingDialog::createDialog() {
   QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
   
   /* Das Grundlayout erzeugen */
-  vLayout = new QVBoxLayout(this);
-  vLayout->setObjectName(QString("vLayout"));
-  this->setLayout(vLayout);
+  m_vLayout = new QVBoxLayout(this);
+  m_vLayout->setObjectName(QString("m_vLayout"));
+  setLayout(m_vLayout);
   
-  hLayout = new QHBoxLayout();
-  hLayout->setObjectName(QString("hLayout"));
+  m_hLayout = new QHBoxLayout();
+  m_hLayout->setObjectName(QString("m_hLayout"));
   
-  tabs = new QTabWidget(this);
-  tabs->setObjectName(QString("tabs"));
-  vLayout->addWidget(tabs);
+  m_tabs = new QTabWidget(this);
+  m_tabs->setObjectName(QString("m_tabs"));
+  m_vLayout->addWidget(m_tabs);
   
   
-  cancel = new QPushButton(this);
-  cancel->setObjectName(QString("cancel"));
-  cancel->setText(trUtf8("Abbrechen"));
+  m_cancel = new QPushButton(this);
+  m_cancel->setObjectName(QString("m_cancel"));
+  m_cancel->setText(trUtf8("Abbrechen"));
   
-  save = new QPushButton(this);
-  save->setObjectName(QString("save"));
-  save->setText(trUtf8("Speichern"));
+  m_save = new QPushButton(this);
+  m_save->setObjectName(QString("m_save"));
+  m_save->setText(trUtf8("Speichern"));
   
-  hLayout->addStretch();
-  hLayout->addWidget(save);
-  hLayout->addWidget(cancel);
+  m_hLayout->addStretch();
+  m_hLayout->addWidget(m_save);
+  m_hLayout->addWidget(m_cancel);
   
-  vLayout->addLayout(hLayout);
+  m_vLayout->addLayout(m_hLayout);
   
   /* Das 'Editor' - Tab erzeugen */
-  QWidget *editorTab = new QWidget(tabs);
+  QWidget *editorTab = new QWidget(m_tabs);
   editorTab->setObjectName(QString("editorTab"));
   
   QVBoxLayout *editorLayout = new QVBoxLayout(editorTab);
@@ -59,25 +59,25 @@ void SettingDialog::createDialog() {
   labelFontName->setText(trUtf8("Schriftart:"));
   groupFontLayout->addWidget(labelFontName, 0, 0);
   
-  fontName = new QFontComboBox(groupFont);
-  fontName->setObjectName(QString("fontName"));
-  groupFontLayout->addWidget(fontName, 0, 1);
+  m_fontName = new QFontComboBox(groupFont);
+  m_fontName->setObjectName(QString("m_fontName"));
+  groupFontLayout->addWidget(m_fontName, 0, 1);
   
-  fontSize = new QSpinBox(groupFont);
-  fontSize->setObjectName(QString("fontSize"));
-  fontSize->setSizePolicy(sizePolicy);
-  groupFontLayout->addWidget(fontSize, 0, 2);
+  m_fontSize = new QSpinBox(groupFont);
+  m_fontSize->setObjectName(QString("m_fontSize"));
+  m_fontSize->setSizePolicy(sizePolicy);
+  groupFontLayout->addWidget(m_fontSize, 0, 2);
   
   QLabel *labelFontColor = new QLabel(groupFont);
   labelFontColor->setObjectName(QString("labelFontColor"));
   labelFontColor->setText(trUtf8("Schriftfarbe:"));
   groupFontLayout->addWidget(labelFontColor, 1, 0);
   
-  buttonFontColor = new ColorChooseButton(groupFont);
-  buttonFontColor->setIconSize(QSize(16, 16));
-  buttonFontColor->setMaximumSize(QSize(24, 24));
-  buttonFontColor->setObjectName(QString("buttonFontColor"));
-  groupFontLayout->addWidget(buttonFontColor, 1, 1);
+  m_buttonFontColor = new ColorChooseButton(groupFont);
+  m_buttonFontColor->setIconSize(QSize(16, 16));
+  m_buttonFontColor->setMaximumSize(QSize(24, 24));
+  m_buttonFontColor->setObjectName(QString("m_buttonFontColor"));
+  groupFontLayout->addWidget(m_buttonFontColor, 1, 1);
   
   /* Tabulatorgruppe */
   QGridLayout *groupTabulatorLayout = new QGridLayout();
@@ -92,9 +92,9 @@ void SettingDialog::createDialog() {
   labelTabulatorWidth->setText(trUtf8("Tabulatorbreite:"));
   groupTabulatorLayout->addWidget(labelTabulatorWidth, 0, 0);
   
-  tabulatorWidth = new QSpinBox(groupTabulator);
-  tabulatorWidth->setObjectName(QString("tabulatorWidth"));
-  groupTabulatorLayout->addWidget(tabulatorWidth, 0, 1);
+  m_tabulatorWidth = new QSpinBox(groupTabulator);
+  m_tabulatorWidth->setObjectName(QString("m_tabulatorWidth"));
+  groupTabulatorLayout->addWidget(m_tabulatorWidth, 0, 1);
   
   /* Alles zusammenbauen */
   editorLayout->addWidget(groupFont);
@@ -112,17 +112,17 @@ void SettingDialog::createDialog() {
   latexCommandLabel->setText(trUtf8("Latex:"));
   erstellenTableLayout->addWidget(latexCommandLabel, 0, 0);
   
-  latexCommandInput = new QLineEdit(erstellenTab);
-  latexCommandInput->setObjectName(QString("latexCommandInput"));
-  erstellenTableLayout->addWidget(latexCommandInput, 0, 1);
+  m_latexCommandInput = new QLineEdit(erstellenTab);
+  m_latexCommandInput->setObjectName(QString("m_latexCommandInput"));
+  erstellenTableLayout->addWidget(m_latexCommandInput, 0, 1);
   
   QLabel *pdflatexCommandLabel = new QLabel(erstellenTab);
   pdflatexCommandLabel->setText(trUtf8("Pdflatex:"));
   erstellenTableLayout->addWidget(pdflatexCommandLabel, 1, 0);
   
-  pdflatexCommandInput = new QLineEdit(erstellenTab);
-  pdflatexCommandInput->setObjectName(QString("pdflatexCommandInput"));
-  erstellenTableLayout->addWidget(pdflatexCommandInput, 1, 1);
+  m_pdflatexCommandInput = new QLineEdit(erstellenTab);
+  m_pdflatexCommandInput->setObjectName(QString("m_pdflatexCommandInput"));
+  erstellenTableLayout->addWidget(m_pdflatexCommandInput, 1, 1);
   
   erstellenLayout->addLayout(erstellenTableLayout);
   erstellenLayout->addStretch();
@@ -155,88 +155,88 @@ void SettingDialog::createDialog() {
   commentLabel->setText(trUtf8("Kommentare:"));
   tableLayout->addWidget(commentLabel, 1, 0);
   
-  buttonCommentForeground = new ColorChooseButton(syntaxTab);
-  buttonCommentForeground->setObjectName(QString("buttonCommentForeground"));
-  buttonCommentForeground->setIconSize(QSize(16, 16));
-  buttonCommentForeground->setMaximumSize(QSize(24, 24));
-  tableLayout->addWidget(buttonCommentForeground, 1, 1, Qt::AlignHCenter);
+  m_buttonCommentForeground = new ColorChooseButton(syntaxTab);
+  m_buttonCommentForeground->setObjectName(QString("m_buttonCommentForeground"));
+  m_buttonCommentForeground->setIconSize(QSize(16, 16));
+  m_buttonCommentForeground->setMaximumSize(QSize(24, 24));
+  tableLayout->addWidget(m_buttonCommentForeground, 1, 1, Qt::AlignHCenter);
   
-  buttonCommentBackground = new ColorChooseButton(syntaxTab);
-  buttonCommentBackground->setObjectName(QString("buttonCommentBackground"));
-  buttonCommentBackground->setIconSize(QSize(16, 16));
-  buttonCommentBackground->setMaximumSize(QSize(24, 24));
-  tableLayout->addWidget(buttonCommentBackground, 1, 2, Qt::AlignHCenter);
+  m_buttonCommentBackground = new ColorChooseButton(syntaxTab);
+  m_buttonCommentBackground->setObjectName(QString("m_buttonCommentBackground"));
+  m_buttonCommentBackground->setIconSize(QSize(16, 16));
+  m_buttonCommentBackground->setMaximumSize(QSize(24, 24));
+  tableLayout->addWidget(m_buttonCommentBackground, 1, 2, Qt::AlignHCenter);
   
-  buttonCommentBold = new QCheckBox(syntaxTab);
-  buttonCommentBold->setObjectName(QString("buttonCommentBold"));
-  tableLayout->addWidget(buttonCommentBold, 1, 3, Qt::AlignHCenter);
+  m_buttonCommentBold = new QCheckBox(syntaxTab);
+  m_buttonCommentBold->setObjectName(QString("m_buttonCommentBold"));
+  tableLayout->addWidget(m_buttonCommentBold, 1, 3, Qt::AlignHCenter);
   
-  buttonCommentItalic = new QCheckBox(syntaxTab);
-  buttonCommentItalic->setObjectName(QString("buttonCommentItalic"));
-  tableLayout->addWidget(buttonCommentItalic, 1, 4, Qt::AlignHCenter);
+  m_buttonCommentItalic = new QCheckBox(syntaxTab);
+  m_buttonCommentItalic->setObjectName(QString("m_buttonCommentItalic"));
+  tableLayout->addWidget(m_buttonCommentItalic, 1, 4, Qt::AlignHCenter);
   
   /* zweite Zeile */
   QLabel *latexLabel = new QLabel(syntaxTab);
   latexLabel->setText(trUtf8("Latex-Kommandos:"));
   tableLayout->addWidget(latexLabel, 2, 0);
   
-  buttonLatexForeground = new ColorChooseButton(syntaxTab);
-  buttonLatexForeground->setObjectName(QString("buttonLatexForeground"));
-  buttonLatexForeground->setIconSize(QSize(16, 16));
-  buttonLatexForeground->setMaximumSize(QSize(24, 24));
-  tableLayout->addWidget(buttonLatexForeground, 2, 1, Qt::AlignHCenter);
+  m_buttonLatexForeground = new ColorChooseButton(syntaxTab);
+  m_buttonLatexForeground->setObjectName(QString("m_buttonLatexForeground"));
+  m_buttonLatexForeground->setIconSize(QSize(16, 16));
+  m_buttonLatexForeground->setMaximumSize(QSize(24, 24));
+  tableLayout->addWidget(m_buttonLatexForeground, 2, 1, Qt::AlignHCenter);
   
-  buttonLatexBackground = new ColorChooseButton(syntaxTab);
-  buttonLatexBackground->setObjectName(QString("buttonLatexBackground"));
-  buttonLatexBackground->setIconSize(QSize(16, 16));
-  buttonLatexBackground->setMaximumSize(QSize(24, 24));
-  tableLayout->addWidget(buttonLatexBackground, 2, 2, Qt::AlignHCenter);
+  m_buttonLatexBackground = new ColorChooseButton(syntaxTab);
+  m_buttonLatexBackground->setObjectName(QString("m_buttonLatexBackground"));
+  m_buttonLatexBackground->setIconSize(QSize(16, 16));
+  m_buttonLatexBackground->setMaximumSize(QSize(24, 24));
+  tableLayout->addWidget(m_buttonLatexBackground, 2, 2, Qt::AlignHCenter);
   
-  buttonLatexBold = new QCheckBox(syntaxTab);
-  buttonLatexBold->setObjectName(QString("buttonLatexBold"));
-  tableLayout->addWidget(buttonLatexBold, 2, 3, Qt::AlignHCenter);
+  m_buttonLatexBold = new QCheckBox(syntaxTab);
+  m_buttonLatexBold->setObjectName(QString("m_buttonLatexBold"));
+  tableLayout->addWidget(m_buttonLatexBold, 2, 3, Qt::AlignHCenter);
   
-  buttonLatexItalic = new QCheckBox(syntaxTab);
-  buttonLatexItalic->setObjectName(QString("buttonLatexItalic"));
-  tableLayout->addWidget(buttonLatexItalic, 2, 4, Qt::AlignHCenter);
+  m_buttonLatexItalic = new QCheckBox(syntaxTab);
+  m_buttonLatexItalic->setObjectName(QString("m_buttonLatexItalic"));
+  tableLayout->addWidget(m_buttonLatexItalic, 2, 4, Qt::AlignHCenter);
   
   /* dritte Zeile */
   QLabel *mathLabel = new QLabel(syntaxTab);
   mathLabel->setText(trUtf8("Mathemodus:"));
   tableLayout->addWidget(mathLabel, 3, 0);
   
-  buttonMathForeground = new ColorChooseButton(syntaxTab);
-  buttonMathForeground->setObjectName(QString("buttonMathForeground"));
-  buttonMathForeground->setIconSize(QSize(16, 16));
-  buttonMathForeground->setMaximumSize(QSize(24, 24));
-  tableLayout->addWidget(buttonMathForeground, 3, 1, Qt::AlignHCenter);
+  m_buttonMathForeground = new ColorChooseButton(syntaxTab);
+  m_buttonMathForeground->setObjectName(QString("m_buttonMathForeground"));
+  m_buttonMathForeground->setIconSize(QSize(16, 16));
+  m_buttonMathForeground->setMaximumSize(QSize(24, 24));
+  tableLayout->addWidget(m_buttonMathForeground, 3, 1, Qt::AlignHCenter);
   
-  buttonMathBackground = new ColorChooseButton(syntaxTab);
-  buttonMathBackground->setObjectName(QString("buttonMathBackground"));
-  buttonMathBackground->setIconSize(QSize(16, 16));
-  buttonMathBackground->setMaximumSize(QSize(24, 24));
-  tableLayout->addWidget(buttonMathBackground, 3, 2, Qt::AlignHCenter);
+  m_buttonMathBackground = new ColorChooseButton(syntaxTab);
+  m_buttonMathBackground->setObjectName(QString("m_buttonMathBackground"));
+  m_buttonMathBackground->setIconSize(QSize(16, 16));
+  m_buttonMathBackground->setMaximumSize(QSize(24, 24));
+  tableLayout->addWidget(m_buttonMathBackground, 3, 2, Qt::AlignHCenter);
   
-  buttonMathBold = new QCheckBox(syntaxTab);
-  buttonMathBold->setObjectName(QString("buttonMathBold"));
-  tableLayout->addWidget(buttonMathBold, 3, 3, Qt::AlignHCenter);
+  m_buttonMathBold = new QCheckBox(syntaxTab);
+  m_buttonMathBold->setObjectName(QString("m_buttonMathBold"));
+  tableLayout->addWidget(m_buttonMathBold, 3, 3, Qt::AlignHCenter);
   
-  buttonMathItalic = new QCheckBox(syntaxTab);
-  buttonMathItalic->setObjectName(QString("buttonMathItalic"));
-  tableLayout->addWidget(buttonMathItalic, 3, 4, Qt::AlignHCenter);
+  m_buttonMathItalic = new QCheckBox(syntaxTab);
+  m_buttonMathItalic->setObjectName(QString("m_buttonMathItalic"));
+  tableLayout->addWidget(m_buttonMathItalic, 3, 4, Qt::AlignHCenter);
   
   syntaxLayout->addLayout(tableLayout) ;
   syntaxLayout->addStretch();
   
   
-  tabs->addTab(editorTab, trUtf8("Editor"));
-  tabs->addTab(erstellenTab, trUtf8("Erstellen"));
-  tabs->addTab(syntaxTab, trUtf8("Syntax Highlighting"));
+  m_tabs->addTab(editorTab, trUtf8("Editor"));
+  m_tabs->addTab(erstellenTab, trUtf8("Erstellen"));
+  m_tabs->addTab(syntaxTab, trUtf8("Syntax Highlighting"));
 }
 
 void SettingDialog::createConnections() {
-  QObject::connect(cancel, SIGNAL(clicked()), this, SLOT(reject()));
-  QObject::connect(save, SIGNAL(clicked()), this, SLOT(saveSettings()));
+  connect(m_cancel, SIGNAL(clicked()), this, SLOT(reject()));
+  connect(m_save, SIGNAL(clicked()), this, SLOT(slotSaveSettings()));
 }
 
 void SettingDialog::loadSettings() {
@@ -245,112 +245,112 @@ void SettingDialog::loadSettings() {
   /* Schrifteinstellungen laden */
   settings.beginGroup(QString("font"));
   
-  fontName->setEditText(settings.value(QString("name"), QString("Monospace")).toString());
-  fontSize->setValue(settings.value(QString("size"), 10).toInt());
+  m_fontName->setEditText(settings.value(QString("name"), QString("Monospace")).toString());
+  m_fontSize->setValue(settings.value(QString("size"), 10).toInt());
   
   QColor fontColor = settings.value(QString("color"), Qt::black).value<QColor>();
-  buttonFontColor->setColor(fontColor);
+  m_buttonFontColor->setColor(fontColor);
   
   settings.endGroup();
   
   /* Tabulatoreinstellungen laden */
   settings.beginGroup(QString("tabulator"));
-  this->tabulatorWidth->setValue(settings.value(QString("width"), 2).toInt());
+  m_tabulatorWidth->setValue(settings.value(QString("width"), 2).toInt());
   settings.endGroup();
   
   /* Erstellen-Einstellungen laden */
   settings.beginGroup(QString("compiler"));
-  latexCommandInput->setText(settings.value(QString("latex"), QString("latex")).toString());
-  pdflatexCommandInput->setText(settings.value(QString("pdflatex"), QString("pdflatex")).toString());
+  m_latexCommandInput->setText(settings.value(QString("latex"), QString("latex")).toString());
+  m_pdflatexCommandInput->setText(settings.value(QString("pdflatex"), QString("pdflatex")).toString());
   settings.endGroup();
   
   /* Synatx-Highlighting-Einstellungen laden */
   settings.beginGroup(QString("syntaxhighlighting"));
-  buttonCommentForeground->setColor(settings.value(QString("commentForeground"), Qt::red).value<QColor>());
-  buttonCommentBackground->setColor(settings.value(QString("commentBackground"), Qt::white).value<QColor>());
+  m_buttonCommentForeground->setColor(settings.value(QString("commentForeground"), Qt::red).value<QColor>());
+  m_buttonCommentBackground->setColor(settings.value(QString("commentBackground"), Qt::white).value<QColor>());
   int state = settings.value(QString("commentBold"), Qt::Unchecked).toInt();
   if (state == 0) {
-    buttonCommentBold->setCheckState(Qt::Unchecked);
+    m_buttonCommentBold->setCheckState(Qt::Unchecked);
   } else {
-    buttonCommentBold->setCheckState(Qt::Checked);
+    m_buttonCommentBold->setCheckState(Qt::Checked);
   }
   state = settings.value(QString("commentItalic"), Qt::Checked).toInt();
   if (state == 0) {
-    buttonCommentItalic->setCheckState(Qt::Unchecked);
+    m_buttonCommentItalic->setCheckState(Qt::Unchecked);
   } else {
-    buttonCommentItalic->setCheckState(Qt::Checked);
+    m_buttonCommentItalic->setCheckState(Qt::Checked);
   }
   
-  buttonLatexForeground->setColor(settings.value(QString("latexForeground"), Qt::darkMagenta).value<QColor>());
-  buttonLatexBackground->setColor(settings.value(QString("latexBackground"), Qt::white).value<QColor>());
+  m_buttonLatexForeground->setColor(settings.value(QString("latexForeground"), Qt::darkMagenta).value<QColor>());
+  m_buttonLatexBackground->setColor(settings.value(QString("latexBackground"), Qt::white).value<QColor>());
   state = settings.value(QString("latexBold"), Qt::Checked).toInt();
   if (state == 0) {
-    buttonLatexBold->setCheckState(Qt::Unchecked);
+    m_buttonLatexBold->setCheckState(Qt::Unchecked);
   } else {
-    buttonLatexBold->setCheckState(Qt::Checked);
+    m_buttonLatexBold->setCheckState(Qt::Checked);
   }
   state = settings.value(QString("latexItalic"), Qt::Unchecked).toInt();
   if (state == 0) {
-    buttonLatexItalic->setCheckState(Qt::Unchecked);
+    m_buttonLatexItalic->setCheckState(Qt::Unchecked);
   } else {
-    buttonLatexItalic->setCheckState(Qt::Checked);
+    m_buttonLatexItalic->setCheckState(Qt::Checked);
   }
   
-  buttonMathForeground->setColor(settings.value(QString("mathForeground"), Qt::black).value<QColor>());
-  buttonMathBackground->setColor(settings.value(QString("mathBackground"), Qt::yellow).value<QColor>());
+  m_buttonMathForeground->setColor(settings.value(QString("mathForeground"), Qt::black).value<QColor>());
+  m_buttonMathBackground->setColor(settings.value(QString("mathBackground"), Qt::yellow).value<QColor>());
   state = settings.value(QString("mathBold"), Qt::Unchecked).toInt();
   if (state == 0) {
-    buttonMathBold->setCheckState(Qt::Unchecked);
+    m_buttonMathBold->setCheckState(Qt::Unchecked);
   } else {
-    buttonMathBold->setCheckState(Qt::Checked);
+    m_buttonMathBold->setCheckState(Qt::Checked);
   }
   state = settings.value(QString("mathItalic"), Qt::Unchecked).toInt();
   if (state == 0) {
-    buttonMathItalic->setCheckState(Qt::Unchecked);
+    m_buttonMathItalic->setCheckState(Qt::Unchecked);
   } else {
-    buttonMathItalic->setCheckState(Qt::Checked);
+    m_buttonMathItalic->setCheckState(Qt::Checked);
   }
   settings.endGroup();
 }
 
-void SettingDialog::saveSettings() {
-  QColor fontColor = buttonFontColor->getColor();
+void SettingDialog::slotSaveSettings() {
+  QColor fontColor = m_buttonFontColor->getColor();
   QSettings settings("QteX", "QteX");
   
   /* Schrifteinstellungen */
   settings.beginGroup(QString("font"));
-  settings.setValue(QString("name"), fontName->currentText());
-  settings.setValue(QString("size"), fontSize->value());
+  settings.setValue(QString("name"), m_fontName->currentText());
+  settings.setValue(QString("size"), m_fontSize->value());
   settings.setValue(QString("color"), fontColor);
   settings.endGroup();
   
   /* Tabulatoreinstellungen */
   settings.beginGroup(QString("tabulator"));
-  settings.setValue(QString("width"), tabulatorWidth->value());
+  settings.setValue(QString("width"), m_tabulatorWidth->value());
   settings.endGroup();
   
   /* Erstellen-Einstellungen */
   settings.beginGroup(QString("compiler"));
-  settings.setValue(QString("latex"), latexCommandInput->text());
-  settings.setValue(QString("pdflatex"), pdflatexCommandInput->text());
+  settings.setValue(QString("latex"), m_latexCommandInput->text());
+  settings.setValue(QString("pdflatex"), m_pdflatexCommandInput->text());
   settings.endGroup();
   
   /* Synatxhighlighting-Einstellungen */
   settings.beginGroup(QString("syntaxhighlighting"));
-  settings.setValue(QString("commentForeground"), buttonCommentForeground->getColor());
-  settings.setValue(QString("commentBackground"), buttonCommentBackground->getColor());
-  settings.setValue(QString("commentBold"), buttonCommentBold->checkState());
-  settings.setValue(QString("commentItalic"), buttonCommentItalic->checkState());
+  settings.setValue(QString("commentForeground"), m_buttonCommentForeground->getColor());
+  settings.setValue(QString("commentBackground"), m_buttonCommentBackground->getColor());
+  settings.setValue(QString("commentBold"), m_buttonCommentBold->checkState());
+  settings.setValue(QString("commentItalic"), m_buttonCommentItalic->checkState());
   
-  settings.setValue(QString("latexForeground"), buttonLatexForeground->getColor());
-  settings.setValue(QString("latexBackground"), buttonLatexBackground->getColor());
-  settings.setValue(QString("latexBold"), buttonLatexBold->checkState());
-  settings.setValue(QString("latexItalic"), buttonLatexItalic->checkState());
+  settings.setValue(QString("latexForeground"), m_buttonLatexForeground->getColor());
+  settings.setValue(QString("latexBackground"), m_buttonLatexBackground->getColor());
+  settings.setValue(QString("latexBold"), m_buttonLatexBold->checkState());
+  settings.setValue(QString("latexItalic"), m_buttonLatexItalic->checkState());
   
-  settings.setValue(QString("mathForeground"), buttonMathForeground->getColor());
-  settings.setValue(QString("mathBackground"), buttonMathBackground->getColor());
-  settings.setValue(QString("mathBold"), buttonMathBold->checkState());
-  settings.setValue(QString("mathItalic"), buttonMathItalic->checkState());
+  settings.setValue(QString("mathForeground"), m_buttonMathForeground->getColor());
+  settings.setValue(QString("mathBackground"), m_buttonMathBackground->getColor());
+  settings.setValue(QString("mathBold"), m_buttonMathBold->checkState());
+  settings.setValue(QString("mathItalic"), m_buttonMathItalic->checkState());
   settings.endGroup();
   
   accept();

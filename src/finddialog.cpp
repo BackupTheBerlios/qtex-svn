@@ -8,9 +8,12 @@ FindDialog::FindDialog(QWidget *parent) : QDialog(parent) {
   
   createDialog();
   
-  QObject::connect(close, SIGNAL(clicked()), this, SLOT(reject()));
-  QObject::connect(search, SIGNAL(clicked()), this, SLOT(searchButtonClicked()));
-  QObject::connect(searchTextInput, SIGNAL(textChanged(QString)), this, SLOT(toggleSearchButton(QString)));
+  /* eigene Slots */
+  connect(m_search, SIGNAL(clicked()), this, SLOT(slotSearchButtonClicked()));
+  connect(m_searchTextInput, SIGNAL(textChanged(QString)), this, SLOT(slotToggleSearchButton(QString)));
+  
+  /* vorhandene Slots */
+  connect(m_close, SIGNAL(clicked()), this, SLOT(reject()));
 }
 
 void FindDialog::closeEvent(QCloseEvent event) {
@@ -26,11 +29,11 @@ void FindDialog::createDialog() {
   QLabel *labelSearchText = new QLabel(this);
   labelSearchText->setText(trUtf8("Suchen nach:"));
   
-  searchTextInput = new QLineEdit(this);
-  searchTextInput->setFocus();
-  searchTextInput->setObjectName(QString("searchTextInput"));
-  searchTextInput->setText(searchText);
-  searchTextInput->selectAll();
+  m_searchTextInput = new QLineEdit(this);
+  m_searchTextInput->setFocus();
+  m_searchTextInput->setObjectName(QString("m_searchTextInput"));
+  m_searchTextInput->setText(m_searchText);
+  m_searchTextInput->selectAll();
   
   /* Flags */
   QGroupBox *groupFlags = new QGroupBox(this);
@@ -38,61 +41,55 @@ void FindDialog::createDialog() {
   QVBoxLayout *groupFlagsLayout = new QVBoxLayout(groupFlags);
   groupFlags->setLayout(groupFlagsLayout);
   
-  caseSensitive = new QCheckBox(groupFlags);
-  caseSensitive->setObjectName(QString("caseSensitive"));
-  caseSensitive->setText(trUtf8("Groß- und Kleinschreibung unterscheiden"));
-  groupFlagsLayout->addWidget(caseSensitive);
+  m_caseSensitive = new QCheckBox(groupFlags);
+  m_caseSensitive->setObjectName(QString("m_caseSensitive"));
+  m_caseSensitive->setText(trUtf8("Groß- und Kleinschreibung unterscheiden"));
+  groupFlagsLayout->addWidget(m_caseSensitive);
   
-  wholeWords = new QCheckBox(groupFlags);
-  wholeWords->setObjectName(QString("wholeWord"));
-  wholeWords->setText(trUtf8("nur ganze Wörter"));
-  groupFlagsLayout->addWidget(wholeWords);
+  m_wholeWords = new QCheckBox(groupFlags);
+  m_wholeWords->setObjectName(QString("m_wholeWord"));
+  m_wholeWords->setText(trUtf8("nur ganze Wörter"));
+  groupFlagsLayout->addWidget(m_wholeWords);
   
-  backward = new QCheckBox(groupFlags);
-  backward->setObjectName(QString("backward"));
-  backward->setText(trUtf8("rückwärts suchen"));
-  groupFlagsLayout->addWidget(backward);
+  m_backward = new QCheckBox(groupFlags);
+  m_backward->setObjectName(QString("m_backward"));
+  m_backward->setText(trUtf8("rückwärts suchen"));
+  groupFlagsLayout->addWidget(m_backward);
   
   /* Buttons */
-  search = new QPushButton(this);
-  search->setEnabled(false);
-  search->setObjectName(QString("search"));
-  search->setText(trUtf8("Suchen"));
+  m_search = new QPushButton(this);
+  m_search->setEnabled(false);
+  m_search->setObjectName(QString("m_search"));
+  m_search->setText(trUtf8("Suchen"));
   
-  close = new QPushButton(this);
-  close->setObjectName(QString("close"));
-  close->setText(trUtf8("Schließen"));
+  m_close = new QPushButton(this);
+  m_close->setObjectName(QString("m_close"));
+  m_close->setText(trUtf8("Schließen"));
   
   QHBoxLayout *buttonLayout = new QHBoxLayout();
   buttonLayout->addStretch();
-  buttonLayout->addWidget(search);
-  buttonLayout->addWidget(close);
+  buttonLayout->addWidget(m_search);
+  buttonLayout->addWidget(m_close);
   
   /* zusammenbauen */
   layout->addWidget(labelSearchText);
-  layout->addWidget(searchTextInput);
+  layout->addWidget(m_searchTextInput);
   layout->addWidget(groupFlags);
   layout->addLayout(buttonLayout);
-}
-
-int FindDialog::exec() {
-  searchTextInput->setFocus();
-  searchTextInput->selectAll();
-  return QDialog::exec();
 }
 
 QTextDocument::FindFlags FindDialog::getSearchFlags() {
   QTextDocument::FindFlags flags = 0;
   
-  if (caseSensitive->isChecked()) {
+  if (m_caseSensitive->isChecked()) {
     flags |= QTextDocument::FindCaseSensitively;
   }
   
-  if (wholeWords->isChecked()) {
+  if (m_wholeWords->isChecked()) {
     flags |= QTextDocument::FindWholeWords;
   }
   
-  if (backward->isChecked()) {
+  if (m_backward->isChecked()) {
     flags |= QTextDocument::FindBackward;
   }
   
@@ -100,18 +97,24 @@ QTextDocument::FindFlags FindDialog::getSearchFlags() {
 }
 
 QString FindDialog::getSearchText() {
-  return searchText;
+  return m_searchText;
 }
 
-void FindDialog::searchButtonClicked() {
-  searchText = searchTextInput->text();
+int FindDialog::slotExec() {
+  m_searchTextInput->setFocus();
+  m_searchTextInput->selectAll();
+  return QDialog::exec();
+}
+
+void FindDialog::slotSearchButtonClicked() {
+  m_searchText = m_searchTextInput->text();
   accept();
 }
 
-void FindDialog::toggleSearchButton(QString text) {
+void FindDialog::slotToggleSearchButton(QString text) {
   if (text.isEmpty() || text.isNull()) {
-    search->setEnabled(false);
+    m_search->setEnabled(false);
   } else {
-    search->setEnabled(true);
+    m_search->setEnabled(true);
   }
 }
