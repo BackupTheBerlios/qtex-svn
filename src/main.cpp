@@ -1,22 +1,26 @@
 #include <QApplication>
-#include <QLibraryInfo>
-#include <QLocale>
-#include <QString>
-#include <QTranslator>
+
 #include "mainwindow.h"
+#include "languagechooser.h"
 
 int main(int argc, char *argv[]) {
   QApplication app(argc, argv);
   
-  /* Übersetzungsdateien */
-  QString translatorFileName = QLatin1String("qt_de_DE"); 
-  QTranslator *translator = new QTranslator(&app); 
-  if (translator->load(translatorFileName, QLibraryInfo::location(QLibraryInfo::TranslationsPath))) 
-    app.installTranslator(translator);
-    
-  QTranslator *translator2 = new QTranslator(&app);
-  translator2->load("QteX_de");
-  app.installTranslator(translator2);
+  /* Sprache auswählen lassen */ 
+  QSettings settings("QteX", "QteX");
+  settings.beginGroup(QString("editor"));
+  
+  if (settings.contains(QString("language"))) {
+    QString suffix = settings.value(QString("language"), "en").toString();
+    LanguageChooser::setLanguage(suffix);
+  } else {
+    LanguageChooser *lang = new LanguageChooser(0);
+    if (lang->exec() == QDialog::Accepted) {
+      LanguageChooser::setLanguage(lang->getLanguageCode());
+    }
+  }
+  
+  settings.endGroup();
   
   /* Hauptfenster */
   MainWindow *wnd = new MainWindow();

@@ -3,7 +3,7 @@
 ReplaceDialog::ReplaceDialog(QWidget *parent) : QDialog(parent) {
   setModal(true);
   setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
-  setWindowTitle(trUtf8("Text ersetzen"));
+  setWindowTitle(tr("Replace"));
   hide();
   
   createDialog();
@@ -24,7 +24,7 @@ void ReplaceDialog::createDialog() {
   
   /* Suchtext */
   QLabel *labelSearchText = new QLabel(this);
-  labelSearchText->setText(trUtf8("Suchen nach:"));
+  labelSearchText->setText(tr("Search term:"));
   
   m_searchTextInput = new QLineEdit(this);
   m_searchTextInput->setFocus();
@@ -34,7 +34,7 @@ void ReplaceDialog::createDialog() {
   
   /* Ersatztext */
   QLabel *labelReplaceText = new QLabel(this);
-  labelReplaceText->setText(trUtf8("Ersetzen durch:"));
+  labelReplaceText->setText(tr("Replacement:"));
   
   m_replaceTextInput = new QLineEdit(this);
   m_replaceTextInput->setFocus();
@@ -43,39 +43,39 @@ void ReplaceDialog::createDialog() {
   
   /* Flags */
   QGroupBox *groupFlags = new QGroupBox(this);
-  groupFlags->setTitle(trUtf8("Einstellungen"));
+  groupFlags->setTitle(tr("Options"));
   QVBoxLayout *groupFlagsLayout = new QVBoxLayout(groupFlags);
   groupFlags->setLayout(groupFlagsLayout);
   
   m_caseSensitive = new QCheckBox(groupFlags);
   m_caseSensitive->setObjectName(QString("m_caseSensitive"));
-  m_caseSensitive->setText(trUtf8("Groß- und Kleinschreibung unterscheiden"));
+  m_caseSensitive->setText(tr("Case sensitive"));
   groupFlagsLayout->addWidget(m_caseSensitive);
   
   m_wholeWords = new QCheckBox(groupFlags);
   m_wholeWords->setObjectName(QString("m_wholeWord"));
-  m_wholeWords->setText(trUtf8("nur ganze Wörter"));
+  m_wholeWords->setText(tr("Whole words"));
   groupFlagsLayout->addWidget(m_wholeWords);
   
   m_backward = new QCheckBox(groupFlags);
   m_backward->setObjectName(QString("m_backward"));
-  m_backward->setText(trUtf8("rückwärts suchen"));
+  m_backward->setText(tr("Find backwards"));
   groupFlagsLayout->addWidget(m_backward);
   
   m_promptOnReplace = new QCheckBox(groupFlags);
   m_promptOnReplace->setObjectName(QString("m_promptOnReplace"));
-  m_promptOnReplace->setText(trUtf8("vor dem Ersetzen nachfragen"));
+  m_promptOnReplace->setText(tr("Prompt on replace"));
   groupFlagsLayout->addWidget(m_promptOnReplace);
   
   /* Buttons */
   m_replace = new QPushButton(this);
   m_replace->setEnabled(false);
   m_replace->setObjectName(QString("m_replace"));
-  m_replace->setText(trUtf8("Ersetzen"));
+  m_replace->setText(tr("Replace"));
   
   m_close = new QPushButton(this);
   m_close->setObjectName(QString("m_close"));
-  m_close->setText(trUtf8("Schließen"));
+  m_close->setText(tr("Close"));
   
   QHBoxLayout *buttonLayout = new QHBoxLayout();
   buttonLayout->addStretch();

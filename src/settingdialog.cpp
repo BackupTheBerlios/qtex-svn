@@ -1,12 +1,14 @@
 #include "settingdialog.h"
 
 SettingDialog::SettingDialog(QWidget *parent) : QDialog(parent) {
-  setWindowTitle(trUtf8("Einstellungen"));
+  setWindowTitle(tr("Settings"));
   
   createDialog();
   createConnections();
   
   loadSettings();
+  
+  m_languageChanged = false;
 }
 
 void SettingDialog::createDialog() {
@@ -27,11 +29,11 @@ void SettingDialog::createDialog() {
   
   m_cancel = new QPushButton(this);
   m_cancel->setObjectName(QString("m_cancel"));
-  m_cancel->setText(trUtf8("Abbrechen"));
+  m_cancel->setText(tr("Cancel"));
   
   m_save = new QPushButton(this);
   m_save->setObjectName(QString("m_save"));
-  m_save->setText(trUtf8("Speichern"));
+  m_save->setText(tr("Save"));
   
   m_hLayout->addStretch();
   m_hLayout->addWidget(m_save);
@@ -46,50 +48,72 @@ void SettingDialog::createDialog() {
   QVBoxLayout *editorLayout = new QVBoxLayout(editorTab);
   editorLayout->setObjectName(QString("editorLayout"));
   
+  QLabel *labelLanguages = new QLabel(m_tabs);
+  labelLanguages->setObjectName(QString("labelLanguage"));
+  labelLanguages->setText(tr("Language:"));
+  
+  m_languages = new QComboBox(m_tabs);
+  m_languages->setObjectName(QString("m_languages"));
+  m_languages->addItems(LanguageChooser::getLanguages());
+  QString suffix = "(" + LanguageChooser::getCurrentLanguageCode() + ")";
+  for (int i = 0; i < m_languages->count(); i++) {
+    if (m_languages->itemText(i).endsWith(suffix)) {
+      m_languages->setCurrentIndex(i);
+      break;
+    } else {
+      continue;
+    }
+  }
+  
   /* Schriftgruppe */
   QGridLayout *groupFontLayout = new QGridLayout();
   
   QGroupBox *groupFont = new QGroupBox(editorTab);
   groupFont->setObjectName(QString("groupFont"));
-  groupFont->setTitle(trUtf8("Schrift"));
+  groupFont->setTitle(tr("Font"));
   groupFont->setLayout(groupFontLayout);
   
   QLabel *labelFontName = new QLabel(groupFont);
   labelFontName->setObjectName(QString("labelFontName"));
-  labelFontName->setText(trUtf8("Schriftart:"));
+  labelFontName->setText(tr("Name:"));
   groupFontLayout->addWidget(labelFontName, 0, 0);
   
   m_fontName = new QFontComboBox(groupFont);
   m_fontName->setObjectName(QString("m_fontName"));
   groupFontLayout->addWidget(m_fontName, 0, 1);
   
+  QLabel *labelFontSize = new QLabel(groupFont);
+  labelFontSize->setObjectName(QString("labelFontName"));
+  labelFontSize->setText(tr("Size:"));
+  groupFontLayout->addWidget(labelFontSize, 1, 0);
+  
   m_fontSize = new QSpinBox(groupFont);
   m_fontSize->setObjectName(QString("m_fontSize"));
   m_fontSize->setSizePolicy(sizePolicy);
-  groupFontLayout->addWidget(m_fontSize, 0, 2);
+  groupFontLayout->addWidget(m_fontSize, 1, 1);
   
   QLabel *labelFontColor = new QLabel(groupFont);
   labelFontColor->setObjectName(QString("labelFontColor"));
-  labelFontColor->setText(trUtf8("Schriftfarbe:"));
-  groupFontLayout->addWidget(labelFontColor, 1, 0);
+  labelFontColor->setText(tr("Color:"));
+  groupFontLayout->addWidget(labelFontColor, 2, 0);
   
   m_buttonFontColor = new ColorChooseButton(groupFont);
   m_buttonFontColor->setIconSize(QSize(16, 16));
   m_buttonFontColor->setMaximumSize(QSize(24, 24));
   m_buttonFontColor->setObjectName(QString("m_buttonFontColor"));
-  groupFontLayout->addWidget(m_buttonFontColor, 1, 1);
+  groupFontLayout->addWidget(m_buttonFontColor, 2, 1);
   
   /* Tabulatorgruppe */
   QGridLayout *groupTabulatorLayout = new QGridLayout();
   
   QGroupBox *groupTabulator = new QGroupBox(editorTab);
   groupTabulator->setObjectName(QString("groupTabulator"));
-  groupTabulator->setTitle(trUtf8("Tabulator"));
+  groupTabulator->setTitle(tr("Tab"));
   groupTabulator->setLayout(groupTabulatorLayout);
   
   QLabel *labelTabulatorWidth = new QLabel(groupTabulator);
   labelTabulatorWidth->setObjectName(QString("labelTabulatorWidth"));
-  labelTabulatorWidth->setText(trUtf8("Tabulatorbreite:"));
+  labelTabulatorWidth->setText(tr("Tabwidth:"));
   groupTabulatorLayout->addWidget(labelTabulatorWidth, 0, 0);
   
   m_tabulatorWidth = new QSpinBox(groupTabulator);
@@ -97,6 +121,8 @@ void SettingDialog::createDialog() {
   groupTabulatorLayout->addWidget(m_tabulatorWidth, 0, 1);
   
   /* Alles zusammenbauen */
+  editorLayout->addWidget(labelLanguages);
+  editorLayout->addWidget(m_languages);
   editorLayout->addWidget(groupFont);
   editorLayout->addWidget(groupTabulator);
   editorLayout->addStretch();
@@ -109,7 +135,7 @@ void SettingDialog::createDialog() {
   QGridLayout *erstellenTableLayout = new QGridLayout();
   
   QLabel *latexCommandLabel = new QLabel(erstellenTab);
-  latexCommandLabel->setText(trUtf8("Latex:"));
+  latexCommandLabel->setText(tr("Latex:"));
   erstellenTableLayout->addWidget(latexCommandLabel, 0, 0);
   
   m_latexCommandInput = new QLineEdit(erstellenTab);
@@ -117,7 +143,7 @@ void SettingDialog::createDialog() {
   erstellenTableLayout->addWidget(m_latexCommandInput, 0, 1);
   
   QLabel *pdflatexCommandLabel = new QLabel(erstellenTab);
-  pdflatexCommandLabel->setText(trUtf8("Pdflatex:"));
+  pdflatexCommandLabel->setText(tr("Pdflatex:"));
   erstellenTableLayout->addWidget(pdflatexCommandLabel, 1, 0);
   
   m_pdflatexCommandInput = new QLineEdit(erstellenTab);
@@ -135,24 +161,24 @@ void SettingDialog::createDialog() {
   QGridLayout *tableLayout = new QGridLayout();
   
   QLabel *headerForeground = new QLabel(syntaxTab);
-  headerForeground->setText(trUtf8("Vordergrund"));
+  headerForeground->setText(tr("Foreground"));
   tableLayout->addWidget(headerForeground, 0, 1, Qt::AlignHCenter);
   
   QLabel *headerBackground = new QLabel(syntaxTab);
-  headerBackground->setText(trUtf8("Hintergrund"));
+  headerBackground->setText(tr("Background"));
   tableLayout->addWidget(headerBackground, 0, 2, Qt::AlignHCenter);
   
   QLabel *headerBold = new QLabel(syntaxTab);
-  headerBold->setText(trUtf8("fett"));
+  headerBold->setText(tr("bold"));
   tableLayout->addWidget(headerBold, 0, 3, Qt::AlignHCenter);
   
   QLabel *headerItalic = new QLabel(syntaxTab);
-  headerItalic->setText(trUtf8("kursiv"));
+  headerItalic->setText(tr("italic"));
   tableLayout->addWidget(headerItalic, 0, 4, Qt::AlignHCenter);
   
   /* erste Zeile */
   QLabel *commentLabel = new QLabel(syntaxTab);
-  commentLabel->setText(trUtf8("Kommentare:"));
+  commentLabel->setText(tr("Commentary:"));
   tableLayout->addWidget(commentLabel, 1, 0);
   
   m_buttonCommentForeground = new ColorChooseButton(syntaxTab);
@@ -177,7 +203,7 @@ void SettingDialog::createDialog() {
   
   /* zweite Zeile */
   QLabel *latexLabel = new QLabel(syntaxTab);
-  latexLabel->setText(trUtf8("Latex-Kommandos:"));
+  latexLabel->setText(tr("Latexcommand:"));
   tableLayout->addWidget(latexLabel, 2, 0);
   
   m_buttonLatexForeground = new ColorChooseButton(syntaxTab);
@@ -202,7 +228,7 @@ void SettingDialog::createDialog() {
   
   /* dritte Zeile */
   QLabel *mathLabel = new QLabel(syntaxTab);
-  mathLabel->setText(trUtf8("Mathemodus:"));
+  mathLabel->setText(tr("Mathmode:"));
   tableLayout->addWidget(mathLabel, 3, 0);
   
   m_buttonMathForeground = new ColorChooseButton(syntaxTab);
@@ -229,18 +255,23 @@ void SettingDialog::createDialog() {
   syntaxLayout->addStretch();
   
   
-  m_tabs->addTab(editorTab, trUtf8("Editor"));
-  m_tabs->addTab(erstellenTab, trUtf8("Erstellen"));
-  m_tabs->addTab(syntaxTab, trUtf8("Syntax Highlighting"));
+  m_tabs->addTab(editorTab, tr("Editor"));
+  m_tabs->addTab(erstellenTab, tr("Build"));
+  m_tabs->addTab(syntaxTab, tr("Syntax Highlighting"));
 }
 
 void SettingDialog::createConnections() {
   connect(m_cancel, SIGNAL(clicked()), this, SLOT(reject()));
   connect(m_save, SIGNAL(clicked()), this, SLOT(slotSaveSettings()));
+  connect(m_languages, SIGNAL(currentIndexChanged(int)), this, SLOT(slotLanguageChanged()));
 }
 
 void SettingDialog::loadSettings() {
   QSettings settings("QteX", "QteX");
+  
+  settings.beginGroup(QString("editor"));
+  //m_languages->setCurrentText(MainWindow::langua)
+  settings.endGroup();
   
   /* Schrifteinstellungen laden */
   settings.beginGroup(QString("font"));
@@ -313,9 +344,23 @@ void SettingDialog::loadSettings() {
   settings.endGroup();
 }
 
+void SettingDialog::slotLanguageChanged() {
+  if (!m_languageChanged) {
+    QMessageBox::information(this, tr("Language"), tr("You need to restart in order to use a new language."));
+  }
+  
+  m_languageChanged = true;
+}
+
 void SettingDialog::slotSaveSettings() {
   QColor fontColor = m_buttonFontColor->getColor();
   QSettings settings("QteX", "QteX");
+  
+  settings.beginGroup(QString("editor"));
+  QString lang = m_languages->currentText();
+  lang = lang.mid(lang.lastIndexOf(")") - 2, 2);
+  settings.setValue(QString("language"), lang);
+  settings.endGroup();
   
   /* Schrifteinstellungen */
   settings.beginGroup(QString("font"));

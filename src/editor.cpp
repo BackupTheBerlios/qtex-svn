@@ -79,26 +79,26 @@ bool Editor::find(QString exp, QTextDocument::FindFlags flags) {
   
   if (flags & QTextDocument::FindBackward) {
     if (cursorPos < toPlainText().length()) {
-      int ret = QMessageBox::question(0, trUtf8("Text suchen"), trUtf8("Der Anfang des Textes wurde erreicht. Suche am Ende fortsetzen?"), QMessageBox::Yes | QMessageBox::No);
+      int ret = QMessageBox::question(0, tr("Find"), tr("Beginning of document reached. Continue search from the end?"), QMessageBox::Yes | QMessageBox::No);
       if (ret == QMessageBox::Yes) {
         setCursorPos(toPlainText().length());
       } else {
         return false;
       }
     } else {
-      QMessageBox::information(this, trUtf8("Text suchen"), trUtf8("Der Suchbegriff '") + exp + trUtf8("' wurde nicht gefunden!"));
+      QMessageBox::information(this, tr("Find"), tr("Search term '") + exp + tr("' not found!"));
       return false;
     }
   } else {
     if (cursorPos > 0) {
-      int ret = QMessageBox::question(0, trUtf8("Text suchen"), trUtf8("Das Ende des Textes wurde erreicht. Suche am Anfang fortsetzen?"), QMessageBox::Yes | QMessageBox::No);
+      int ret = QMessageBox::question(0, tr("Find"), tr("End of document reached. Continue search from the beginning?"), QMessageBox::Yes | QMessageBox::No);
       if (ret == QMessageBox::Yes) {
         setCursorPos(0);
       } else {
         return false;
       }
     } else {
-      QMessageBox::information(this, trUtf8("Text suchen"), trUtf8("Der Suchbegriff '") + exp + trUtf8("' wurde nicht gefunden!"));
+      QMessageBox::information(this, tr("Find"), tr("Search term '") + exp + tr("' not found!"));
       return false;
     }
   }
@@ -203,14 +203,14 @@ bool Editor::maybeSave() {
     return true;
   }
   
-  QString title = trUtf8("Dokument schließen");  
-  QString text = trUtf8("Das Dokument '");
+  QString title = tr("Close document");  
+  QString text = tr("Document '");
   if (getFilename().isEmpty() || getFilename().isNull()) {
-    text += trUtf8("Unbenannt");
+    text += tr("Unnamed");
   } else {
     text += getFilename().mid(getFilename().lastIndexOf(QDir::separator()) + 1);
   }
-  text += trUtf8("' wurde geändert.\n\nMöchten Sie die Änderungen speichern oder verwerfen?");
+  text += tr("' has changed.\n\nWhat do you want to do?");
   
   int ret = QMessageBox::question(this, title, text, QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel, QMessageBox::Save);
   if (ret == QMessageBox::Cancel) {
@@ -232,7 +232,7 @@ bool Editor::openDocument(QString filename) {
   if (filename.isEmpty() || filename.isNull()) {
     /* Letzten Pfad laden */
     QString path = settings.value(QString("openPath"), QDir::homePath()).toString();
-    filename = QFileDialog::getOpenFileName(this->parentWidget(), trUtf8("Datei öffnen"), path);
+    filename = QFileDialog::getOpenFileName(this->parentWidget(), tr("Open file"), path);
   }
   
   if (filename.isEmpty() || filename.isNull()) {
@@ -245,25 +245,25 @@ bool Editor::openDocument(QString filename) {
   
   QFile file(filename);
   if (!file.exists()) {
-    QMessageBox::critical(this, trUtf8("Fehler"), trUtf8("Die angeforderte Datei existiert nicht!"));
+    QMessageBox::critical(this, tr("Error"), tr("Choosen file does not exist!"));
     return false;
   }
   
   if (!file.open(QIODevice::ReadOnly)) {
-    QMessageBox::critical(this, trUtf8("Fehler"), trUtf8("Die angeforderte Datei konnte nicht geöffnet werden!"));
+    QMessageBox::critical(this, tr("Error"), tr("Choosen file could not be opened!"));
     return false;
   }
   
-  QString allData;
+  QTextCodec *codec = QTextCodec::codecForName("ISO 8859-1");
+  QByteArray tmp;
+
   while (!file.atEnd()) {
-    QByteArray line = file.readLine();
-    allData += QString::fromLatin1(line);
+    tmp.append(file.readLine());
   }
-  
   file.close();
   
   setFilename(filename);
-  setText(allData);
+  setText(codec->toUnicode(tmp));
   
   setChanged(false);
   
@@ -273,16 +273,15 @@ bool Editor::openDocument(QString filename) {
 void Editor::replace(QString exp, QString rep, QTextDocument::FindFlags flags, bool bPromptOnReplace) {
   QMessageBox prompt;
   prompt.setIcon(QMessageBox::Question);
-  prompt.setWindowTitle(tr("Text ersetzen"));
-  prompt.setText(trUtf8("Der Suchbegriff wurde gefunden. Was wollen Sie tun?"));
-  prompt.addButton(trUtf8("Ersetzen"), QMessageBox::ActionRole);
-  QPushButton *replaceAll = prompt.addButton(trUtf8("Alle ersetzen"), QMessageBox::ActionRole);
-  QPushButton *findNext = prompt.addButton(trUtf8("Weitersuchen"), QMessageBox::ActionRole);
+  prompt.setWindowTitle(tr("Replace"));
+  prompt.setText(tr("Search term found. What do you want to do?"));
+  QPushButton *replace = prompt.addButton(tr("Replace"), QMessageBox::ActionRole);
+  QPushButton *replaceAll = prompt.addButton(tr("Replace all"), QMessageBox::ActionRole);
+  QPushButton *findNext = prompt.addButton(tr("Find next"), QMessageBox::ActionRole);
   QPushButton *close = prompt.addButton(QMessageBox::Close);
   
   int count = 0;
   while (find(exp, flags)) {
-    count++;
     if (bPromptOnReplace) {
       prompt.exec();
       QAbstractButton *clickedButton = prompt.clickedButton();
@@ -290,9 +289,14 @@ void Editor::replace(QString exp, QString rep, QTextDocument::FindFlags flags, b
         break;
       } else if (clickedButton == (QAbstractButton*)findNext) {
         continue;
+      } else if (clickedButton == (QAbstractButton*)replace) {
+        count++;
       } else if (clickedButton == (QAbstractButton*)replaceAll) {
+        count++;
         bPromptOnReplace = false;
       }
+    } else {
+      count++;
     }
     
     /* Ersetzung durchführen */
@@ -300,7 +304,7 @@ void Editor::replace(QString exp, QString rep, QTextDocument::FindFlags flags, b
     this->textCursor().insertText(rep);
   }
   
-  QMessageBox::information(0, tr("Text ersetzen"), tr("Es wurden ") + QString::number(count) + trUtf8(" Ersetzungen durchgeführt."));
+  QMessageBox::information(0, tr("Replace"), QString::number(count) + tr(" replacement(s) made."));
 }
 
 /*
@@ -317,7 +321,7 @@ bool Editor::save() {
   /* Die Datei muss schreibbar sein */
   QFile file(getFilename());
   if (!file.open(QIODevice::WriteOnly)) {
-    QMessageBox::critical(this, trUtf8("Fehler"), trUtf8("Die aktuelle Datei ist nicht schreibbar!"));
+    QMessageBox::critical(this, tr("Error"), tr("Choosen file is not writeable!"));
     return false;
   }
   
@@ -326,7 +330,7 @@ bool Editor::save() {
   
   /* Versuchen, die Daten zu schreiben */
   if (file.write(data) == -1) {
-    QMessageBox::critical(this, trUtf8("Fehler"), trUtf8("Der Schreibvorgang für die aktuelle Datei war nicht erfolgreich!"));
+    QMessageBox::critical(this, tr("Error"), tr("Write operation for choosen file not successful!"));
     return false;
   }
   
@@ -349,7 +353,7 @@ bool Editor::saveAs() {
   
   while (true) {
     /* Zunaechst einen Dateinamen holen */
-    QFileDialog dlg(this->parentWidget(), trUtf8("Datei speichern"), path);
+    QFileDialog dlg(this->parentWidget(), tr("Save file"), path);
     dlg.setAcceptMode(QFileDialog::AcceptSave);
     dlg.setConfirmOverwrite(false);
     
@@ -372,12 +376,12 @@ bool Editor::saveAs() {
     
     /* Wurde eine andere, bereits existierende Datei gewählt? Dann nachfragen */
     if (temp.exists() && m_filename != filename) {
-      QString text("Eine Datei namens '");
+      QString text = tr("File '");
       text += filename.mid(filename.lastIndexOf(QDir::separator()) + 1);
-      text += trUtf8("' existiert bereits. Überschreiben?");
+      text += tr("' already exists. Overwrite?");
       
       /* Überschreiben? Wenn ja: raus aus der Schleife. Sonst von vorne */
-      int ret = QMessageBox::question(this, trUtf8("Datei speichern"), text, QMessageBox::Yes | QMessageBox::No);
+      int ret = QMessageBox::question(this, tr("Save file"), text, QMessageBox::Yes | QMessageBox::No);
       if (ret == QMessageBox::Yes) {
         break;
       } else {
@@ -398,7 +402,7 @@ bool Editor::saveAs() {
   /* Die Datei muss schreibbar sein */
   QFile file(filename);
   if (!file.open(QIODevice::WriteOnly)) {
-    QMessageBox::critical(this, trUtf8("Fehler"), trUtf8("Die aktuelle Datei ist nicht schreibbar!"));
+    QMessageBox::critical(this, tr("Error"), tr("Choosen file is not writeable!"));
     return false;
   }
   
@@ -409,7 +413,7 @@ bool Editor::saveAs() {
   
   /* Versuchen, die Daten zu schreiben */
   if (file.write(data) == -1) {
-    QMessageBox::critical(this, trUtf8("Fehler"), trUtf8("Der Schreibvorgang für die aktuelle Datei war nicht erfolgreich!"));
+    QMessageBox::critical(this, tr("Error"), tr("Write operation for choosen file not successful!"));
     return false;
   }
   
@@ -456,7 +460,7 @@ void Editor::slotCursorPositionChanged() {
   int line = text.count(QString("\n")) + 1;
   int col = index - lastIndex;
   
-  emit signalCursorPositionChanged(trUtf8("Zeile ") + QString::number(line) + trUtf8(", Spalte ") + QString::number(col)); 
+  emit signalCursorPositionChanged(tr("Line ") + QString::number(line) + tr(", column ") + QString::number(col)); 
 }
 
 void Editor::slotRedoAvailable(bool canRedo) {

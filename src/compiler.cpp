@@ -44,7 +44,7 @@ void Compiler::checkEnvironment() {
     return;
   }
   
-  QMessageBox::critical(0, trUtf8("Fehler"), trUtf8("Folgende Programme wurden in der aktuellen Umgebung nicht gefunden:\n\n") + missingPrograms + trUtf8("\nBitte tragen Sie die exakten Pfade in den Einstellungen nach!"));
+  QMessageBox::critical(0, tr("Error"), tr("The following programs were not found in the current environment:\n\n") + missingPrograms + tr("\nPlease enter the paths in the settings!"));
 }
 
 void Compiler::compileLatex(QString filename) {
@@ -92,9 +92,9 @@ void Compiler::run() {
 
 void Compiler::slotCommandNotFound() {
   terminate();
-  emit signalOutputReceived(trUtf8("Befehl nicht gefunden: ") + m_command);
+  emit signalOutputReceived(tr("Command not found: ") + m_command);
   
-  QString title = trUtf8("Befehl nicht gefunden");
-  QString message = trUtf8("Der Befehl '") + m_command + trUtf8("' wurde nicht gefunden! Bitte setzen Sie in den Einstellungen den richtigen Pfad!");
+  QString title = tr("Command not found");
+  QString message = tr("The command '") + m_command + tr("' was not found! Plase enter the correct path in the settings!");
   QMessageBox::critical(0, title, message);
 }

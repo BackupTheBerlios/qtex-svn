@@ -4,7 +4,7 @@
 
 MainWindow::MainWindow() : QMainWindow() {
   setWindowIcon(QIcon(":/images/qtexlogo.png"));
-  setWindowTitle(trUtf8("QteX"));
+  setWindowTitle(tr("QteX"));
   
   createMenus();
   createStatusbar();
@@ -78,23 +78,23 @@ void MainWindow::createMenus() {
   /* Menu 'Datei' einrichten */
   m_menuFile = new QMenu(m_menubar);
   m_menuFile->setObjectName(QString("m_menuFile"));
-  m_menuFile->setTitle(trUtf8("&Datei"));
+  m_menuFile->setTitle(tr("&File"));
   
   m_actionNew = new QAction(this);
   m_actionNew->setIcon(QIcon(":/images/filenew.png"));
   m_actionNew->setObjectName(QString("m_actionNew"));
   m_actionNew->setShortcut(tr("Ctrl+N"));
-  m_actionNew->setText(trUtf8("&Neu"));
+  m_actionNew->setText(tr("&New"));
   
   m_actionOpen = new QAction(this);
   m_actionOpen->setIcon(QIcon(":/images/fileopen.png"));
   m_actionOpen->setObjectName(QString("m_actionOpen"));
   m_actionOpen->setShortcut(tr("Ctrl+O"));
-  m_actionOpen->setText(trUtf8("Ö&ffnen..."));
+  m_actionOpen->setText(tr("&Open..."));
   
   m_actionRecentlyOpen = new QAction(this);
   m_actionRecentlyOpen->setObjectName(QString("m_actionRecentlyOpen"));
-  m_actionRecentlyOpen->setText(trUtf8("&Zuletzt geöffnet"));
+  m_actionRecentlyOpen->setText(tr("&Recently open"));
   
   // Untermenü für die letzten Dateien
   m_menuRecentlyOpen = new QMenu(m_menubar);
@@ -106,35 +106,35 @@ void MainWindow::createMenus() {
   m_actionSave->setIcon(QIcon(":/images/filesave.png"));
   m_actionSave->setObjectName(QString("m_actionSave"));
   m_actionSave->setShortcut(tr("Ctrl+S"));
-  m_actionSave->setText(trUtf8("&Speichern"));
+  m_actionSave->setText(tr("&Save"));
   
   m_actionSaveAs = new QAction(this);
   m_actionSaveAs->setEnabled(false);
   m_actionSaveAs->setIcon(QIcon(":/images/filesaveas.png"));
   m_actionSaveAs->setObjectName(QString("m_actionSaveAs"));
-  m_actionSaveAs->setText(trUtf8("Speichern &unter..."));
+  m_actionSaveAs->setText(tr("Save &as..."));
   
   m_actionSaveAll = new QAction(this);
   m_actionSaveAll->setEnabled(false);
   m_actionSaveAll->setIcon(QIcon(":/images/filesaveall.png"));
   m_actionSaveAll->setObjectName(QString("m_actionSaveAll"));
-  m_actionSaveAll->setText(trUtf8("&Alle speichern"));
+  m_actionSaveAll->setText(tr("Save a&ll"));
   
   m_actionClose = new QAction(this);
   m_actionClose->setEnabled(false);
   m_actionClose->setIcon(QIcon(":/images/fileclose.png"));
   m_actionClose->setObjectName(QString("m_actionClose"));
-  m_actionClose->setText(trUtf8("Schl&ießen"));
+  m_actionClose->setText(tr("&Close"));
   
   m_actionCloseAll = new QAction(this);
   m_actionCloseAll->setEnabled(false);
   m_actionCloseAll->setObjectName(QString("m_actionCloseAll"));
-  m_actionCloseAll->setText(trUtf8("Alle schließen"));
+  m_actionCloseAll->setText(tr("Close All"));
   
   m_actionQuit = new QAction(this);
   m_actionQuit->setObjectName(QString("m_actionQuit"));
-  m_actionQuit->setShortcut(tr("Ctrl+B"));
-  m_actionQuit->setText(trUtf8("&Beenden"));
+  m_actionQuit->setShortcut(tr("Ctrl+Q"));
+  m_actionQuit->setText(tr("&Quit"));
   
   m_menuFile->addAction(m_actionNew);
   m_menuFile->addAction(m_actionOpen);
@@ -152,64 +152,64 @@ void MainWindow::createMenus() {
   /* Menu 'Bearbeiten' einrichten */
   m_menuEdit = new QMenu(m_menubar);
   m_menuEdit->setObjectName(QString("m_menuEdit"));
-  m_menuEdit->setTitle(trUtf8("&Bearbeiten"));
+  m_menuEdit->setTitle(tr("&Edit"));
   
   m_actionUndo = new QAction(this);
   m_actionUndo->setEnabled(false);
   m_actionUndo->setIcon(QIcon(":/images/undo.png"));
   m_actionUndo->setObjectName(QString("m_actionUndo"));
   m_actionUndo->setShortcut(tr("Ctrl+Z"));
-  m_actionUndo->setText(trUtf8("&Rückgängig"));
+  m_actionUndo->setText(tr("&Undo"));
   
   m_actionRedo = new QAction(this);
   m_actionRedo->setEnabled(false);
   m_actionRedo->setIcon(QIcon(":/images/redo.png"));
   m_actionRedo->setObjectName(QString("m_actionRedo"));
   m_actionRedo->setShortcut(tr("Ctrl+Shift+Z"));
-  m_actionRedo->setText(trUtf8("&Wiederherstellen"));
+  m_actionRedo->setText(tr("&Redo"));
   
   m_actionCut = new QAction(this);
   m_actionCut->setIcon(QIcon(":/images/editcut.png"));
   m_actionCut->setObjectName(QString("m_actionCut"));
   m_actionCut->setShortcut(tr("Ctrl+X"));
-  m_actionCut->setText(trUtf8("&Ausschneiden"));
+  m_actionCut->setText(tr("Cu&t"));
   
   m_actionCopy = new QAction(this);
   m_actionCopy->setIcon(QIcon(":/images/editcopy.png"));
   m_actionCopy->setObjectName(QString("m_actionCopy"));
   m_actionCopy->setShortcut(tr("Ctrl+C"));
-  m_actionCopy->setText(trUtf8("&Kopieren"));
+  m_actionCopy->setText(tr("&Copy"));
   
   m_actionPaste = new QAction(this);
   m_actionPaste->setIcon(QIcon(":/images/editpaste.png"));
   m_actionPaste->setObjectName(QString("m_actionPaste"));
   m_actionPaste->setShortcut(tr("Ctrl+V"));
-  m_actionPaste->setText(trUtf8("&Einfügen"));
+  m_actionPaste->setText(tr("&Paste"));
   
   m_actionFind = new QAction(this);
   m_actionFind->setIcon(QIcon(":/images/find.png"));
   m_actionFind->setObjectName(QString("m_actionFind"));
   m_actionFind->setShortcut(tr("Ctrl+F"));
-  m_actionFind->setText(trUtf8("&Suchen..."));
+  m_actionFind->setText(tr("&Find..."));
   
   m_actionFindNext = new QAction(this);
   m_actionFindNext->setObjectName(QString("m_actionFindNext"));
   m_actionFindNext->setShortcut(tr("F3"));
-  m_actionFindNext->setText(trUtf8("&Weitersuchen"));
+  m_actionFindNext->setText(tr("Find &next"));
   
   m_actionFindPrevious = new QAction(this);
   m_actionFindPrevious->setObjectName(QString("m_actionFindPrevious"));
   m_actionFindPrevious->setShortcut(tr("Shift+F3"));
-  m_actionFindPrevious->setText(trUtf8("&Frühere suchen"));
+  m_actionFindPrevious->setText(tr("Find pr&evious"));
   
   m_actionReplace = new QAction(this);
   m_actionReplace->setObjectName(QString("m_actionReplace"));
   m_actionReplace->setShortcut(tr("Ctrl+R"));
-  m_actionReplace->setText(tr("&Ersetzen"));
+  m_actionReplace->setText(tr("&Replace..."));
   
   m_actionSettings = new QAction(this);
   m_actionSettings->setObjectName(QString("m_actionSettings"));
-  m_actionSettings->setText(trUtf8("Ei&nstellungen"));
+  m_actionSettings->setText(tr("&Settings..."));
   
   m_menuEdit->addAction(m_actionUndo);
   m_menuEdit->addAction(m_actionRedo);
@@ -228,19 +228,19 @@ void MainWindow::createMenus() {
   /* Menu 'Erstellen' einrichten */
   m_menuBuild = new QMenu(m_menubar);
   m_menuBuild->setObjectName(QString("m_menuBuild"));
-  m_menuBuild->setTitle(trUtf8("Erstellen"));
+  m_menuBuild->setTitle(tr("&Build"));
   
   m_actionCompileLatex = new QAction(this);
   m_actionCompileLatex->setIcon(QIcon(":/images/latex.png"));
   m_actionCompileLatex->setObjectName(QString("m_actionCompileLatex"));
   m_actionCompileLatex->setShortcut(tr("Alt+1"));
-  m_actionCompileLatex->setText(trUtf8("&Latex"));
+  m_actionCompileLatex->setText(tr("&Latex"));
   
   m_actionCompilePdflatex = new QAction(this);
   m_actionCompilePdflatex->setIcon(QIcon(":/images/pdflatex.png"));
   m_actionCompilePdflatex->setObjectName(QString("m_actionCompilePdflatex"));
   m_actionCompilePdflatex->setShortcut(tr("Alt+2"));
-  m_actionCompilePdflatex->setText(trUtf8("&PdfLatex"));
+  m_actionCompilePdflatex->setText(tr("&PdfLatex"));
   
   m_menuBuild->addAction(m_actionCompileLatex);
   m_menuBuild->addAction(m_actionCompilePdflatex);
@@ -266,7 +266,7 @@ void MainWindow::createStatusbar() {
  */
 void MainWindow::createToolbars() {
   /* Datei */
-  m_toolbarFile = new QToolBar(trUtf8("Datei"), this);
+  m_toolbarFile = new QToolBar(tr("File"), this);
   m_toolbarFile->setObjectName(QString("m_toolbarFile"));
   this->addToolBar(Qt::TopToolBarArea, m_toolbarFile);
   
@@ -278,7 +278,7 @@ void MainWindow::createToolbars() {
   m_toolbarFile->addAction(m_actionClose);
   
   /* Bearbeiten */
-  m_toolbarEdit = new QToolBar(trUtf8("Bearbeiten"), this);
+  m_toolbarEdit = new QToolBar(tr("Edit"), this);
   m_toolbarEdit->setObjectName(QString("m_toolbarEdit"));
   this->addToolBar(Qt::TopToolBarArea, m_toolbarEdit);
   
@@ -290,7 +290,7 @@ void MainWindow::createToolbars() {
   m_toolbarEdit->addAction(m_actionFind);
   
   /* Kompilierwerkzeuge */
-  m_toolbarBuild = new QToolBar(trUtf8("Erstellen"), this);
+  m_toolbarBuild = new QToolBar(tr("Build"), this);
   m_toolbarBuild->setObjectName(QString("m_toolbarBuild"));
   this->addToolBar(Qt::TopToolBarArea, m_toolbarBuild);
   
@@ -346,10 +346,10 @@ void MainWindow::createWorkspace() {
   /* Seiten in die Toolbox einfuegen */
   m_page = new QWidget();
   m_page->setObjectName(QString("m_page"));
-  m_toolbox->addItem(m_page, trUtf8("Seite 1"));
+  m_toolbox->addItem(m_page, tr("Page 1"));
   m_page2 = new QWidget();
   m_page2->setObjectName(QString("m_page_2"));
-  m_toolbox->addItem(m_page2, trUtf8("Seite 2"));
+  m_toolbox->addItem(m_page2, tr("Page 2"));
   m_toolbox->setCurrentIndex(0);
   
   /* Einrichten des Tab */
@@ -615,7 +615,7 @@ void MainWindow::slotFindPrevious() {
  */
 void MainWindow::slotNewDocument() {
   m_newFileCount++;
-  QString filename = trUtf8("Unbenannt") + QString::number(m_newFileCount);
+  QString filename = tr("Unnamed") + QString::number(m_newFileCount);
   
   /* Eingabefeld einrichten */
   Editor *input = new Editor();
@@ -716,7 +716,7 @@ void MainWindow::slotReconnectTab(int newIndex) {
   m_actionCut->setEnabled(curInput->getCopy());
   m_actionCopy->setEnabled(curInput->getCopy());
   
-  m_statusbar->showMessage(trUtf8("Zeile 1, Spalte 1"));
+  m_statusbar->showMessage(tr("Line 1, Column 1"));
 }
 
 void MainWindow::slotReplace() {

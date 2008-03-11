@@ -2,9 +2,11 @@
 #define __MAINWINDOW_H__
 
 #include <QAction>
+#include <QApplication>
 #include <QCloseEvent>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QLibraryInfo>
 #include <QList>
 #include <QMainWindow>
 #include <QMenu>
@@ -19,6 +21,7 @@
 #include <QToolBar>
 #include <QToolBox>
 #include <QToolButton>
+#include <QTranslator>
 #include <QWidget>
 
 #include "compiler.h"

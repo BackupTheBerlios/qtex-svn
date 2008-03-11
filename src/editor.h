@@ -20,6 +20,7 @@
 #include <QRectF>
 #include <QScrollBar>
 #include <QSettings>
+#include <QTextCodec>
 #include <QTextEdit>
 #include <QTextLayout>
 
