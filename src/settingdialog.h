@@ -28,6 +28,7 @@
 #include <QWidget>
 
 #include "colorchoosebutton.h"
+#include "compiler.h"
 #include "languagechooser.h"
 
 class SettingDialog : public QDialog 

@@ -11,6 +11,22 @@ Compiler::Compiler(QTextEdit *console) {
   connect(m_proc, SIGNAL(error(QProcess::ProcessError)), this, SLOT(slotCommandNotFound()));
 }
 
+bool Compiler::checkCommand(QString command) {
+  QProcess *p = new QProcess();
+  p->setEnvironment(QProcess::systemEnvironment());
+  p->start(command, QStringList("-version"));
+  p->waitForFinished(1000);
+  
+  bool retVal = true;
+  if (p->error() == QProcess::FailedToStart) {
+    QMessageBox::critical(0, tr("Error"), tr("The command '") + command + tr("' was not found in the current environment! Please enter a corrent path in the settings!"));
+    retVal = false;
+  }
+  p->terminate();
+  
+  return retVal;
+}
+
 void Compiler::checkEnvironment() {
   QSettings settings("QteX", "QteX");
   settings.beginGroup(QString("compiler"));

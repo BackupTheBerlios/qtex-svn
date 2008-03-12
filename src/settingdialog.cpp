@@ -353,6 +353,16 @@ void SettingDialog::slotLanguageChanged() {
 }
 
 void SettingDialog::slotSaveSettings() {
+  QString latex = m_latexCommandInput->text();
+  if (!Compiler::checkCommand(latex)) {
+    return;
+  }
+  
+  QString pdflatex = m_pdflatexCommandInput->text();
+  if (!Compiler::checkCommand(pdflatex)) {
+    return;
+  }
+  
   QColor fontColor = m_buttonFontColor->getColor();
   QSettings settings("QteX", "QteX");
   
@@ -376,8 +386,8 @@ void SettingDialog::slotSaveSettings() {
   
   /* Erstellen-Einstellungen */
   settings.beginGroup(QString("compiler"));
-  settings.setValue(QString("latex"), m_latexCommandInput->text());
-  settings.setValue(QString("pdflatex"), m_pdflatexCommandInput->text());
+  settings.setValue(QString("latex"), latex);
+  settings.setValue(QString("pdflatex"), pdflatex);
   settings.endGroup();
   
   /* Synatxhighlighting-Einstellungen */

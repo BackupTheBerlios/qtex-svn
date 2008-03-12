@@ -17,6 +17,7 @@ class Compiler : QThread
   
   public:
     Compiler(QTextEdit *);
+    static bool checkCommand(QString);
     void checkEnvironment();
     void compileLatex(QString);
     void compilePdflatex(QString);

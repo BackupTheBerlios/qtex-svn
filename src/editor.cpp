@@ -20,7 +20,6 @@ Editor::Editor( QWidget * parent )
   setViewportMargins(m_lineMargin, 0, 0, 0);
   
 	m_highlighter = new Highlighter(document());
-  m_changeState = false;
   
   /* eigene Slots */
   connect(this, SIGNAL(textChanged()), this, SLOT(slotChanged()));
@@ -34,6 +33,8 @@ Editor::Editor( QWidget * parent )
   connect(this, SIGNAL(textChanged()), this, SLOT(update())); 
   
   loadSettings();
+  
+  setChanged(false);
 }
 
 /*
@@ -177,11 +178,10 @@ void Editor::loadSettings() {
     setTextColor(fontcolor);
     setTextCursor(tmp);
   }
-  setChanged(tmp);
   
   /* Tabulatoreigenschaften setzen */
   settings.beginGroup(QString("tabulator"));
-  int width = settings.value(QString("width"), 14).toInt();
+  int width = settings.value(QString("width"), 2).toInt();
   settings.endGroup();
   
   QFontMetrics fm(font());
@@ -190,6 +190,8 @@ void Editor::loadSettings() {
   /* Highlighting erneuern */
   m_highlighter->loadHighlighting();
   m_highlighter->rehighlight();
+  
+  setChanged(tmp);
 }
 
 /*
@@ -335,7 +337,7 @@ bool Editor::save() {
   }
   
   file.close();  
-  m_changeState = false;
+  setChanged(false);
   
   return true;
 }
@@ -418,7 +420,7 @@ bool Editor::saveAs() {
   }
   
   file.close();
-  m_changeState = false;
+  setChanged(false);
   
   return true;
 }
@@ -429,6 +431,7 @@ bool Editor::saveAs() {
  */
 void Editor::setChanged(bool changeState) {
   m_changeState = changeState;
+  emit signalContentChanged(this);
 }
 
 void Editor::setCursorPos(int pos) {

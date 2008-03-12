@@ -49,6 +49,7 @@ class Editor : public QTextEdit
     void setFilename(QString);
     
   signals:
+    void signalContentChanged(Editor *);
     void signalCursorPositionChanged(QString);
     
   private slots:

@@ -60,6 +60,9 @@ void MainWindow::createConnections() {
   
   connect(m_actionCompileLatex, SIGNAL(triggered()), this, SLOT(slotCompileLatex()));
   connect(m_actionCompilePdflatex, SIGNAL(triggered()), this, SLOT(slotCompilePdflatex()));
+  
+  connect(m_actionAbout, SIGNAL(triggered()), this, SLOT(slotAbout()));
+  connect(m_actionAboutQt, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
 
   /* Weitere Signale einrichten */
   connect(m_closeButton, SIGNAL(clicked()), this, SLOT(slotCloseCurrentTab()));
@@ -245,10 +248,27 @@ void MainWindow::createMenus() {
   m_menuBuild->addAction(m_actionCompileLatex);
   m_menuBuild->addAction(m_actionCompilePdflatex);
   
+  /* Menu 'About' einrichten */
+  m_menuAbout = new QMenu(m_menubar);
+  m_menuAbout->setObjectName(QString("m_menuAbout"));
+  m_menuAbout->setTitle(tr("&About"));
+  
+  m_actionAbout = new QAction(this);
+  m_actionAbout->setObjectName(QString("m_actionAbout"));
+  m_actionAbout->setText(tr("&About QteX..."));
+  
+  m_actionAboutQt = new QAction(this);
+  m_actionAboutQt->setObjectName(QString("m_actionAboutQt"));
+  m_actionAboutQt->setText(tr("About &Qt..."));
+  
+  m_menuAbout->addAction(m_actionAbout);
+  m_menuAbout->addAction(m_actionAboutQt);
+  
   /* Untermenus einfuegen */
   m_menubar->addAction(m_menuFile->menuAction());
   m_menubar->addAction(m_menuEdit->menuAction());
   m_menubar->addAction(m_menuBuild->menuAction());
+  m_menubar->addAction(m_menuAbout->menuAction());
 }
 
 /*
@@ -378,6 +398,43 @@ void MainWindow::createWorkspace() {
 }
 
 /*
+ * Führt die gewünschte Suche durch. Werte für type:
+ * 0 = find(), 1 = findNext(), 2 = findPrevious() 
+ */
+void MainWindow::find(int type) {
+  if (type < 0 || type > 2) {
+    return;
+  }
+  
+  Editor *curInput = getCurrentEditor();
+  if (curInput == 0) {
+    return;
+  }
+  
+  if (type == 0) {
+    if (m_findDialog->slotExec() == QDialog::Rejected) {
+      return;
+    }
+  } else { // type == 1 oder type == 2
+    QString str = m_findDialog->getSearchText();
+    if (str.isEmpty() || str.isNull()) {
+      if (m_findDialog->slotExec() == QDialog::Rejected) {
+        return;
+      }
+    }
+  }
+  
+  QString searchText = m_findDialog->getSearchText();
+  QTextDocument::FindFlags searchFlags = m_findDialog->getSearchFlags();
+  
+  if (type == 2) {
+    searchFlags ^= QTextDocument::FindBackward;
+  }
+  
+  curInput->find(searchText, searchFlags);
+}
+
+/*
  * Liefert den aktuell offenen Editor zurück oder 0, falls
  * noch keiner offen ist.
  */
@@ -421,7 +478,7 @@ void MainWindow::openDocument(QString filename) {
     m_tabs->setCurrentIndex(index);
     slotReconnectTab(index);
     
-    m_actionSave->setEnabled(true);
+    //m_actionSave->setEnabled(true);
     m_actionSaveAs->setEnabled(true);
     m_actionSaveAll->setEnabled(true);
     m_actionClose->setEnabled(true);
@@ -431,6 +488,11 @@ void MainWindow::openDocument(QString filename) {
     delete input;
     input = 0;
   }
+}
+
+void MainWindow::slotAbout() {
+  AboutDialog *dlg = new AboutDialog(this);
+  dlg->exec();
 }
 
 /*
@@ -531,6 +593,31 @@ void MainWindow::slotCompilePdflatex() {
   }
 }
 
+void MainWindow::slotContentChanged(Editor *curInput) {
+  if (curInput == 0) {
+    return;
+  }
+  
+  int index = m_tabs->indexOf(curInput);
+  if (index == -1) {
+    return;
+  }
+  
+  if (curInput->hasChanged()) {
+    m_actionSave->setEnabled(true);
+    QString str = m_tabs->tabText(index);
+    if (!str.startsWith(QString("* "))) {
+      m_tabs->setTabText(index, QString("* ") + str);
+    }
+  } else {
+    m_actionSave->setEnabled(false);
+    QString str = m_tabs->tabText(index);
+    if (str.startsWith(QString("* "))) {
+      m_tabs->setTabText(index, str.mid(2));
+    }
+  }
+}
+
 void MainWindow::slotCreateRecentFilesMenu() {
   QList<QAction*> tmp = m_menuRecentlyOpen->actions();
   for (int i = 0; i < tmp.size(); i++) {
@@ -554,57 +641,16 @@ void MainWindow::slotCreateRecentFilesMenu() {
   }
 }
 
-/*
- * Zeigt den Suchdialog an und sucht anschließend
- * nach dem ersten Treffer ab Cursorposition
- */
 void MainWindow::slotFind() {
-  Editor *curInput = getCurrentEditor();
-  if (curInput == 0) {
-    return;
-  }
-  
-  if (m_findDialog->slotExec() == QDialog::Rejected) {
-    return;
-  }
-  
-  curInput->find(m_findDialog->getSearchText(), m_findDialog->getSearchFlags());
+  find(0);
 }
 
 void MainWindow::slotFindNext() {
-  Editor *curInput = getCurrentEditor();
-  if (curInput == 0) {
-    return;
-  }
-  
-  QString searchText = m_findDialog->getSearchText();
-  QTextDocument::FindFlags searchFlags = m_findDialog->getSearchFlags();
-  
-  if (searchText.isEmpty() || searchText.isNull()) {
-    if (m_findDialog->slotExec() == QDialog::Rejected) {
-      return;
-    }
-  }
-  
-  curInput->find(m_findDialog->getSearchText(), m_findDialog->getSearchFlags());
+  find(1);
 }
 
 void MainWindow::slotFindPrevious() {
-  Editor *curInput = getCurrentEditor();
-  if (curInput == 0) {
-    return;
-  }
-  
-  QString searchText = m_findDialog->getSearchText();
-  QTextDocument::FindFlags searchFlags = m_findDialog->getSearchFlags() | QTextDocument::FindBackward;
-  
-  if (searchText.isEmpty() || searchText.isNull()) {
-    if (m_findDialog->slotExec() == QDialog::Rejected) {
-      return;
-    }
-  }
-  
-  curInput->find(m_findDialog->getSearchText(), m_findDialog->getSearchFlags() ^ QTextDocument::FindBackward);
+  find(2);
 }
 
 /*
@@ -627,7 +673,7 @@ void MainWindow::slotNewDocument() {
   m_tabs->setCurrentIndex(index);
   slotReconnectTab(index);
   
-  m_actionSave->setEnabled(true);
+  //m_actionSave->setEnabled(true);
   m_actionSaveAs->setEnabled(true);
   m_actionSaveAll->setEnabled(true);
   m_actionClose->setEnabled(true);
@@ -688,6 +734,7 @@ void MainWindow::slotReconnectTab(int newIndex) {
     
     disconnect(curInput, 0, m_actionUndo, 0);
     disconnect(curInput, 0, m_actionRedo, 0);
+    disconnect(curInput, SIGNAL(signalContentChanged(Editor *)), 0, 0);
   }
   
   /* Nun den neuen Editor laden */
@@ -697,6 +744,7 @@ void MainWindow::slotReconnectTab(int newIndex) {
   }
   
   /* Und für diesen alle wichtigen Verbindungen neu erzeugen */
+  connect(curInput, SIGNAL(signalContentChanged(Editor *)), this, SLOT(slotContentChanged(Editor *)));
   connect(curInput, SIGNAL(undoAvailable(bool)), m_actionUndo, SLOT(setEnabled(bool)));
   connect(curInput, SIGNAL(redoAvailable(bool)), m_actionRedo, SLOT(setEnabled(bool)));
   connect(curInput, SIGNAL(copyAvailable(bool)), m_actionCut, SLOT(setEnabled(bool)));

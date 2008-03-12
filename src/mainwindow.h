@@ -24,6 +24,7 @@
 #include <QTranslator>
 #include <QWidget>
 
+#include "aboutdialog.h"
 #include "compiler.h"
 #include "editor.h"
 #include "finddialog.h"
@@ -40,6 +41,7 @@ class MainWindow : public QMainWindow
     MainWindow();
     
   public slots:
+    void slotAbout();
     void slotCloseAllTabs();
     void slotCloseCurrentTab();
     void slotCompileLatex();
@@ -59,6 +61,9 @@ class MainWindow : public QMainWindow
     void slotSaveAs();
     void slotSettings();
     
+  private slots:
+    void slotContentChanged(Editor *);
+    
   private:
     void closeEvent(QCloseEvent *);
     void createConnections();
@@ -66,6 +71,7 @@ class MainWindow : public QMainWindow
     void createStatusbar();
     void createToolbars();
     void createWorkspace();
+    void find(int);
     Editor * getCurrentEditor();
     void loadSettings();
     void openDocument(QString);
@@ -81,10 +87,11 @@ class MainWindow : public QMainWindow
     QAction *m_actionFind, *m_actionFindNext, *m_actionFindPrevious, *m_actionReplace;
     QAction *m_actionSettings;
     QAction *m_actionCompileLatex, *m_actionCompilePdflatex;
+    QAction *m_actionAbout, *m_actionAboutQt;
     QHBoxLayout *m_hboxLayout;
     QLabel *m_cursorPosition;
     QList<Editor *> m_editorList;
-    QMenu *m_menuFile, *m_menuEdit, *m_menuRecentlyOpen, *m_menuBuild;
+    QMenu *m_menuFile, *m_menuEdit, *m_menuRecentlyOpen, *m_menuBuild, *m_menuAbout;
     QMenuBar *m_menubar;
     QSplitter *m_hSplitter, *m_vSplitter;
     QStatusBar *m_statusbar;
