@@ -1,13 +1,13 @@
 #include "compiler.h"
 
-Compiler::Compiler(QTextEdit *console) {
-  m_console = console;
+Compiler::Compiler(LogConsole *log) {
+  m_log = log;
   m_proc = new QProcess();
   
   qRegisterMetaType<QProcess::ProcessError>("QProcess::ProcessError");
   qRegisterMetaType<QProcess::ExitStatus>("QProcess::ExitStatus");
   
-  connect(this, SIGNAL(signalOutputReceived(QString)), m_console, SLOT(setText(QString)));
+  connect(this, SIGNAL(signalOutputReceived(QString, QString, int)), m_log, SLOT(parse(QString, QString, int)));
   connect(m_proc, SIGNAL(error(QProcess::ProcessError)), this, SLOT(slotCommandNotFound()));
 }
 
@@ -102,13 +102,12 @@ void Compiler::run() {
   
   QString allData = m_proc->readAll();
   if (!allData.isEmpty() && !allData.isNull()) {
-    emit signalOutputReceived(allData);
+    emit signalOutputReceived(m_command, allData, m_proc->exitCode());
   }
 }
 
 void Compiler::slotCommandNotFound() {
   terminate();
-  emit signalOutputReceived(tr("Command not found: ") + m_command);
   
   QString title = tr("Command not found");
   QString message = tr("The command '") + m_command + tr("' was not found! Plase enter the correct path in the settings!");

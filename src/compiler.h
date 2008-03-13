@@ -11,19 +11,21 @@
 #include <QTextEdit>
 #include <QThread>
 
+#include "logconsole.h"
+
 class Compiler : QThread
 {
   Q_OBJECT
   
   public:
-    Compiler(QTextEdit *);
+    Compiler(LogConsole *);
     static bool checkCommand(QString);
     void checkEnvironment();
     void compileLatex(QString);
     void compilePdflatex(QString);
     
   signals:
-    void signalOutputReceived(QString);
+    void signalOutputReceived(QString, QString, int);
     void signalError(QString);
     
   private slots:
@@ -33,10 +35,10 @@ class Compiler : QThread
     void compile(QString, QString, QStringList);
     void run();
      
+    LogConsole *m_log;
     QProcess *m_proc;
     QString m_path, m_command;
     QStringList m_arguments;
-    QTextEdit *m_console;
 };
 
 #endif

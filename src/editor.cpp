@@ -145,6 +145,7 @@ bool Editor::gotoLine(int line) {
   }
   
   setCursorPos(cursorPos);
+  setFocus();
   
   return true;
 }

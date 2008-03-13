@@ -672,6 +672,7 @@ void MainWindow::slotNewDocument() {
   
   m_tabs->setCurrentIndex(index);
   slotReconnectTab(index);
+  input->setChanged(true);
   
   //m_actionSave->setEnabled(true);
   m_actionSaveAs->setEnabled(true);
@@ -742,6 +743,8 @@ void MainWindow::slotReconnectTab(int newIndex) {
   if (curInput == 0) {
     return;
   }
+  
+  m_log->setCurrentEditor(curInput);
   
   /* Und für diesen alle wichtigen Verbindungen neu erzeugen */
   connect(curInput, SIGNAL(signalContentChanged(Editor *)), this, SLOT(slotContentChanged(Editor *)));
