@@ -28,6 +28,7 @@
 #include "compiler.h"
 #include "editor.h"
 #include "finddialog.h"
+#include "logconsole.h"
 #include "recentfileaction.h"
 #include "recentfilemanager.h"
 #include "replacedialog.h"
@@ -79,6 +80,7 @@ class MainWindow : public QMainWindow
     Compiler *m_compiler;
     FindDialog *m_findDialog;
     int m_newFileCount;
+    LogConsole *m_log;
     QAction *m_actionNew, *m_actionOpen, *m_actionRecentlyOpen;
     QAction *m_actionSave, *m_actionSaveAs, *m_actionSaveAll;
     QAction *m_actionClose, *m_actionCloseAll, *m_actionQuit;
@@ -95,7 +97,6 @@ class MainWindow : public QMainWindow
     QMenuBar *m_menubar;
     QSplitter *m_hSplitter, *m_vSplitter;
     QStatusBar *m_statusbar;
-    QTextEdit *m_output;
     QTabWidget *m_tabs;
     QToolBar *m_toolbarEdit, *m_toolbarFile, *m_toolbarBuild;
     QToolBox *m_toolbox;

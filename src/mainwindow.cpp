@@ -12,7 +12,7 @@ MainWindow::MainWindow() : QMainWindow() {
   createWorkspace();
   createConnections();
 
-  m_compiler = new Compiler(m_output);
+  m_compiler = new Compiler(m_log);
   m_compiler->checkEnvironment();
   
   m_findDialog = new FindDialog(this);
@@ -389,12 +389,12 @@ void MainWindow::createWorkspace() {
   m_tabs->setSizePolicy(sizePolicy2);
   
   /* Ausgabefeld fuer Compilermeldungen einrichten */
-  m_output = new QTextEdit(m_vSplitter);
-  m_output->setFont(QFont("monospace", 8));
-  m_output->setObjectName(QString("m_output"));
-  m_vSplitter->addWidget(m_output);
-  sizePolicy1.setHeightForWidth(m_output->sizePolicy().hasHeightForWidth());
-  m_output->setSizePolicy(sizePolicy1);
+  m_log = new LogConsole(m_vSplitter);
+  m_log->setFont(QFont("monospace", 8));
+  m_log->setObjectName(QString("m_log"));
+  m_vSplitter->addWidget(m_log);
+  sizePolicy1.setHeightForWidth(m_log->sizePolicy().hasHeightForWidth());
+  m_log->setSizePolicy(sizePolicy1);
 }
 
 /*
