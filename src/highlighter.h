@@ -15,6 +15,13 @@
 #include <QSyntaxHighlighter>
 #include <QTextCharFormat>
 
+#include <set>
+#include <utility> // pair
+
+#include "format.h"
+
+using namespace std;
+
 class QTextDocument;
 
 class Highlighter : public QSyntaxHighlighter
@@ -34,7 +41,8 @@ class Highlighter : public QSyntaxHighlighter
   		QRegExp expression;
   		QRegExp startExpression;
   		QRegExp endExpression;
-  		QTextCharFormat format;
+  		//QTextCharFormat format;
+		Format format;
   		int priority;
   		bool block;
   	};
@@ -44,11 +52,16 @@ class Highlighter : public QSyntaxHighlighter
   	{
   		int index;
   		int length;
-  		QTextCharFormat format;
+  		//QTextCharFormat format;
+		Format format;
   	};
     
-  	QTextCharFormat m_latexFormat, m_singleLineCommentFormat, m_mathModeFormat;
+  	//QTextCharFormat m_latexFormat, m_singleLineCommentFormat, m_mathModeFormat;
+	Format m_latexFormat, m_singleLineCommentFormat, m_mathModeFormat;
+	
     QVector<HighlightingRule> m_highlightingRules;
+	
+	void applyFormat(int,int,Format&);
 };
 
 #endif
