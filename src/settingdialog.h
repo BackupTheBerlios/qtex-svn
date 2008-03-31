@@ -27,6 +27,7 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
+#include "codecaction.h"
 #include "colorchoosebutton.h"
 #include "compiler.h"
 #include "languagechooser.h"
@@ -51,7 +52,7 @@ class SettingDialog : public QDialog
     QCheckBox *m_buttonCommentBold, *m_buttonCommentItalic;
     QCheckBox *m_buttonLatexBold, *m_buttonLatexItalic;
     QCheckBox *m_buttonMathBold, *m_buttonMathItalic;
-    QComboBox *m_languages;
+    QComboBox *m_codecs, *m_languages;
     QFontComboBox *m_fontName;
     QHBoxLayout *m_hLayout;
     QLineEdit *m_latexCommandInput, *m_pdflatexCommandInput;

@@ -9,7 +9,7 @@
 
 #include "editor.h"
 
-Editor::Editor( QWidget * parent )
+Editor::Editor( QWidget * parent, QTextCodec *codec )
 : QTextEdit(parent)
 {
   m_lineMargin = 60;
@@ -20,6 +20,17 @@ Editor::Editor( QWidget * parent )
   setViewportMargins(m_lineMargin, 0, 0, 0);
   
 	m_highlighter = new Highlighter(document());
+  
+  /* Startcodierung setzen */
+  if (codec == 0) {
+    QSettings settings("QteX", "QteX");
+    settings.beginGroup(QString("editor"));
+    QString codecName = settings.value(QString("defaultCodec"), QString("ISO 8859-1")).toString();
+    m_codec = QTextCodec::codecForName(codecName.toLatin1());
+    settings.endGroup();
+  } else {
+    m_codec = codec;
+  }
   
   /* eigene Slots */
   connect(this, SIGNAL(textChanged()), this, SLOT(slotChanged()));
@@ -257,16 +268,14 @@ bool Editor::openDocument(QString filename) {
     return false;
   }
   
-  QTextCodec *codec = QTextCodec::codecForName("ISO 8859-1");
-  QByteArray tmp;
-
+  QByteArray data;
   while (!file.atEnd()) {
-    tmp.append(file.readLine());
+    data.append(file.readLine());
   }
   file.close();
   
   setFilename(filename);
-  setText(codec->toUnicode(tmp));
+  setText(m_codec->toUnicode(data));
   
   setChanged(false);
   
@@ -329,7 +338,7 @@ bool Editor::save() {
   }
   
   /* Text holen und in char * konvertieren */
-  QByteArray data = toPlainText().toLatin1();
+  QByteArray data = m_codec->fromUnicode(toPlainText());
   
   /* Versuchen, die Daten zu schreiben */
   if (file.write(data) == -1) {
@@ -412,7 +421,7 @@ bool Editor::saveAs() {
   setFilename(filename);
   
   /* Text holen und nach char * konvertieren */
-  QByteArray data = toPlainText().toLatin1();
+  QByteArray data = m_codec->fromUnicode(toPlainText());
   
   /* Versuchen, die Daten zu schreiben */
   if (file.write(data) == -1) {
@@ -443,6 +452,19 @@ void Editor::setCursorPos(int pos) {
 
 void Editor::setFilename(QString filename) {
   m_filename = filename;
+}
+
+void Editor::slotChangeCodec(QTextCodec *codec) {
+  if (codec == 0) {
+    return;
+  }
+  
+  if (!maybeSave()) {
+    return;
+  }
+  
+  m_codec = codec;
+  openDocument(getFilename());
 }
 
 /*

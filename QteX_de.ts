@@ -15,6 +15,19 @@
     </message>
 </context>
 <context>
+    <name>CodecAction</name>
+    <message>
+        <location filename="src/codecaction.cpp" line="21"/>
+        <source>Western europe</source>
+        <translation>Westeuropa</translation>
+    </message>
+    <message>
+        <location filename="src/codecaction.cpp" line="21"/>
+        <source>Unicode</source>
+        <translation>Unicode</translation>
+    </message>
+</context>
+<context>
     <name>Compiler</name>
     <message>
         <location filename="src/compiler.cpp" line="63"/>
@@ -38,22 +51,17 @@ Please enter the paths in the settings!</source>
 Bitte tragen Sie die Pfade in den Einstellungen ein!</translation>
     </message>
     <message>
-        <location filename="src/compiler.cpp" line="111"/>
-        <source>Command not found: </source>
-        <translation>Befehl nicht gefunden: </translation>
-    </message>
-    <message>
-        <location filename="src/compiler.cpp" line="113"/>
+        <location filename="src/compiler.cpp" line="112"/>
         <source>Command not found</source>
         <translation>Befehl nicht gefunden</translation>
     </message>
     <message>
-        <location filename="src/compiler.cpp" line="114"/>
+        <location filename="src/compiler.cpp" line="113"/>
         <source>The command &apos;</source>
         <translation>Der Befehl &apos;</translation>
     </message>
     <message>
-        <location filename="src/compiler.cpp" line="114"/>
+        <location filename="src/compiler.cpp" line="113"/>
         <source>&apos; was not found! Plase enter the correct path in the settings!</source>
         <translation>&apos; wurde nicht gefunden! Bitte tragen Sie den korrekten Pfad in den Einstellungen ein!</translation>
     </message>
@@ -66,47 +74,47 @@ Bitte tragen Sie die Pfade in den Einstellungen ein!</translation>
 <context>
     <name>Editor</name>
     <message>
-        <location filename="src/editor.cpp" line="102"/>
+        <location filename="src/editor.cpp" line="113"/>
         <source>Find</source>
         <translation>Suchen</translation>
     </message>
     <message>
-        <location filename="src/editor.cpp" line="83"/>
+        <location filename="src/editor.cpp" line="94"/>
         <source>Beginning of document reached. Continue search from the end?</source>
         <translation>Der Anfang des Dokumentes wurde erreicht. Suche am Ende fortsetzen?</translation>
     </message>
     <message>
-        <location filename="src/editor.cpp" line="102"/>
+        <location filename="src/editor.cpp" line="113"/>
         <source>Search term &apos;</source>
         <translation>Der Suchbegriff &apos;</translation>
     </message>
     <message>
-        <location filename="src/editor.cpp" line="102"/>
+        <location filename="src/editor.cpp" line="113"/>
         <source>&apos; not found!</source>
         <translation>&apos; wurde nicht gefunden!</translation>
     </message>
     <message>
-        <location filename="src/editor.cpp" line="95"/>
+        <location filename="src/editor.cpp" line="106"/>
         <source>End of document reached. Continue search from the beginning?</source>
         <translation>Das Ende des Dokumentes wurde erreicht. Suche am Anfang fortsetzen?</translation>
     </message>
     <message>
-        <location filename="src/editor.cpp" line="208"/>
+        <location filename="src/editor.cpp" line="220"/>
         <source>Close document</source>
         <translation>Dokument schließen</translation>
     </message>
     <message>
-        <location filename="src/editor.cpp" line="209"/>
+        <location filename="src/editor.cpp" line="221"/>
         <source>Document &apos;</source>
         <translation>Das Dokument &apos;</translation>
     </message>
     <message>
-        <location filename="src/editor.cpp" line="211"/>
+        <location filename="src/editor.cpp" line="223"/>
         <source>Unnamed</source>
         <translation>Unbenannt</translation>
     </message>
     <message>
-        <location filename="src/editor.cpp" line="215"/>
+        <location filename="src/editor.cpp" line="227"/>
         <source>&apos; has changed.
 
 What do you want to do?</source>
@@ -115,82 +123,82 @@ What do you want to do?</source>
 Was möchten Sie tun?</translation>
     </message>
     <message>
-        <location filename="src/editor.cpp" line="237"/>
+        <location filename="src/editor.cpp" line="249"/>
         <source>Open file</source>
         <translation>Datei öffnen</translation>
     </message>
     <message>
-        <location filename="src/editor.cpp" line="418"/>
+        <location filename="src/editor.cpp" line="428"/>
         <source>Error</source>
         <translation>Fehler</translation>
     </message>
     <message>
-        <location filename="src/editor.cpp" line="250"/>
+        <location filename="src/editor.cpp" line="262"/>
         <source>Choosen file does not exist!</source>
         <translation>Die ausgewählte Datei existiert nicht!</translation>
     </message>
     <message>
-        <location filename="src/editor.cpp" line="255"/>
+        <location filename="src/editor.cpp" line="267"/>
         <source>Choosen file could not be opened!</source>
         <translation>Die ausgewählte Datei konnte nicht geöffnet werden!</translation>
     </message>
     <message>
-        <location filename="src/editor.cpp" line="309"/>
+        <location filename="src/editor.cpp" line="319"/>
         <source>Replace</source>
         <translation>Ersetzen</translation>
     </message>
     <message>
-        <location filename="src/editor.cpp" line="279"/>
+        <location filename="src/editor.cpp" line="289"/>
         <source>Search term found. What do you want to do?</source>
         <translation>Der Suchbegriff wurde gefunden. Was möchten Sie tun?</translation>
     </message>
     <message>
-        <location filename="src/editor.cpp" line="281"/>
+        <location filename="src/editor.cpp" line="291"/>
         <source>Replace all</source>
         <translation>Alle ersetzen</translation>
     </message>
     <message>
-        <location filename="src/editor.cpp" line="282"/>
+        <location filename="src/editor.cpp" line="292"/>
         <source>Find next</source>
         <translation>Weitersuchen</translation>
     </message>
     <message>
-        <location filename="src/editor.cpp" line="309"/>
+        <location filename="src/editor.cpp" line="319"/>
         <source> replacement(s) made.</source>
         <translation> Ersetzung(en) durchgeführt.</translation>
     </message>
     <message>
-        <location filename="src/editor.cpp" line="407"/>
+        <location filename="src/editor.cpp" line="417"/>
         <source>Choosen file is not writeable!</source>
         <translation>Die ausgewählte Datei ist nicht schreibbar!</translation>
     </message>
     <message>
-        <location filename="src/editor.cpp" line="418"/>
+        <location filename="src/editor.cpp" line="428"/>
         <source>Write operation for choosen file not successful!</source>
         <translation>Der Schreibvorgang für die ausgewählte Datei war nicht erfolgreich!</translation>
     </message>
     <message>
-        <location filename="src/editor.cpp" line="386"/>
+        <location filename="src/editor.cpp" line="396"/>
         <source>Save file</source>
         <translation>Datei speichern</translation>
     </message>
     <message>
-        <location filename="src/editor.cpp" line="381"/>
+        <location filename="src/editor.cpp" line="391"/>
         <source>File &apos;</source>
         <translation>Die Datei &apos;</translation>
     </message>
     <message>
-        <location filename="src/editor.cpp" line="383"/>
+        <location filename="src/editor.cpp" line="393"/>
         <source>&apos; already exists. Overwrite?</source>
         <translation>&apos; existiert bereits. Überschreiben?</translation>
     </message>
     <message>
-        <location filename="src/editor.cpp" line="466"/>
+        <location filename="src/editor.cpp" line="489"/>
         <source>Line </source>
         <translation>Zeile </translation>
     </message>
     <message>
-        <location filename="src/editor.cpp" line="466"/>
+        <location filename="src/editor.cpp" line="489"/>
         <source>, column </source>
         <translation>, Spalte </translation>
     </message>
@@ -262,74 +270,102 @@ Was möchten Sie tun?</translation>
     </message>
 </context>
 <context>
+    <name>LogConsole</name>
+    <message>
+        <location filename="src/logconsole.cpp" line="94"/>
+        <source> (No line found)</source>
+        <translation> (Keine Zeile gefunden)</translation>
+    </message>
+    <message>
+        <location filename="src/logconsole.cpp" line="40"/>
+        <source> Finished with exitcode </source>
+        <translation> Beendet mit Status </translation>
+    </message>
+    <message>
+        <location filename="src/logconsole.cpp" line="60"/>
+        <source>Done. </source>
+        <translation>Fertig.</translation>
+    </message>
+    <message>
+        <location filename="src/logconsole.cpp" line="62"/>
+        <source> Error(s), </source>
+        <translation> Fehler, </translation>
+    </message>
+    <message>
+        <location filename="src/logconsole.cpp" line="62"/>
+        <source> BadBox(es).</source>
+        <translation> BadBox(en).</translation>
+    </message>
+</context>
+<context>
     <name>MainWindow</name>
     <message>
-        <location filename="src/mainwindow.cpp" line="89"/>
+        <location filename="src/mainwindow.cpp" line="123"/>
         <source>Ctrl+N</source>
         <translation>Ctrl+N</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="95"/>
+        <location filename="src/mainwindow.cpp" line="129"/>
         <source>Ctrl+O</source>
         <translation>Ctrl+O</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="111"/>
+        <location filename="src/mainwindow.cpp" line="145"/>
         <source>Ctrl+S</source>
         <translation>Ctrl+S</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="210"/>
+        <location filename="src/mainwindow.cpp" line="244"/>
         <source>Ctrl+R</source>
         <translation>Ctrl+R</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="177"/>
+        <location filename="src/mainwindow.cpp" line="211"/>
         <source>Ctrl+X</source>
         <translation>Ctrl+X</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="183"/>
+        <location filename="src/mainwindow.cpp" line="217"/>
         <source>Ctrl+C</source>
         <translation>Ctrl+C</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="189"/>
+        <location filename="src/mainwindow.cpp" line="223"/>
         <source>Ctrl+V</source>
         <translation>Ctrl+V</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="239"/>
+        <location filename="src/mainwindow.cpp" line="273"/>
         <source>Alt+1</source>
         <translation>Alt+1</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="240"/>
+        <location filename="src/mainwindow.cpp" line="274"/>
         <source>&amp;Latex</source>
         <translation>&amp;Latex</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="245"/>
+        <location filename="src/mainwindow.cpp" line="279"/>
         <source>Alt+2</source>
         <translation>Alt+2</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="246"/>
+        <location filename="src/mainwindow.cpp" line="280"/>
         <source>&amp;PdfLatex</source>
         <translation>&amp;Pdflatex</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="195"/>
+        <location filename="src/mainwindow.cpp" line="229"/>
         <source>Ctrl+F</source>
         <translation>Ctrl+F</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="200"/>
+        <location filename="src/mainwindow.cpp" line="234"/>
         <source>F3</source>
         <translation>F3</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="205"/>
+        <location filename="src/mainwindow.cpp" line="239"/>
         <source>Shift+F3</source>
         <translation>Shift+F3</translation>
     </message>
@@ -339,179 +375,184 @@ Was möchten Sie tun?</translation>
         <translation>QteX</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="84"/>
+        <location filename="src/mainwindow.cpp" line="118"/>
         <source>&amp;File</source>
         <translation>&amp;Datei</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="90"/>
+        <location filename="src/mainwindow.cpp" line="124"/>
         <source>&amp;New</source>
         <translation>&amp;Neu</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="96"/>
+        <location filename="src/mainwindow.cpp" line="130"/>
         <source>&amp;Open...</source>
         <translation>&amp;Öffnen...</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="100"/>
+        <location filename="src/mainwindow.cpp" line="134"/>
         <source>&amp;Recently open</source>
         <translation>&amp;Zuletzt geöffnet</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="112"/>
+        <location filename="src/mainwindow.cpp" line="146"/>
         <source>&amp;Save</source>
         <translation>&amp;Speichern</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="118"/>
+        <location filename="src/mainwindow.cpp" line="152"/>
         <source>Save &amp;as...</source>
         <translation>Speichern &amp;unter...</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="124"/>
+        <location filename="src/mainwindow.cpp" line="158"/>
         <source>Save a&amp;ll</source>
         <translation>&amp;Alle speichern</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="130"/>
+        <location filename="src/mainwindow.cpp" line="164"/>
         <source>&amp;Close</source>
         <translation>S&amp;chließen</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="135"/>
+        <location filename="src/mainwindow.cpp" line="169"/>
         <source>Close All</source>
         <translation>Alle schließen</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="139"/>
+        <location filename="src/mainwindow.cpp" line="173"/>
         <source>Ctrl+Q</source>
         <translation>Ctrl+Q</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="140"/>
+        <location filename="src/mainwindow.cpp" line="174"/>
         <source>&amp;Quit</source>
         <translation>&amp;Beenden</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="158"/>
+        <location filename="src/mainwindow.cpp" line="192"/>
         <source>&amp;Edit</source>
         <translation>&amp;Bearbeiten</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="164"/>
+        <location filename="src/mainwindow.cpp" line="198"/>
         <source>Ctrl+Z</source>
         <translation>Ctrl+Z</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="165"/>
+        <location filename="src/mainwindow.cpp" line="199"/>
         <source>&amp;Undo</source>
         <translation>&amp;Rückgängig</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="171"/>
+        <location filename="src/mainwindow.cpp" line="205"/>
         <source>Ctrl+Shift+Z</source>
         <translation>Ctrl+Shift+Z</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="172"/>
+        <location filename="src/mainwindow.cpp" line="206"/>
         <source>&amp;Redo</source>
         <translation>&amp;Wiederherstellen</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="178"/>
+        <location filename="src/mainwindow.cpp" line="212"/>
         <source>Cu&amp;t</source>
         <translation>&amp;Ausschneiden</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="184"/>
+        <location filename="src/mainwindow.cpp" line="218"/>
         <source>&amp;Copy</source>
         <translation>&amp;Kopieren</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="190"/>
+        <location filename="src/mainwindow.cpp" line="224"/>
         <source>&amp;Paste</source>
         <translation>&amp;Einfügen</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="196"/>
+        <location filename="src/mainwindow.cpp" line="230"/>
         <source>&amp;Find...</source>
         <translation>&amp;Suchen...</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="201"/>
+        <location filename="src/mainwindow.cpp" line="235"/>
         <source>Find &amp;next</source>
         <translation>W&amp;eitersuchen</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="206"/>
+        <location filename="src/mainwindow.cpp" line="240"/>
         <source>Find pr&amp;evious</source>
         <translation>&amp;Frühere suchen</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="211"/>
+        <location filename="src/mainwindow.cpp" line="245"/>
         <source>&amp;Replace...</source>
         <translation>Erse&amp;tzen...</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="215"/>
+        <location filename="src/mainwindow.cpp" line="249"/>
         <source>&amp;Settings...</source>
         <translation>Ei&amp;nstellungen...</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="313"/>
+        <location filename="src/mainwindow.cpp" line="354"/>
         <source>Build</source>
         <translation>Erstellen</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="289"/>
+        <location filename="src/mainwindow.cpp" line="330"/>
         <source>File</source>
         <translation>Datei</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="301"/>
+        <location filename="src/mainwindow.cpp" line="342"/>
         <source>Edit</source>
         <translation>Bearbeiten</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="369"/>
+        <location filename="src/mainwindow.cpp" line="410"/>
         <source>Page 1</source>
         <translation>Seite 1</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="372"/>
+        <location filename="src/mainwindow.cpp" line="413"/>
         <source>Page 2</source>
         <translation>Seite 2</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="664"/>
+        <location filename="src/mainwindow.cpp" line="731"/>
         <source>Unnamed</source>
         <translation>Unbenannt</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="767"/>
+        <location filename="src/mainwindow.cpp" line="837"/>
         <source>Line 1, Column 1</source>
         <translation>Zeile 1, Spalte 1</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="234"/>
+        <location filename="src/mainwindow.cpp" line="268"/>
         <source>&amp;Build</source>
         <translation>&amp;Erstellen</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="254"/>
+        <location filename="src/mainwindow.cpp" line="294"/>
         <source>&amp;About</source>
         <translation>&amp;Info</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="258"/>
+        <location filename="src/mainwindow.cpp" line="298"/>
         <source>&amp;About QteX...</source>
         <translation>&amp;Über QteX...</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="262"/>
+        <location filename="src/mainwindow.cpp" line="302"/>
         <source>About &amp;Qt...</source>
         <translation>Über &amp;Qt...</translation>
+    </message>
+    <message>
+        <location filename="src/mainwindow.cpp" line="288"/>
+        <source>En&amp;coding</source>
+        <translation>&amp;Kodierung</translation>
     </message>
 </context>
 <context>
@@ -565,22 +606,22 @@ Was möchten Sie tun?</translation>
 <context>
     <name>SettingDialog</name>
     <message>
-        <location filename="src/settingdialog.cpp" line="258"/>
+        <location filename="src/settingdialog.cpp" line="276"/>
         <source>Editor</source>
         <translation>Editor</translation>
     </message>
     <message>
-        <location filename="src/settingdialog.cpp" line="260"/>
+        <location filename="src/settingdialog.cpp" line="278"/>
         <source>Syntax Highlighting</source>
         <translation>Syntax Highlighting</translation>
     </message>
     <message>
-        <location filename="src/settingdialog.cpp" line="138"/>
+        <location filename="src/settingdialog.cpp" line="156"/>
         <source>Latex:</source>
         <translation>Latex:</translation>
     </message>
     <message>
-        <location filename="src/settingdialog.cpp" line="146"/>
+        <location filename="src/settingdialog.cpp" line="164"/>
         <source>Pdflatex:</source>
         <translation>Pdflatex:</translation>
     </message>
@@ -600,72 +641,72 @@ Was möchten Sie tun?</translation>
         <translation>Speichern</translation>
     </message>
     <message>
-        <location filename="src/settingdialog.cpp" line="73"/>
+        <location filename="src/settingdialog.cpp" line="89"/>
         <source>Font</source>
         <translation>Schrift</translation>
     </message>
     <message>
-        <location filename="src/settingdialog.cpp" line="78"/>
+        <location filename="src/settingdialog.cpp" line="94"/>
         <source>Name:</source>
         <translation>Name:</translation>
     </message>
     <message>
-        <location filename="src/settingdialog.cpp" line="87"/>
+        <location filename="src/settingdialog.cpp" line="103"/>
         <source>Size:</source>
         <translation>Größe:</translation>
     </message>
     <message>
-        <location filename="src/settingdialog.cpp" line="97"/>
+        <location filename="src/settingdialog.cpp" line="113"/>
         <source>Color:</source>
         <translation>Farbe:</translation>
     </message>
     <message>
-        <location filename="src/settingdialog.cpp" line="111"/>
+        <location filename="src/settingdialog.cpp" line="127"/>
         <source>Tab</source>
         <translation>Tabulator</translation>
     </message>
     <message>
-        <location filename="src/settingdialog.cpp" line="116"/>
+        <location filename="src/settingdialog.cpp" line="132"/>
         <source>Tabwidth:</source>
         <translation>Tabulatorbreite:</translation>
     </message>
     <message>
-        <location filename="src/settingdialog.cpp" line="164"/>
+        <location filename="src/settingdialog.cpp" line="182"/>
         <source>Foreground</source>
         <translation>Vordergrund</translation>
     </message>
     <message>
-        <location filename="src/settingdialog.cpp" line="168"/>
+        <location filename="src/settingdialog.cpp" line="186"/>
         <source>Background</source>
         <translation>Hintergrund</translation>
     </message>
     <message>
-        <location filename="src/settingdialog.cpp" line="172"/>
+        <location filename="src/settingdialog.cpp" line="190"/>
         <source>bold</source>
         <translation>fett</translation>
     </message>
     <message>
-        <location filename="src/settingdialog.cpp" line="176"/>
+        <location filename="src/settingdialog.cpp" line="194"/>
         <source>italic</source>
         <translation>kursiv</translation>
     </message>
     <message>
-        <location filename="src/settingdialog.cpp" line="181"/>
+        <location filename="src/settingdialog.cpp" line="199"/>
         <source>Commentary:</source>
         <translation>Kommentar:</translation>
     </message>
     <message>
-        <location filename="src/settingdialog.cpp" line="206"/>
+        <location filename="src/settingdialog.cpp" line="224"/>
         <source>Latexcommand:</source>
         <translation>Latexkommando:</translation>
     </message>
     <message>
-        <location filename="src/settingdialog.cpp" line="231"/>
+        <location filename="src/settingdialog.cpp" line="249"/>
         <source>Mathmode:</source>
         <translation>Mathemodus:</translation>
     </message>
     <message>
-        <location filename="src/settingdialog.cpp" line="259"/>
+        <location filename="src/settingdialog.cpp" line="277"/>
         <source>Build</source>
         <translation>Erstellen</translation>
     </message>
@@ -675,14 +716,19 @@ Was möchten Sie tun?</translation>
         <translation>Sprache:</translation>
     </message>
     <message>
-        <location filename="src/settingdialog.cpp" line="349"/>
+        <location filename="src/settingdialog.cpp" line="367"/>
         <source>Language</source>
         <translation>Sprache</translation>
     </message>
     <message>
-        <location filename="src/settingdialog.cpp" line="349"/>
+        <location filename="src/settingdialog.cpp" line="367"/>
         <source>You need to restart in order to use a new language.</source>
         <translation>Das Programm muss neu gestartet werden, um eine neue Sprache zu benutzen.</translation>
+    </message>
+    <message>
+        <location filename="src/settingdialog.cpp" line="70"/>
+        <source>Default encoding:</source>
+        <translation>Standardkodierung:</translation>
     </message>
 </context>
 </TS>

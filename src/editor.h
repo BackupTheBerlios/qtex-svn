@@ -31,7 +31,7 @@ class Editor : public QTextEdit
 		Q_OBJECT
 		
 	public:
-		Editor( QWidget * parent = 0 );
+		Editor( QWidget * parent = 0, QTextCodec *codec = 0 );
     bool find(QString, QTextDocument::FindFlags);
     QString getFilename();
     bool getCopy();
@@ -47,6 +47,9 @@ class Editor : public QTextEdit
     bool saveAs();
     void setChanged(bool);
     void setFilename(QString);
+    
+  public slots:
+    void slotChangeCodec(QTextCodec *);
     
   signals:
     void signalContentChanged(Editor *);
@@ -70,6 +73,7 @@ class Editor : public QTextEdit
 		Highlighter *m_highlighter;
     int m_lineMargin;
     QString m_filename;
+    QTextCodec *m_codec;
     QTextCursor *m_cursor;
 	};
 

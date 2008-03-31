@@ -36,6 +36,38 @@ void MainWindow::closeEvent(QCloseEvent *event) {
   }
 }
 
+void MainWindow::createCodecMenu() {
+  m_codecGroup = new QActionGroup(m_menuEncoding);
+  m_codecGroup->setObjectName(QString("m_codecGroup"));
+
+  QStringList codecs, descriptions;
+  codecs = CodecAction::getAvailableCodecs();
+  descriptions = CodecAction::getAvailableDescriptions();
+  
+  QSettings settings("QteX", "QteX");
+  settings.beginGroup(QString("editor"));
+  QString defaultCodec = settings.value(QString("defaultCodec"), CodecAction::getDefaultCodec()).toString();
+  settings.endGroup();
+  
+  CodecAction *action;
+  QString name;
+  for (int i = 0; i < codecs.size(); i++) {
+    name = codecs.at(i);
+    
+    action = new CodecAction(0, descriptions.at(i), codecs.at(i));
+    action->setCheckable(true);
+    m_codecGroup->addAction(action);
+    
+    connect(action, SIGNAL(signalWasTriggered(CodecAction *)), this, SLOT(slotChangeCodec(CodecAction *)));
+    
+    if (defaultCodec == codecs.at(i)) {
+      action->setChecked(true);
+    }
+  }
+  
+  m_menuEncoding->addActions(m_codecGroup->actions());
+}
+
 /*
  * Bestimmte unveränderliche Verbindungen erzeugen.
  */
@@ -60,6 +92,8 @@ void MainWindow::createConnections() {
   
   connect(m_actionCompileLatex, SIGNAL(triggered()), this, SLOT(slotCompileLatex()));
   connect(m_actionCompilePdflatex, SIGNAL(triggered()), this, SLOT(slotCompilePdflatex()));
+  
+  //connect(m_codecGroup, SIGNAL(triggered(QAction *)), this, SLOT(slotChangeCodec(QAction *)));
   
   connect(m_actionAbout, SIGNAL(triggered()), this, SLOT(slotAbout()));
   connect(m_actionAboutQt, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
@@ -248,6 +282,12 @@ void MainWindow::createMenus() {
   m_menuBuild->addAction(m_actionCompileLatex);
   m_menuBuild->addAction(m_actionCompilePdflatex);
   
+  /* Menu 'Encoding' einrichten */
+  m_menuEncoding = new QMenu(m_menubar);
+  m_menuEncoding->setObjectName(QString("m_menuEncoding"));
+  m_menuEncoding->setTitle(tr("En&coding"));
+  createCodecMenu();
+  
   /* Menu 'About' einrichten */
   m_menuAbout = new QMenu(m_menubar);
   m_menuAbout->setObjectName(QString("m_menuAbout"));
@@ -268,6 +308,7 @@ void MainWindow::createMenus() {
   m_menubar->addAction(m_menuFile->menuAction());
   m_menubar->addAction(m_menuEdit->menuAction());
   m_menubar->addAction(m_menuBuild->menuAction());
+  m_menubar->addAction(m_menuEncoding->menuAction());
   m_menubar->addAction(m_menuAbout->menuAction());
 }
 
@@ -493,6 +534,32 @@ void MainWindow::openDocument(QString filename) {
 void MainWindow::slotAbout() {
   AboutDialog *dlg = new AboutDialog(this);
   dlg->exec();
+}
+
+void MainWindow::slotChangeCodec(CodecAction *action) {
+  if (action == 0) {
+    return;
+  }
+  
+  /*QString name = action->text();
+  if (name.isNull() || name.isEmpty()) {
+    return;
+  }
+  
+  QString codecName = name.mid(name.lastIndexOf(QString("(")) + 1);
+  codecName = codecName.mid(0, codecName.length() - 1);*/
+  
+  QTextCodec *codec = QTextCodec::codecForName(action->getCodec().toLatin1());
+  if (codec == 0) {
+    return;
+  }
+  
+  Editor *curInput = getCurrentEditor();
+  if (curInput == 0) {
+    return;
+  }
+  
+  curInput->slotChangeCodec(codec);
 }
 
 /*

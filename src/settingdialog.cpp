@@ -65,6 +65,22 @@ void SettingDialog::createDialog() {
     }
   }
   
+  QLabel *labelCodecs = new QLabel(m_tabs);
+  labelCodecs->setObjectName(QString("labelCodecs"));
+  labelCodecs->setText(tr("Default encoding:"));
+  
+  m_codecs = new QComboBox(m_tabs);
+  m_codecs->setObjectName(QString("m_codecs"));
+  m_codecs->addItems(CodecAction::getAvailableCodecs());
+  for (int i = 0; i < m_codecs->count(); i++) {
+    if (m_codecs->itemText(i) == CodecAction::getDefaultCodec()) {
+      m_codecs->setCurrentIndex(i);
+      break;
+    } else {
+      continue;
+    }
+  }
+  
   /* Schriftgruppe */
   QGridLayout *groupFontLayout = new QGridLayout();
   
@@ -123,6 +139,8 @@ void SettingDialog::createDialog() {
   /* Alles zusammenbauen */
   editorLayout->addWidget(labelLanguages);
   editorLayout->addWidget(m_languages);
+  editorLayout->addWidget(labelCodecs);
+  editorLayout->addWidget(m_codecs);
   editorLayout->addWidget(groupFont);
   editorLayout->addWidget(groupTabulator);
   editorLayout->addStretch();
@@ -367,9 +385,14 @@ void SettingDialog::slotSaveSettings() {
   QSettings settings("QteX", "QteX");
   
   settings.beginGroup(QString("editor"));
+  
   QString lang = m_languages->currentText();
   lang = lang.mid(lang.lastIndexOf(")") - 2, 2);
   settings.setValue(QString("language"), lang);
+  
+  QString codec = m_codecs->currentText();
+  settings.setValue(QString("encoding"), codec);
+  
   settings.endGroup();
   
   /* Schrifteinstellungen */

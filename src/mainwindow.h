@@ -2,6 +2,7 @@
 #define __MAINWINDOW_H__
 
 #include <QAction>
+#include <QActionGroup>
 #include <QApplication>
 #include <QCloseEvent>
 #include <QHBoxLayout>
@@ -25,6 +26,7 @@
 #include <QWidget>
 
 #include "aboutdialog.h"
+#include "codecaction.h"
 #include "compiler.h"
 #include "editor.h"
 #include "finddialog.h"
@@ -64,9 +66,11 @@ class MainWindow : public QMainWindow
     
   private slots:
     void slotContentChanged(Editor *);
+    void slotChangeCodec(CodecAction *);
     
   private:
     void closeEvent(QCloseEvent *);
+    void createCodecMenu();
     void createConnections();
     void createMenus();
     void createStatusbar();
@@ -90,10 +94,11 @@ class MainWindow : public QMainWindow
     QAction *m_actionSettings;
     QAction *m_actionCompileLatex, *m_actionCompilePdflatex;
     QAction *m_actionAbout, *m_actionAboutQt;
+    QActionGroup *m_codecGroup;
     QHBoxLayout *m_hboxLayout;
     QLabel *m_cursorPosition;
     QList<Editor *> m_editorList;
-    QMenu *m_menuFile, *m_menuEdit, *m_menuRecentlyOpen, *m_menuBuild, *m_menuAbout;
+    QMenu *m_menuFile, *m_menuEdit, *m_menuRecentlyOpen, *m_menuBuild, *m_menuEncoding, *m_menuAbout;
     QMenuBar *m_menubar;
     QSplitter *m_hSplitter, *m_vSplitter;
     QStatusBar *m_statusbar;
